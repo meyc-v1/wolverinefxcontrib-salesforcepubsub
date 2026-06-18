@@ -1,0 +1,10 @@
+<Project>
+
+  <PropertyGroup>
+    <LangVersion>latest</LangVersion>
+    <Authors>meyc-v1</Authors>
+    <Company>meyc-v1</Company>
+    <Version>0.1.0</Version>
+  </PropertyGroup>
+
+</Project>

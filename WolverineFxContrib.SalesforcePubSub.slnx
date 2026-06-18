@@ -1,0 +1,12 @@
+<Solution>
+  <Folder Name="/host/">
+    <Project Path="host/WolverineFxContrib.SalesforcePubSub.TestHost/WolverineFxContrib.SalesforcePubSub.TestHost.csproj" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/WolverineFxContrib.SalesforcePubSub/WolverineFxContrib.SalesforcePubSub.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/WolverineFxContrib.SalesforcePubSub.IntegrationTests/WolverineFxContrib.SalesforcePubSub.IntegrationTests.csproj" />
+    <Project Path="tests/WolverineFxContrib.SalesforcePubSub.Tests/WolverineFxContrib.SalesforcePubSub.Tests.csproj" />
+  </Folder>
+</Solution>
