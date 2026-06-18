@@ -1,0 +1,38 @@
+using Wolverine.Configuration;
+using Wolverine.Transports;
+
+namespace Wolverine.SalesforcePubSub;
+
+/// <summary>
+/// Wolverine transport for the Salesforce Pub/Sub gRPC API. Listen-only: it surfaces topic
+/// subscriptions and managed event subscriptions (MES) as Wolverine listening endpoints.
+/// </summary>
+public sealed class SalesforcePubSubTransport : TransportBase<SalesforceEndpoint>
+{
+    public const string ProtocolName = "sfpubsub";
+
+    private readonly List<SalesforceEndpoint> _endpoints = [];
+
+    public SalesforcePubSubTransport() : base(ProtocolName, "Salesforce Pub/Sub", [ProtocolName])
+    {
+    }
+
+    /// <summary>Finds an existing endpoint for the resource or creates and registers a new one.</summary>
+    internal SalesforceEndpoint EndpointForResource(SalesforceResourceKind kind, string resource)
+    {
+        var uri = SalesforceEndpoint.BuildUri(kind, resource);
+        var existing = _endpoints.FirstOrDefault(e => e.Uri == uri);
+        if (existing is not null)
+            return existing;
+
+        var endpoint = new SalesforceEndpoint(this, kind, resource, EndpointRole.Application);
+        _endpoints.Add(endpoint);
+        return endpoint;
+    }
+
+    protected override IEnumerable<SalesforceEndpoint> endpoints() => _endpoints;
+
+    protected override SalesforceEndpoint findEndpointByUri(Uri uri)
+        => _endpoints.FirstOrDefault(e => e.Uri == uri)
+           ?? throw new ArgumentOutOfRangeException(nameof(uri), $"Unknown Salesforce Pub/Sub endpoint: {uri}");
+}

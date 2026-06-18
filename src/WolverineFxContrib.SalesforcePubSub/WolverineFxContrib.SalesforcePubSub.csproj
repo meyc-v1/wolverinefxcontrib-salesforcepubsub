@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
+    <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <RootNamespace>Wolverine.SalesforcePubSub</RootNamespace>
@@ -30,6 +30,10 @@
 
   <ItemGroup>
     <Protobuf Include="protos\salesforce_pubsub_api.proto" GrpcServices="Client" Access="Internal" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="WolverineFx" Version="6.12.0" />
   </ItemGroup>
 
 </Project>
