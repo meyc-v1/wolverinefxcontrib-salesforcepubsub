@@ -1,0 +1,177 @@
+using System.Buffers.Binary;
+using System.Runtime.CompilerServices;
+using Google.Protobuf;
+using Grpc.Core;
+using Microsoft.Extensions.Logging;
+using SalesforceGrpc;
+
+namespace Wolverine.SalesforcePubSub.Internals;
+
+internal sealed partial class TopicTransport : ISubscriptionTransport
+{
+    private readonly PubSub.PubSubClient _client;
+    private readonly IReplayIdRepository _replayIdRepository;
+    private readonly SubscriberComponentsSettings _settings;
+    private readonly ILogger _logger;
+    private readonly string _topicName;
+    private AsyncDuplexStreamingCall<FetchRequest, FetchResponse>? _call;
+
+    public TopicTransport(
+        PubSub.PubSubClient client,
+        IReplayIdRepository replayIdRepository,
+        SubscriberComponentsSettings settings,
+        ILogger logger,
+        string topicName)
+    {
+        _client = client ?? throw new ArgumentNullException(nameof(client));
+        _replayIdRepository = replayIdRepository ?? throw new ArgumentNullException(nameof(replayIdRepository));
+        _settings = settings ?? throw new ArgumentNullException(nameof(settings));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _topicName = topicName ?? throw new ArgumentNullException(nameof(topicName));
+    }
+
+    public async Task ConnectAsync(CancellationToken ct)
+    {
+        LogStarted("OpenStream", _topicName);
+        _call = _client.Subscribe(cancellationToken: ct);
+        LogFinished("OpenStream", _topicName);
+
+        await WriteFetchRequestAsync(ct).ConfigureAwait(false);
+    }
+
+    public async IAsyncEnumerable<ResponseMessageInfo> ReadAsync([EnumeratorCancellation] CancellationToken ct)
+    {
+        if (_call == null)
+            throw new InvalidOperationException("Transport is not connected");
+
+        while (true)
+        {
+            FetchResponse response;
+            try
+            {
+                LogStarted("MoveNext", _topicName);
+                if (!await _call.ResponseStream.MoveNext(ct).ConfigureAwait(false))
+                {
+                    LogFinished("MoveNext-StreamEnded", _topicName);
+                    break;
+                }
+
+                response = _call.ResponseStream.Current;
+                LogFinished("MoveNext-ResponseReceived", _topicName);
+            }
+            catch (RpcException ex) when (ex.StatusCode == StatusCode.Cancelled && ct.IsCancellationRequested)
+            {
+                LogGrpcStreamCancelled(ex, _topicName);
+                break;
+            }
+
+            yield return new ResponseMessageInfo
+            {
+                LastReplayIdByteString = response.LatestReplayId,
+                LastReplayId = BinaryPrimitives.ReadInt64BigEndian(response.LatestReplayId.ToByteArray()),
+                Events = response.Events,
+                PendingNumberRequested = response.PendingNumRequested
+            };
+        }
+    }
+
+    public async Task AcknowledgeAsync(ResponseMessageInfo response, CancellationToken ct)
+    {
+        LogStarted("SaveReplayId", _topicName);
+
+        if (response.Events.Count > 0)
+        {
+            await _replayIdRepository.ReportEventsReceivedResponseAsync(
+                _topicName,
+                response.LastReplayId,
+                response.Events.Select(x => BinaryPrimitives.ReadInt64BigEndian(x.ReplayId.ToByteArray())).ToList(),
+                CancellationToken.None).ConfigureAwait(false);
+        }
+        else
+        {
+            await _replayIdRepository.ReportKeepAliveResponseAsync(
+                _topicName, response.LastReplayId, CancellationToken.None).ConfigureAwait(false);
+        }
+
+        LogFinished("SaveReplayId", _topicName);
+    }
+
+    public async Task RequestMoreAsync(CancellationToken ct)
+    {
+        await WriteFetchRequestAsync(ct).ConfigureAwait(false);
+    }
+
+    public async Task<string?> HandleErrorAsync(CancellationToken ct)
+    {
+        if (_call == null)
+            return null;
+
+        LogStarted("CompleteStream", _topicName);
+        await _call.RequestStream.TryCompleteAsync().ConfigureAwait(false);
+        LogFinished("CompleteStream", _topicName);
+
+        _call.TryGetStatus(out var status);
+
+        if (_settings.ProcessNewEventsIfReplayIdValidationFails && _call.TryGetTrailers(out var trailers) && trailers != null)
+        {
+            if (trailers.Any(x => x.Key == "error-code" && x.Value == _settings.ReplayIdValidationFailedErrorCode))
+            {
+                LogStarted("ResetReplayId", _topicName);
+                await _replayIdRepository.ResetForNewEventsOnlyAsync(_topicName, ct).ConfigureAwait(false);
+                LogFinished("ResetReplayId", _topicName);
+            }
+        }
+
+        return status?.ToString();
+    }
+
+    public void Dispose()
+    {
+        _call?.Dispose();
+    }
+
+    private async Task WriteFetchRequestAsync(CancellationToken ct)
+    {
+        if (_call?.RequestStream == null)
+            throw new InvalidOperationException("The request stream has not been initialized");
+
+        LogStarted("GetReplayId", _topicName);
+        var replayId = await _replayIdRepository.GetLastReplayIdAsync(_topicName, ct).ConfigureAwait(false);
+        LogFinished("GetReplayId", _topicName);
+
+        var req = new FetchRequest
+        {
+            TopicName = _topicName,
+            NumRequested = _settings.FetchCount
+        };
+
+        if (replayId == ReplayIds.NewEventsOnly)
+        {
+            req.ReplayPreset = _settings.StartFromEarliest ? ReplayPreset.Earliest : ReplayPreset.Latest;
+        }
+        else
+        {
+            req.ReplayPreset = ReplayPreset.Custom;
+            var converted = BitConverter.IsLittleEndian ? BinaryPrimitives.ReverseEndianness(replayId) : replayId;
+            req.ReplayId = ByteString.CopyFrom(BitConverter.GetBytes(converted));
+        }
+
+        LogSendingFetchRequest(_topicName, _settings.FetchCount, replayId);
+
+        LogStarted("WriteToStream", _topicName);
+        await _call.RequestStream.WriteAsync(req, ct).ConfigureAwait(false);
+        LogFinished("WriteToStream", _topicName);
+    }
+
+    [LoggerMessage(EventId = 1, Level = LogLevel.Debug, Message = "gRPC stream cancelled for {Resource}")]
+    private partial void LogGrpcStreamCancelled(Exception ex, string resource);
+
+    [LoggerMessage(EventId = 2, Level = LogLevel.Debug, Message = "Sending FetchRequest for topic: {Topic}, FetchCount: {FetchCount}, ReplayId: {ReplayId}")]
+    private partial void LogSendingFetchRequest(string topic, int fetchCount, long replayId);
+
+    [LoggerMessage(EventId = 3, Level = LogLevel.Trace, Message = "Started {Operation} for {Resource}")]
+    private partial void LogStarted(string operation, string resource);
+
+    [LoggerMessage(EventId = 4, Level = LogLevel.Trace, Message = "Finished {Operation} for {Resource}")]
+    private partial void LogFinished(string operation, string resource);
+}

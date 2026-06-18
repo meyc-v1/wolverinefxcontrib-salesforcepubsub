@@ -6,6 +6,30 @@
     <Nullable>enable</Nullable>
     <RootNamespace>Wolverine.SalesforcePubSub</RootNamespace>
     <PackageId>WolverineFxContrib.SalesforcePubSub</PackageId>
+    <Description>Wolverine transport for the Salesforce Pub/Sub gRPC API (community contrib)</Description>
+    <PackageTags>Salesforce pub/sub api subscribe wolverine</PackageTags>
   </PropertyGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="WolverineFxContrib.SalesforcePubSub.Tests" />
+    <InternalsVisibleTo Include="WolverineFxContrib.SalesforcePubSub.IntegrationTests" />
+    <InternalsVisibleTo Include="DynamicProxyGenAssembly2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Grpc.Net.ClientFactory" Version="[2.80.0,3.0.0)" />
+    <PackageReference Include="Google.Protobuf" Version="[3.35.0,4.0.0)" />
+    <PackageReference Include="Grpc.Tools" Version="[2.81.0,3.0.0)">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="AvroConvert" Version="[3.4.16,4.0.0)" />
+    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="[10.0.8,11.0.0)" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="[10.0.8,11.0.0)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Protobuf Include="protos\salesforce_pubsub_api.proto" GrpcServices="Client" Access="Internal" />
+  </ItemGroup>
 
 </Project>
