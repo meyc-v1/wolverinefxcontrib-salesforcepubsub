@@ -1,0 +1,11 @@
+using Microsoft.Extensions.Logging;
+
+namespace WolverineFxContrib.SalesforcePubSub.TestHost;
+
+public class TestEventTwoHandler
+{
+    public void Handle(TestEventTwo message, ILogger<TestEventTwoHandler> logger)
+        => logger.LogInformation(
+            "Handled TestEventTwo (MES) — ReplayId {ReplayId}, CreatedById {CreatedById}, CreatedDate {CreatedDate}",
+            message.ReplayId, message.CreatedById, message.CreatedDate);
+}
