@@ -54,19 +54,29 @@ public static class SalesforcePubSubTransportExtensions
     /// <summary>Listen to a Salesforce topic (e.g. a Platform Event channel) with client-side replay tracking.</summary>
     public static SalesforceListenerConfiguration ListenToSalesforceTopic<T>(this WolverineOptions options, string topicName)
         where T : PubSubEvent
-        => ConfigureListener<T>(options, SalesforceResourceKind.Topic, topicName);
+        => options.ListenToSalesforceTopic(topicName, typeof(T));
+
+    /// <summary>Listen to a Salesforce topic with the message type supplied at runtime (e.g. from configuration).</summary>
+    public static SalesforceListenerConfiguration ListenToSalesforceTopic(this WolverineOptions options, string topicName, Type messageType)
+        => ConfigureListener(options, SalesforceResourceKind.Topic, topicName, messageType);
 
     /// <summary>Listen to a Salesforce managed event subscription (MES) with server-side replay tracking.</summary>
     public static SalesforceListenerConfiguration ListenToManagedSubscription<T>(this WolverineOptions options, string subscriptionName)
         where T : PubSubEvent
-        => ConfigureListener<T>(options, SalesforceResourceKind.ManagedSubscription, subscriptionName);
+        => options.ListenToManagedSubscription(subscriptionName, typeof(T));
 
-    private static SalesforceListenerConfiguration ConfigureListener<T>(WolverineOptions options, SalesforceResourceKind kind, string resource)
-        where T : PubSubEvent
+    /// <summary>Listen to a managed event subscription with the message type supplied at runtime.</summary>
+    public static SalesforceListenerConfiguration ListenToManagedSubscription(this WolverineOptions options, string subscriptionName, Type messageType)
+        => ConfigureListener(options, SalesforceResourceKind.ManagedSubscription, subscriptionName, messageType);
+
+    private static SalesforceListenerConfiguration ConfigureListener(WolverineOptions options, SalesforceResourceKind kind, string resource, Type messageType)
     {
+        if (!typeof(PubSubEvent).IsAssignableFrom(messageType))
+            throw new ArgumentException($"Message type '{messageType}' must derive from {nameof(PubSubEvent)}.", nameof(messageType));
+
         var transport = options.Transports.GetOrCreate<SalesforcePubSubTransport>();
         var endpoint = transport.EndpointForResource(kind, resource);
-        endpoint.MessageType = typeof(T);
+        endpoint.MessageType = messageType;
         endpoint.IsListener = true;
         return new SalesforceListenerConfiguration(endpoint);
     }

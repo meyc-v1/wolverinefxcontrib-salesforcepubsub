@@ -25,12 +25,6 @@ public sealed class PlatformEventPublisher
         _logger = logger;
     }
 
-    public Task PublishTestEventOneAsync(CancellationToken ct = default)
-        => PublishAsync(_options.TestEventOneSObject, new { }, ct);
-
-    public Task PublishTestEventTwoAsync(CancellationToken ct = default)
-        => PublishAsync(_options.TestEventTwoSObject, new { }, ct);
-
     /// <summary>POSTs <paramref name="body"/> as the platform event payload to the sObjects REST endpoint.</summary>
     public async Task PublishAsync(string sObjectApiName, object body, CancellationToken ct = default)
     {

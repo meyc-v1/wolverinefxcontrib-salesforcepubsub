@@ -5,10 +5,10 @@ using Microsoft.Extensions.Logging;
 namespace WolverineFxContrib.SalesforcePubSub.TestHost;
 
 /// <summary>
-/// Console trigger for manual verification: press [1] to publish Test Event One, [2] for Test Event Two.
-/// Skipped automatically when console input is redirected (e.g. running detached).
+/// Console trigger for manual verification: press the number key for a configured subscription to
+/// publish its platform event. Skipped automatically when console input is redirected.
 /// </summary>
-public sealed class PublisherWorker(IServiceProvider services, ILogger<PublisherWorker> logger) : BackgroundService
+public sealed class PublisherWorker(IServiceProvider services, SalesforceTestHostOptions options, ILogger<PublisherWorker> logger) : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -18,7 +18,16 @@ public sealed class PublisherWorker(IServiceProvider services, ILogger<Publisher
             return;
         }
 
-        logger.LogInformation("Publisher ready. Press [1] = Test Event One, [2] = Test Event Two, [Q] = stop publishing.");
+        var subs = options.Subscriptions;
+        if (subs.Count == 0)
+        {
+            logger.LogInformation("No subscriptions configured; nothing to publish.");
+            return;
+        }
+
+        for (var i = 0; i < subs.Count; i++)
+            logger.LogInformation("Press [{Key}] to publish {Type} → {Channel}", i + 1, subs[i].MessageType, subs[i].Channel);
+        logger.LogInformation("Press [Q] to stop publishing.");
 
         while (!stoppingToken.IsCancellationRequested)
         {
@@ -32,26 +41,35 @@ public sealed class PublisherWorker(IServiceProvider services, ILogger<Publisher
                 break;
             }
 
-            var publisher = services.GetRequiredService<PlatformEventPublisher>();
+            if (key.Key == ConsoleKey.Q)
+            {
+                logger.LogInformation("Publisher key triggers stopped.");
+                return;
+            }
+
+            if (!char.IsDigit(key.KeyChar))
+                continue;
+
+            var index = key.KeyChar - '1';
+            if (index < 0 || index >= subs.Count)
+                continue;
+
+            var sub = subs[index];
+            var sObject = sub.PublishSObject;
+            if (sObject is null)
+            {
+                logger.LogWarning("No sObject available for '{Channel}'; set its SObject to publish.", sub.Channel);
+                continue;
+            }
 
             try
             {
-                switch (key.Key)
-                {
-                    case ConsoleKey.D1 or ConsoleKey.NumPad1:
-                        await publisher.PublishTestEventOneAsync(stoppingToken).ConfigureAwait(false);
-                        break;
-                    case ConsoleKey.D2 or ConsoleKey.NumPad2:
-                        await publisher.PublishTestEventTwoAsync(stoppingToken).ConfigureAwait(false);
-                        break;
-                    case ConsoleKey.Q:
-                        logger.LogInformation("Publisher key triggers stopped.");
-                        return;
-                }
+                var publisher = services.GetRequiredService<PlatformEventPublisher>();
+                await publisher.PublishAsync(sObject, new { }, stoppingToken).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Failed to publish platform event");
+                logger.LogError(ex, "Failed to publish platform event to {SObject}", sObject);
             }
         }
     }
