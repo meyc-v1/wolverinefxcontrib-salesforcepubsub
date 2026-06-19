@@ -1,3 +1,5 @@
+using Wolverine.SalesforcePubSub.Events;
+
 namespace Wolverine.SalesforcePubSub.Internals;
 
 internal interface IEventDeserializer

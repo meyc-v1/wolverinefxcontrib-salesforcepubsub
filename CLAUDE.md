@@ -7,10 +7,13 @@ endpoints. Package id `WolverineFxContrib.SalesforcePubSub`; root namespace `Wol
 ## Structure
 - `src/WolverineFxContrib.SalesforcePubSub` — the transport library (net10.0).
   - **Public surface:** the three consumer-implemented interfaces `IReplayIdRepository`,
-    `IBackoffStrategy`, `IAuthenticationTokenHandler`; event base types `PubSubEvent` / `PlatformEvent`;
-    and the Wolverine config surface — `UseSalesforcePubSub`, `ListenToSalesforceTopic[<T>]`,
+    `IBackoffStrategy`, `IAuthenticationTokenHandler`; event base types `PubSubEvent` / `PlatformEvent`
+    (in the `Wolverine.SalesforcePubSub.Events` namespace — consumers add a `using` for it); and the
+    Wolverine config surface — `UseSalesforcePubSub`, `ListenToSalesforceTopic[<T>]`,
     `ListenToManagedSubscription[<T>]` (generic + `Type`-based overloads), `SalesforcePubSubTransport`,
     `SalesforceEndpoint`.
+  - **Namespaces are folder-based:** root files → `Wolverine.SalesforcePubSub`, `Events/` →
+    `Wolverine.SalesforcePubSub.Events`, `Internals/` → `Wolverine.SalesforcePubSub.Internals`.
   - **`Internals/`** (all `internal`, `sealed`): `ISubscriptionTransport` + `TopicTransport` /
     `ManagedEventSubscriptionTransport`, the `SalesforceListener` (`IListener`), schema repo,
     `PlatformEventDeserializer`, the in-memory replay + default backoff fallbacks, and the Salesforce

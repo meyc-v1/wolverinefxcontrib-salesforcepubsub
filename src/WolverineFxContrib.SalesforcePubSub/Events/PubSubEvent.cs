@@ -1,4 +1,4 @@
-namespace Wolverine.SalesforcePubSub;
+namespace Wolverine.SalesforcePubSub.Events;
 
 public abstract class PubSubEvent
 {

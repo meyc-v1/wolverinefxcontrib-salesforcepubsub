@@ -2,6 +2,7 @@ using System.Net.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Wolverine.Configuration;
+using Wolverine.SalesforcePubSub.Events;
 using Wolverine.SalesforcePubSub.Internals;
 using Wolverine.Transports;
 using SalesforceGrpc;

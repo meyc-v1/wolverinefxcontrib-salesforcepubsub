@@ -1,7 +1,4 @@
 using System.Reflection;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Wolverine;
 using Wolverine.SalesforcePubSub;
 using WolverineFxContrib.SalesforcePubSub.TestHost;
@@ -19,6 +16,8 @@ builder.Services.AddSalesforceAuthentication(s => builder.Configuration.GetSecti
 builder.Services.AddSalesforce(s => builder.Configuration.GetSection("salesforceSettings").Bind(s));
 
 builder.Services.AddHostedService<PublisherWorker>();
+
+
 
 builder.UseWolverine(opts =>
 {

@@ -1,6 +1,6 @@
 // ReSharper disable InconsistentNaming
 
-using Wolverine.SalesforcePubSub;
+using Wolverine.SalesforcePubSub.Events;
 
 namespace WolverineFxContrib.SalesforcePubSub.TestHost.Events;
 

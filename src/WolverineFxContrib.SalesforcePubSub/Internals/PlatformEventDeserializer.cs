@@ -1,4 +1,5 @@
 using SolTechnology.Avro;
+using Wolverine.SalesforcePubSub.Events;
 
 namespace Wolverine.SalesforcePubSub.Internals;
 
