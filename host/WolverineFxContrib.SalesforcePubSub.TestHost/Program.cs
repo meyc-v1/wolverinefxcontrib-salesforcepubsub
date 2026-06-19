@@ -5,10 +5,14 @@ using Microsoft.Extensions.Hosting;
 using Wolverine;
 using Wolverine.SalesforcePubSub;
 using WolverineFxContrib.SalesforcePubSub.TestHost;
+using WolverineFxContrib.SalesforcePubSub.TestHost.Salesforce;
+using WolverineFxContrib.SalesforcePubSub.TestHost.Settings;
 
 var builder = Host.CreateApplicationBuilder(args);
 
 var sf = builder.Configuration.GetSection("salesforceSettings").Get<SalesforceSettings>() ?? new SalesforceSettings();
+// Apply the same defaults the options pipeline does, so the bootstrap read below matches IOptions consumers.
+new SalesforceSettingsConfigurer().PostConfigure(Microsoft.Extensions.Options.Options.DefaultName, sf);
 
 // Salesforce auth + REST client, mirroring the internal client (own token client; no deprecated package).
 builder.Services.AddSalesforceAuthentication(s => builder.Configuration.GetSection("salesforceAuthenticationSettings").Bind(s));

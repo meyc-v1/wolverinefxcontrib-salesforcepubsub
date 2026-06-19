@@ -1,8 +1,9 @@
 using System.Text.Json;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
+using WolverineFxContrib.SalesforcePubSub.TestHost.Settings;
 
-namespace WolverineFxContrib.SalesforcePubSub.TestHost;
+namespace WolverineFxContrib.SalesforcePubSub.TestHost.Salesforce;
 
 public interface ISalesforceTokenClient
 {

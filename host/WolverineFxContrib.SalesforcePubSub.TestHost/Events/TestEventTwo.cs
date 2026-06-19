@@ -1,3 +1,5 @@
+// ReSharper disable InconsistentNaming
+
 using Wolverine.SalesforcePubSub;
 
 namespace WolverineFxContrib.SalesforcePubSub.TestHost.Events;
@@ -8,5 +10,5 @@ namespace WolverineFxContrib.SalesforcePubSub.TestHost.Events;
 /// </summary>
 public sealed class TestEventTwo : PlatformEvent
 {
-    public string Message__c { get; set; }
+    public string Message__c { get; set; } = null!;
 }

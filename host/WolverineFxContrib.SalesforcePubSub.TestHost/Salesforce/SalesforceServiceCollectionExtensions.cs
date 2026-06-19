@@ -1,11 +1,13 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using WolverineFxContrib.SalesforcePubSub.TestHost.Settings;
 
-namespace WolverineFxContrib.SalesforcePubSub.TestHost;
+namespace WolverineFxContrib.SalesforcePubSub.TestHost.Salesforce;
 
 /// <summary>
 /// Registration mirroring the internal Salesforce client lib: a token client (auth) plus a bearer-authed
-/// REST client. Polly retry and FluentValidation validation are omitted for the test host.
+/// REST client. Settings defaults + FluentValidation run via the *Configurer options bindings; Polly
+/// retry is omitted for the test host.
 /// </summary>
 public static class SalesforceServiceCollectionExtensions
 {
@@ -15,6 +17,7 @@ public static class SalesforceServiceCollectionExtensions
         ArgumentNullException.ThrowIfNull(configure);
 
         services.Configure(configure);
+        services.ConfigureOptions<SalesforceAuthenticationSettingsConfigurer>();
         services.AddMemoryCache();
         services.AddHttpClient<ISalesforceTokenClient, SalesforceTokenClient>((provider, client) =>
         {
@@ -30,6 +33,7 @@ public static class SalesforceServiceCollectionExtensions
         ArgumentNullException.ThrowIfNull(configure);
 
         services.Configure(configure);
+        services.ConfigureOptions<SalesforceSettingsConfigurer>();
         services.AddTransient<SalesforceAuthenticationHandler>();
         services.AddHttpClient<ISalesforceClient, SalesforceClient>((provider, client) =>
         {

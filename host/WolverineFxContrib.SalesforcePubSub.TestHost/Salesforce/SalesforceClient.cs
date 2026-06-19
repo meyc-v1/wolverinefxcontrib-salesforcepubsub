@@ -1,6 +1,6 @@
 using System.Net.Http.Json;
 
-namespace WolverineFxContrib.SalesforcePubSub.TestHost;
+namespace WolverineFxContrib.SalesforcePubSub.TestHost.Salesforce;
 
 /// <summary>Publishes the test platform events via the Salesforce REST API. Lifted from the original runner.</summary>
 public interface ISalesforceClient

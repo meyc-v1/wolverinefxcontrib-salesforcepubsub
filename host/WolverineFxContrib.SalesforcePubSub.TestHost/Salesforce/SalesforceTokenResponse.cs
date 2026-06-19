@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace WolverineFxContrib.SalesforcePubSub.TestHost;
+namespace WolverineFxContrib.SalesforcePubSub.TestHost.Salesforce;
 
 /// <summary>Salesforce OAuth token response. Lifted from the internal client.</summary>
 public sealed class SalesforceTokenResponse

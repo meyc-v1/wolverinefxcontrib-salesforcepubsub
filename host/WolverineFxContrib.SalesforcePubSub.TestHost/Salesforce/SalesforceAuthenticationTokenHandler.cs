@@ -1,6 +1,6 @@
 using Wolverine.SalesforcePubSub;
 
-namespace WolverineFxContrib.SalesforcePubSub.TestHost;
+namespace WolverineFxContrib.SalesforcePubSub.TestHost.Salesforce;
 
 /// <summary>
 /// Bridges the local <see cref="ISalesforceTokenClient"/> to the pub/sub transport's

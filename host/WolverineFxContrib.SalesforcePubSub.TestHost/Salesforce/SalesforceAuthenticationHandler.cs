@@ -1,6 +1,6 @@
 using System.Net.Http.Headers;
 
-namespace WolverineFxContrib.SalesforcePubSub.TestHost;
+namespace WolverineFxContrib.SalesforcePubSub.TestHost.Salesforce;
 
 /// <summary>
 /// DelegatingHandler that attaches the bearer token (from <see cref="ISalesforceTokenClient"/>) to

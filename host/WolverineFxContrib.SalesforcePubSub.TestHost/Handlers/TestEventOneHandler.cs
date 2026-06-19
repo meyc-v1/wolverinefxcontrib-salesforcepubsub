@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Logging;
 using WolverineFxContrib.SalesforcePubSub.TestHost.Events;
 
-namespace WolverineFxContrib.SalesforcePubSub.TestHost;
+namespace WolverineFxContrib.SalesforcePubSub.TestHost.Handlers;
 
 public class TestEventOneHandler
 {
