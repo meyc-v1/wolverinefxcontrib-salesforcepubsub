@@ -1,17 +1,16 @@
-using a deprecated shared auth package;
 using Wolverine.SalesforcePubSub;
 
 namespace WolverineFxContrib.SalesforcePubSub.TestHost;
 
 /// <summary>
-/// Bridges the shared <see cref="ISalesforceTokenClient"/> (a deprecated shared auth package) to the
-/// pub/sub transport's <see cref="IAuthenticationTokenHandler"/>. Lifted from the original runner.
+/// Bridges the local <see cref="ISalesforceTokenClient"/> to the pub/sub transport's
+/// <see cref="IAuthenticationTokenHandler"/>. Mirrors the internal client.SalesforceHandlers.
 /// </summary>
-internal sealed class SubscriberAuthenticationTokenHandler : IAuthenticationTokenHandler
+internal sealed class SalesforceAuthenticationTokenHandler : IAuthenticationTokenHandler
 {
     private readonly ISalesforceTokenClient _client;
 
-    public SubscriberAuthenticationTokenHandler(ISalesforceTokenClient client)
+    public SalesforceAuthenticationTokenHandler(ISalesforceTokenClient client)
         => _client = client ?? throw new ArgumentNullException(nameof(client));
 
     public async Task<AuthenticationTokenResponse> GetAuthenticationTokenAsync()
