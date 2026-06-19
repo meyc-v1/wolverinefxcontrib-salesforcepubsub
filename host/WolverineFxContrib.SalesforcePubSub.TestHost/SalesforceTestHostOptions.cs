@@ -12,11 +12,12 @@ public sealed class SalesforceTestHostOptions
     public string PubSubUri { get; set; } = "https://api.pubsub.salesforce.com:7443";
 
     // Test Event One — consumed via a topic subscription (client-side replay)
-    public string TestEventOneChannel { get; set; } = "/event/Test_Event_One__e";
-    public string TestEventOneSObject { get; set; } = "Test_Event_One__e";
+    public string TestEventOneChannel { get; set; } = "/event/CM_Test_Event_One__e";
+    public string TestEventOneSObject { get; set; } = "CM_Test_Event_One__e";
 
     // Test Event Two — consumed via a managed event subscription (server-side replay).
-    // Set this to the DeveloperName of the ManagedEventSubscription created in Salesforce.
-    public string TestEventTwoManagedSubscription { get; set; } = "Test_Event_Two_MES";
-    public string TestEventTwoSObject { get; set; } = "Test_Event_Two__e";
+    // PLACEHOLDER: set this to the DeveloperName of the ManagedEventSubscription created in Salesforce
+    // (the old runner consumed Test Event Two as a topic, so there was no MES name to carry over).
+    public string TestEventTwoManagedSubscription { get; set; } = "CM_Test_Event_Two_MES";
+    public string TestEventTwoSObject { get; set; } = "CM_Test_Event_Two__e";
 }

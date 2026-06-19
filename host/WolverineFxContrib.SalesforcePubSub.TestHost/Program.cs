@@ -4,6 +4,7 @@ using Microsoft.Extensions.Hosting;
 using Wolverine;
 using Wolverine.SalesforcePubSub;
 using WolverineFxContrib.SalesforcePubSub.TestHost;
+using WolverineFxContrib.SalesforcePubSub.TestHost.Events;
 
 var builder = Host.CreateApplicationBuilder(args);
 

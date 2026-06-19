@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using WolverineFxContrib.SalesforcePubSub.TestHost.Events;
 
 namespace WolverineFxContrib.SalesforcePubSub.TestHost;
 

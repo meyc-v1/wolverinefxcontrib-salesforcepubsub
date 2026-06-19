@@ -1,6 +1,6 @@
 using Wolverine.SalesforcePubSub;
 
-namespace WolverineFxContrib.SalesforcePubSub.TestHost;
+namespace WolverineFxContrib.SalesforcePubSub.TestHost.Events;
 
 /// <summary>
 /// Maps to the "Test Event Two" platform event (/event/Test_Event_Two__e), consumed via MES.
@@ -8,5 +8,5 @@ namespace WolverineFxContrib.SalesforcePubSub.TestHost;
 /// </summary>
 public sealed class TestEventTwo : PlatformEvent
 {
-    // e.g. public string? Message__c { get; set; }
+    public string Message__c { get; set; }
 }

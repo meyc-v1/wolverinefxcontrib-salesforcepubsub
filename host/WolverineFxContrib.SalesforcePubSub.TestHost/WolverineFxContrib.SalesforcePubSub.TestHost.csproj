@@ -4,7 +4,7 @@
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <UserSecretsId>dotnet-WolverineFxContrib.SalesforcePubSub.TestHost-3e05768c-d161-40c9-996e-6879cac32d2c</UserSecretsId>
+    <UserSecretsId>wolverine.salesforcepubsub</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
