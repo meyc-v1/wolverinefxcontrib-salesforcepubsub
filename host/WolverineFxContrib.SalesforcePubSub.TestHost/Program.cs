@@ -1,4 +1,5 @@
 using System.Reflection;
+using a deprecated shared auth package;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -8,16 +9,24 @@ using WolverineFxContrib.SalesforcePubSub.TestHost;
 
 var builder = Host.CreateApplicationBuilder(args);
 
-var sf = builder.Configuration.GetSection("Salesforce").Get<SalesforceTestHostOptions>() ?? new SalesforceTestHostOptions();
+var sf = builder.Configuration.GetSection("salesforceSettings").Get<SalesforceSettings>() ?? new SalesforceSettings();
 builder.Services.AddSingleton(sf);
 
-builder.Services.AddHttpClient<PlatformEventPublisher>();
+// Salesforce auth (client-credentials) from the salesforceAuthenticationSettings section (in user-secrets).
+builder.Services.AddSalesforceAuthentication(settings =>
+    builder.Configuration.GetSection("salesforceAuthenticationSettings").Bind(settings));
+
+// REST client for publishing platform events, bearer-authed via the shared token client.
+builder.Services.AddTransient<SalesforceHandler>();
+builder.Services.AddHttpClient<ISalesforceClient, SalesforceClient>(client => client.BaseAddress = sf.BaseUri)
+    .AddHttpMessageHandler<SalesforceHandler>();
+
 builder.Services.AddHostedService<PublisherWorker>();
 
 builder.UseWolverine(opts =>
 {
-    opts.UseSalesforcePubSub(s => s.PubSubUri = new Uri(sf.PubSubUri))
-        .UseAuthenticationHandler<ConfigAuthenticationTokenHandler>();
+    opts.UseSalesforcePubSub(s => s.PubSubUri = sf.PubSubUri)
+        .UseAuthenticationHandler<SubscriberAuthenticationTokenHandler>();
 
     foreach (var sub in sf.Subscriptions)
     {
