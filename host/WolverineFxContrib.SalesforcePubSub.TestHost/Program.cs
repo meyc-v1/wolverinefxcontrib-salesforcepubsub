@@ -19,11 +19,11 @@ builder.UseWolverine(opts =>
     opts.UseSalesforcePubSub(s => s.PubSubUri = new Uri(sf.PubSubUri))
         .UseAuthenticationHandler<ConfigAuthenticationTokenHandler>();
 
-    // Test Event One → topic subscription (client-side replay)
-    opts.ListenToSalesforceTopic<TestEventOne>(sf.TestEventOneChannel);
+    // Test Event One → managed event subscription (server-side replay)
+    opts.ListenToManagedSubscription<TestEventOne>(sf.TestEventOneManagedSubscription);
 
-    // Test Event Two → managed event subscription (server-side replay)
-    opts.ListenToManagedSubscription<TestEventTwo>(sf.TestEventTwoManagedSubscription);
+    // Test Event Two → topic subscription (client-side replay)
+    opts.ListenToSalesforceTopic<TestEventTwo>(sf.TestEventTwoChannel);
 });
 
 var host = builder.Build();
