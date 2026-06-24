@@ -55,6 +55,7 @@ public sealed class SalesforceEndpoint : Endpoint
         var settings = services.GetRequiredService<SubscriberComponentsSettings>();
         var backoff = services.GetRequiredService<IBackoffStrategy>();
         var deserializer = services.GetRequiredService<PlatformEventDeserializer>();
+        var tokens = services.GetRequiredService<CachingAuthenticationTokenProvider>();
         var logger = runtime.LoggerFactory.CreateLogger<SalesforceListener>();
 
         Func<ISubscriptionTransport> factory;
@@ -69,7 +70,7 @@ public sealed class SalesforceEndpoint : Endpoint
         }
 
         var listener = new SalesforceListener(
-            Uri, Resource, factory, receiver, MessageType, deserializer, settings, backoff, logger, runtime.Cancellation);
+            Uri, Resource, factory, receiver, MessageType, deserializer, settings, backoff, tokens, logger, runtime.Cancellation);
 
         return ValueTask.FromResult((IListener)listener);
     }

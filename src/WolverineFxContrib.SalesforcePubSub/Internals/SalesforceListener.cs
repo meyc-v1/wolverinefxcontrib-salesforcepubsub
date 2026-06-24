@@ -1,5 +1,6 @@
 using System.Buffers.Binary;
 using System.Runtime.CompilerServices;
+using Grpc.Core;
 using Microsoft.Extensions.Logging;
 using Wolverine.Runtime;
 using Wolverine.Transports;
@@ -26,6 +27,7 @@ internal sealed class SalesforceListener : IListener
     private readonly PlatformEventDeserializer _deserializer;
     private readonly SubscriberComponentsSettings _settings;
     private readonly IBackoffStrategy _backoffStrategy;
+    private readonly CachingAuthenticationTokenProvider _tokenProvider;
     private readonly ILogger _logger;
     private readonly CancellationTokenSource _cts;
     private readonly Task _runner;
@@ -41,6 +43,7 @@ internal sealed class SalesforceListener : IListener
         PlatformEventDeserializer deserializer,
         SubscriberComponentsSettings settings,
         IBackoffStrategy backoffStrategy,
+        CachingAuthenticationTokenProvider tokenProvider,
         ILogger logger,
         CancellationToken runtimeCancellation)
     {
@@ -52,6 +55,7 @@ internal sealed class SalesforceListener : IListener
         _deserializer = deserializer;
         _settings = settings;
         _backoffStrategy = backoffStrategy;
+        _tokenProvider = tokenProvider;
         _logger = logger;
         _cts = CancellationTokenSource.CreateLinkedTokenSource(runtimeCancellation);
         _runner = Task.Run(() => RunAsync(_cts.Token));
@@ -148,6 +152,14 @@ internal sealed class SalesforceListener : IListener
     private async Task HandleStreamExceptionAsync(ISubscriptionTransport transport, Exception ex, CancellationToken ct)
     {
         _consecutiveErrors++;
+
+        // An auth failure means the token was rejected (expired or revoked). Drop the cached token so the
+        // reconnect below fetches a fresh one — gated on the auth status codes so ordinary reconnects keep it.
+        if (ex is RpcException { StatusCode: StatusCode.Unauthenticated or StatusCode.PermissionDenied })
+        {
+            _logger.LogInformation("Authentication failure for {Resource}; invalidating cached token before reconnect.", _resource);
+            _tokenProvider.Invalidate();
+        }
 
         try
         {

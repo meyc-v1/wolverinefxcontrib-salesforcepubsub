@@ -8,6 +8,7 @@ public sealed class SubscriberComponentsSettings
 {
     internal static readonly int DefaultFetchCount = 10;
     internal static readonly TimeSpan DefaultFetchTimeout = TimeSpan.FromSeconds(270);
+    internal static readonly TimeSpan DefaultTokenCacheDuration = TimeSpan.FromMinutes(60);
     internal static readonly Uri DefaultPubSubUri = new("https://api.pubsub.salesforce.com:7443");
 
     public static readonly string DefaultReplayIdValidationFailedErrorCode =
@@ -16,6 +17,13 @@ public sealed class SubscriberComponentsSettings
     public Uri PubSubUri { get; set; } = DefaultPubSubUri;
     public TimeSpan FetchTimeout { get; set; } = DefaultFetchTimeout;
     public int FetchCount { get; set; } = DefaultFetchCount;
+
+    /// <summary>
+    /// How long the transport caches a Salesforce access token before re-fetching it from the
+    /// registered <see cref="IAuthenticationTokenHandler"/>. The cache is also invalidated reactively
+    /// on an authentication failure, so this is the proactive-refresh backstop. Defaults to 60 minutes.
+    /// </summary>
+    public TimeSpan TokenCacheDuration { get; set; } = DefaultTokenCacheDuration;
 
     /// <summary>
     /// When true, a cold-start topic subscription (no stored replay id) begins from

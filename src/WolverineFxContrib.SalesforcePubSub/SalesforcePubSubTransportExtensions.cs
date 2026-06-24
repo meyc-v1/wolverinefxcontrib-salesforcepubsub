@@ -30,6 +30,7 @@ public static class SalesforcePubSubTransportExtensions
         services.TryAddSingleton<ISchemaRepository, DefaultSchemaRepository>();
         services.TryAddSingleton<CachingSchemaRepository>();
         services.TryAddSingleton<PlatformEventDeserializer>();
+        services.TryAddSingleton<CachingAuthenticationTokenProvider>();
         services.AddMemoryCache();
 
         services.AddGrpcClient<PubSub.PubSubClient>(o => { o.Address = settings.PubSubUri; })
@@ -40,10 +41,11 @@ public static class SalesforcePubSubTransportExtensions
                 KeepAlivePingTimeout = TimeSpan.FromSeconds(15),
                 EnableMultipleHttp2Connections = true
             })
-            .AddCallCredentials(async (_, metadata, provider) =>
+            .AddCallCredentials(async (context, metadata, provider) =>
             {
-                var handler = provider.GetRequiredService<IAuthenticationTokenHandler>();
-                var tokenResponse = await handler.GetAuthenticationTokenAsync().ConfigureAwait(false);
+                // Token caching/invalidation is owned by the transport's provider, not the consumer's handler.
+                var tokens = provider.GetRequiredService<CachingAuthenticationTokenProvider>();
+                var tokenResponse = await tokens.GetTokenAsync(context.CancellationToken).ConfigureAwait(false);
                 metadata.Add("accesstoken", tokenResponse.AccessToken);
                 metadata.Add("instanceurl", tokenResponse.InstanceUri);
                 metadata.Add("tenantid", tokenResponse.TenantId);
