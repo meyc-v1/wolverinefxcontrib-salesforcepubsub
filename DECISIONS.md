@@ -123,6 +123,9 @@ Places the port strays from Wolverine's conventions or under-implements what Wol
 either resolved (implemented Wolverine's way / documented) or open. Add to this list whenever a new one
 is observed.
 
+_Conformance pass 2026-06-30: audited `IListener`, `Endpoint`, and `TransportBase` against the base
+contracts + Kafka/ASB. The port is largely conformant; findings below._
+
 - **Hand-rolled listener config** — the port wrote a bespoke fluent class instead of deriving from
   `ListenerConfiguration<,>`. → **Resolved** (now derives — #5).
 - **Inherited serializer/encryption knobs are inert** — Wolverine assumes its serialization pipeline; we
@@ -130,10 +133,20 @@ is observed.
 - **`CompleteAsync`/`DeferAsync` are no-ops** — Wolverine's `IListener` contract expects per-envelope
   ack/defer; we commit replay at the batch level in the consume loop instead. The most significant
   under-implementation of what Wolverine expects. → **Open / Deferred** (the at-least-once seam — #2).
+- **`ReplyEndpoint()` returned a listener** — `TransportBase`'s default advertised our listen-only endpoint
+  as a request/reply target, but we can't send. → **Resolved** (overridden to return `null`; a listen-only
+  transport has no reply target — every sendable transport overrides this with its real one).
 - **Batch receive overload unused** — Wolverine's `IReceiver` offers `ReceivedAsync(Envelope[])`; we feed
-  one envelope at a time. → **Deferred** (#6).
-- **No sender** — `SalesforceEndpoint.CreateSender` throws `NotSupportedException`. Wolverine endpoints
-  can send; ours is listen-only by design. → **Intentional / documented** (listen-only).
+  one envelope at a time. → **Deferred** (#6) — and it matches Kafka, which also dispatches singly.
+- **No sender (listen-only)** — `SalesforceEndpoint.CreateSender` throws. Confirmed **safe**:
+  `AutoStartSendingAgent()` is false for a pure listener (no `Subscriptions`), so Wolverine never calls
+  `StartSending`/`CreateSender`; only reachable if a consumer publishes to an `sfpubsub://` URI (throws
+  clearly). → **Intentional / verified**.
+- **`findEndpointByUri` throws on an unknown URI** (Kafka creates on demand) — fine for listen-only, where
+  endpoints exist only from `ListenTo…` config. → **Intentional**.
+- **No diagnostics surface** — `DescribeEndpoint()` returns null (no sanitized broker host) and the listener
+  exposes no health snapshot (Kafka's `ReceiveLoopStatus`, GH-3236). → **Open / optional** (observability,
+  low priority).
 
 ## Inherited from the original port — pending ratification
 

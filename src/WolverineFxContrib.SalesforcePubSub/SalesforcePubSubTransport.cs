@@ -35,4 +35,11 @@ public sealed class SalesforcePubSubTransport : TransportBase<SalesforceEndpoint
     protected override SalesforceEndpoint findEndpointByUri(Uri uri)
         => _endpoints.FirstOrDefault(e => e.Uri == uri)
            ?? throw new ArgumentOutOfRangeException(nameof(uri), $"Unknown Salesforce Pub/Sub endpoint: {uri}");
+
+    /// <summary>
+    /// Listen-only: this transport cannot send, so it can never serve as a request/reply target. The base
+    /// default returns one of our listeners, which would route replies into a sender we don't have
+    /// (<see cref="SalesforceEndpoint"/> throws from CreateSender). Return null instead.
+    /// </summary>
+    public override Endpoint? ReplyEndpoint() => null;
 }
