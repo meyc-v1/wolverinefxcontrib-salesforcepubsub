@@ -156,6 +156,17 @@ contracts + Kafka/ASB. The port is largely conformant; findings below._
   transport has no reply target — every sendable transport overrides this with its real one).
 - **Batch receive overload unused** — Wolverine's `IReceiver` offers `ReceivedAsync(Envelope[])`; we feed
   one envelope at a time. → **Deferred** (#6) — and it matches Kafka, which also dispatches singly.
+- **No `Durable` (inbox) mode → no at-least-once *with parallelism*** — `supportsMode` allows only
+  Inline/BufferedInMemory. The Wolverine-idiomatic way to get at-least-once *and* throughput is the
+  **durable inbox** (`EndpointMode.Durable`): "Complete" means *persisted to the inbox* (in order), and
+  the durability agent provides recovery + dedup — exactly how Kafka's `ProcessConcurrentlyByKey` works.
+  Mostly **free from Wolverine** once a message store is configured (SQL Server / Postgres-Marten / EF +
+  the `WolverineFx.*` package; tables auto-provisioned) — that store is the consumer-side infra.
+  Transport-side work is small: allow `Durable` in `supportsMode`, rely on the **deterministic envelope
+  `Id`** (inbox dedups by it — prerequisite), and align the replay commit with `DurableReceiver`'s
+  persist-then-complete timing. NB: low-water-marking on **BufferedInMemory** is *not* a path here — it
+  acks at receipt, before handling. → **Open / aspirational** (future; distinct from #2, which stays
+  Inline-scoped).
 - **No sender (listen-only)** — `SalesforceEndpoint.CreateSender` throws. Confirmed **safe**:
   `AutoStartSendingAgent()` is false for a pure listener (no `Subscriptions`), so Wolverine never calls
   `StartSending`/`CreateSender`; only reachable if a consumer publishes to an `sfpubsub://` URI (throws
