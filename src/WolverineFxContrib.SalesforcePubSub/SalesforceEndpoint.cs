@@ -46,6 +46,12 @@ public sealed class SalesforceEndpoint : Endpoint
 
     public override ValueTask<IListener> BuildListenerAsync(IWolverineRuntime runtime, IReceiver receiver)
     {
+        // Wolverine builds ListenerCount parallel listeners (ListeningAgent). For this transport each
+        // listener opens its own gRPC subscription to the same channel, so >1 means duplicate delivery.
+        if (ListenerCount > 1)
+            throw new InvalidOperationException(
+                $"The Salesforce Pub/Sub transport supports only a single listener per endpoint, but ListenerCount={ListenerCount} was configured for '{Resource}'. Multiple listeners would open duplicate gRPC subscriptions and cause duplicate delivery; leave ListenerCount at 1.");
+
         if (MessageType is null)
             throw new InvalidOperationException(
                 $"No message type configured for Salesforce endpoint '{Resource}'. Use ListenToSalesforceTopic<T> / ListenToManagedSubscription<T>.");

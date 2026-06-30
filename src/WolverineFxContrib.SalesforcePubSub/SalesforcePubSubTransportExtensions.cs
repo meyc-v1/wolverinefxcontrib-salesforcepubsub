@@ -105,24 +105,25 @@ public sealed class SalesforcePubSubConfiguration
     }
 }
 
-/// <summary>Per-endpoint fluent configuration for a Salesforce listener.</summary>
-public sealed class SalesforceListenerConfiguration
+/// <summary>
+/// Per-endpoint fluent configuration for a Salesforce listener. Derives from Wolverine's
+/// <see cref="ListenerConfiguration{TSelf,TEndpoint}"/> so consumers get the standard listener surface
+/// (<c>ProcessInline</c>, <c>BufferedInMemory</c>, <c>Sequential</c>, <c>MaximumParallelMessages</c>,
+/// <c>Named</c>, …). Unsupported modes are rejected by <see cref="SalesforceEndpoint"/>'s
+/// <c>supportsMode</c>, and <c>ListenerCount</c> is constrained to 1 in
+/// <see cref="SalesforceEndpoint.BuildListenerAsync"/> (multiple listeners would duplicate the stream).
+/// </summary>
+public class SalesforceListenerConfiguration
+    : ListenerConfiguration<SalesforceListenerConfiguration, SalesforceEndpoint>
 {
-    private readonly SalesforceEndpoint _endpoint;
-
-    internal SalesforceListenerConfiguration(SalesforceEndpoint endpoint) => _endpoint = endpoint;
-
-    /// <summary>Process events inline (at-least-once: replay advances only after the handler runs). The default.</summary>
-    public SalesforceListenerConfiguration ProcessInline()
+    internal SalesforceListenerConfiguration(SalesforceEndpoint endpoint) : base(endpoint)
     {
-        _endpoint.Mode = EndpointMode.Inline;
-        return this;
     }
 
-    /// <summary>Buffer events in memory for parallel processing (at-most-once on handler failure).</summary>
-    public SalesforceListenerConfiguration BufferedInMemory()
+    internal SalesforceListenerConfiguration(Func<SalesforceEndpoint> source) : base(source)
     {
-        _endpoint.Mode = EndpointMode.BufferedInMemory;
-        return this;
     }
+
+    // Salesforce-specific listener knobs would be added here later (e.g. a per-endpoint replay start),
+    // each queued via add(e => …) following the Kafka transport's pattern.
 }

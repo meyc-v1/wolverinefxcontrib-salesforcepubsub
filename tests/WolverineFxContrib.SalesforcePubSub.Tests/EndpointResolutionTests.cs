@@ -80,4 +80,15 @@ public class EndpointResolutionTests
         // The MessageType guard runs synchronously before the runtime is ever touched.
         Assert.Throws<InvalidOperationException>(() => { _ = endpoint.BuildListenerAsync(null!, null!); });
     }
+
+    [Fact]
+    public void BuildListenerAsync_rejects_listener_count_greater_than_one()
+    {
+        var transport = new SalesforcePubSubTransport();
+        var endpoint = transport.EndpointForResource(SalesforceResourceKind.Topic, "/event/A__e");
+        endpoint.ListenerCount = 2; // would open duplicate gRPC subscriptions to the same channel
+
+        var ex = Assert.Throws<InvalidOperationException>(() => { _ = endpoint.BuildListenerAsync(null!, null!); });
+        Assert.Contains("ListenerCount", ex.Message);
+    }
 }
