@@ -75,22 +75,20 @@ internal sealed partial class TopicTransport : ISubscriptionTransport
         }
     }
 
-    public async Task AcknowledgeAsync(ResponseMessageInfo response, CancellationToken ct)
+    public async Task CommitAsync(long replayId, bool isKeepAlive, CancellationToken ct)
     {
         LogStarted("SaveReplayId", _topicName);
 
-        if (response.Events.Count > 0)
+        // Commit regardless of cancellation so a shutdown still persists progress.
+        if (isKeepAlive)
         {
-            await _replayIdRepository.ReportEventsReceivedResponseAsync(
-                _topicName,
-                response.LastReplayId,
-                response.Events.Select(x => BinaryPrimitives.ReadInt64BigEndian(x.ReplayId.ToByteArray())).ToList(),
-                CancellationToken.None).ConfigureAwait(false);
+            await _replayIdRepository.ReportKeepAliveResponseAsync(
+                _topicName, replayId, CancellationToken.None).ConfigureAwait(false);
         }
         else
         {
-            await _replayIdRepository.ReportKeepAliveResponseAsync(
-                _topicName, response.LastReplayId, CancellationToken.None).ConfigureAwait(false);
+            await _replayIdRepository.ReportEventsReceivedResponseAsync(
+                _topicName, replayId, [replayId], CancellationToken.None).ConfigureAwait(false);
         }
 
         LogFinished("SaveReplayId", _topicName);

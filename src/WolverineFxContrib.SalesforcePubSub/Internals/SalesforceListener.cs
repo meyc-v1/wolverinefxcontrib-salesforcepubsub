@@ -16,11 +16,12 @@ namespace Wolverine.SalesforcePubSub.Internals;
 /// loop (ported from the original SubscriptionOrchestrator) so Wolverine never has to restart a faulted
 /// stream — the loop self-heals internally and only stops on shutdown.
 ///
-/// FIRST CUT — replay/ack seam: replay is committed in-loop via <see cref="ISubscriptionTransport.AcknowledgeAsync"/>
-/// after the batch is dispatched (and, in Inline mode, processed). This is the agreed at-most-once
-/// "free" behavior. The at-least-once refinement — commit per-envelope in <see cref="CompleteAsync"/>
-/// after the handler succeeds, a dedicated keepalive-advance path, and a handler-failure policy — is the
-/// next iteration. <see cref="CompleteAsync"/>/<see cref="DeferAsync"/> are intentionally no-ops for now.
+/// Replay/ack: a per-envelope <see cref="ReplayCommitTracker"/> watermark commits the replay position
+/// only after an envelope is resolved via <see cref="CompleteAsync"/> (success, dead-letter, or discard),
+/// never past an in-flight event. <see cref="DeferAsync"/> holds the position (this transport has no
+/// native per-message requeue — inline-retry + DLQ are the failure model). Under <c>Inline</c> this yields
+/// at-least-once; <c>BufferedInMemory</c> stays at-most-once (its receiver completes on receipt). Commits
+/// route to the current transport (the MES stream rotates on reconnect; the topic repository is long-lived).
 /// </summary>
 internal sealed class SalesforceListener : IListener
 {
@@ -32,11 +33,13 @@ internal sealed class SalesforceListener : IListener
     private readonly SubscriberComponentsSettings _settings;
     private readonly IBackoffStrategy _backoffStrategy;
     private readonly CachingAuthenticationTokenProvider _tokenProvider;
+    private readonly ReplayCommitTracker _commits;
     private readonly ILogger _logger;
     private readonly CancellationTokenSource _cts;
     private readonly Task _runner;
 
     private long _consecutiveErrors;
+    private ISubscriptionTransport? _currentTransport;
 
     public SalesforceListener(
         Uri address,
@@ -48,7 +51,7 @@ internal sealed class SalesforceListener : IListener
         SubscriberComponentsSettings settings,
         IBackoffStrategy backoffStrategy,
         CachingAuthenticationTokenProvider tokenProvider,
-        ILogger logger,
+        ILogger<SalesforceListener> logger,
         CancellationToken runtimeCancellation)
     {
         Address = address;
@@ -61,6 +64,7 @@ internal sealed class SalesforceListener : IListener
         _backoffStrategy = backoffStrategy;
         _tokenProvider = tokenProvider;
         _logger = logger;
+        _commits = new ReplayCommitTracker(CommitToCurrentTransportAsync, settings.FetchCount);
         _cts = CancellationTokenSource.CreateLinkedTokenSource(runtimeCancellation);
         _runner = Task.Run(() => RunAsync(_cts.Token));
     }
@@ -69,10 +73,18 @@ internal sealed class SalesforceListener : IListener
 
     public IHandlerPipeline Pipeline => _receiver.Pipeline;
 
-    // See class remarks: replay is committed in the consume loop for this first cut.
-    public ValueTask CompleteAsync(Envelope envelope) => ValueTask.CompletedTask;
+    /// <summary>Resolved (handled / dead-lettered / discarded) — advance the replay watermark past it.</summary>
+    public ValueTask CompleteAsync(Envelope envelope) => new(_commits.CompleteAsync(envelope.Offset));
 
-    public ValueTask DeferAsync(Envelope envelope) => ValueTask.CompletedTask;
+    /// <summary>
+    /// Requeue requested. Leave the event in flight so the watermark holds below it; it re-delivers on the
+    /// next reconnect. No native per-message requeue here — inline-retry + DLQ are the failure model (#2).
+    /// </summary>
+    public ValueTask DeferAsync(Envelope envelope)
+    {
+        _logger.LogDebug("Defer requested for {Resource} (replayId {ReplayId}); holding replay position.", _resource, envelope.Offset);
+        return ValueTask.CompletedTask;
+    }
 
     public async ValueTask StopAsync()
     {
@@ -90,6 +102,16 @@ internal sealed class SalesforceListener : IListener
         {
             _logger.LogDebug(ex, "Listener runner faulted during stop for {Resource}", _resource);
         }
+
+        // Persist the final committable replay position (the commit throttle may be holding one).
+        try
+        {
+            await _commits.FlushAsync().ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "Final replay commit failed during stop for {Resource}", _resource);
+        }
     }
 
     public async ValueTask DisposeAsync()
@@ -105,6 +127,7 @@ internal sealed class SalesforceListener : IListener
         while (!ct.IsCancellationRequested)
         {
             using var transport = _transportFactory();
+            _currentTransport = transport;
             try
             {
                 await transport.ConnectAsync(ct).ConfigureAwait(false);
@@ -129,33 +152,64 @@ internal sealed class SalesforceListener : IListener
         {
             _consecutiveErrors = 0;
 
-            foreach (var consumerEvent in response.Events)
+            if (response.Events.Count == 0)
             {
-                var replayId = BinaryPrimitives.ReadInt64BigEndian(consumerEvent.ReplayId.ToByteArray());
-                var eventMessage = new EventMessage(_resource, replayId, consumerEvent);
-                var deserialized = await _deserializer.DeserializeAsync(eventMessage, _messageType, ct).ConfigureAwait(false);
-                deserialized.ReplayId = replayId;
-
-                var envelope = new Envelope
+                // Keep-alive: advance the committed position during idle (respects any in-flight floor).
+                await _commits.ObserveKeepAliveAsync(response.LastReplayId).ConfigureAwait(false);
+            }
+            else
+            {
+                foreach (var consumerEvent in response.Events)
                 {
-                    // Deterministic Id from the Salesforce event id so a redelivered event is dedup-able.
-                    Id = ResolveEnvelopeId(consumerEvent.Event.Id, _resource, replayId),
-                    Message = deserialized,
-                    MessageType = _messageType.ToMessageTypeName(),
-                    TopicName = _resource,
-                    Offset = replayId
-                };
+                    var replayId = BinaryPrimitives.ReadInt64BigEndian(consumerEvent.ReplayId.ToByteArray());
+                    _commits.Track(replayId); // in flight until CompleteAsync resolves it
 
-                if (deserialized is PlatformEvent platformEvent)
-                    envelope.SentAt = DateTimeOffset.FromUnixTimeMilliseconds(platformEvent.CreatedDate);
+                    var eventMessage = new EventMessage(_resource, replayId, consumerEvent);
+                    var deserialized = await _deserializer.DeserializeAsync(eventMessage, _messageType, ct).ConfigureAwait(false);
+                    deserialized.ReplayId = replayId;
 
-                await _receiver.ReceivedAsync(this, envelope).ConfigureAwait(false);
+                    var envelope = new Envelope
+                    {
+                        // Deterministic Id from the Salesforce event id so a redelivered event is dedup-able.
+                        Id = ResolveEnvelopeId(consumerEvent.Event.Id, _resource, replayId),
+                        Message = deserialized,
+                        MessageType = _messageType.ToMessageTypeName(),
+                        TopicName = _resource,
+                        Offset = replayId
+                    };
+
+                    if (deserialized is PlatformEvent platformEvent)
+                        envelope.SentAt = DateTimeOffset.FromUnixTimeMilliseconds(platformEvent.CreatedDate);
+
+                    await _receiver.ReceivedAsync(this, envelope).ConfigureAwait(false);
+                }
             }
 
-            await transport.AcknowledgeAsync(response, ct).ConfigureAwait(false);
+            // Replay commit is driven by the watermark (CompleteAsync / keep-alive), not a batch ack.
 
             if (response.PendingNumberRequested <= 0)
                 await transport.RequestMoreAsync(ct).ConfigureAwait(false);
+        }
+    }
+
+    /// <summary>
+    /// Commits a replay position to whichever transport is currently connected (the MES stream rotates on
+    /// reconnect; the topic repository is long-lived). Best-effort — a commit racing a reconnect is fine.
+    /// </summary>
+    private async Task CommitToCurrentTransportAsync(long replayId, bool isKeepAlive)
+    {
+        var transport = _currentTransport;
+        if (transport is null)
+            return;
+
+        try
+        {
+            await transport.CommitAsync(replayId, isKeepAlive, CancellationToken.None).ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            // The position is re-committed on the next event, or re-derived server-side on reconnect.
+            _logger.LogDebug(ex, "Replay commit failed for {Resource} (replayId {ReplayId}); will retry on next commit.", _resource, replayId);
         }
     }
 

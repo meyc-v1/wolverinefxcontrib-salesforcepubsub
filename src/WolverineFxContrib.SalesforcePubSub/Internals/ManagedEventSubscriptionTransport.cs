@@ -1,5 +1,6 @@
 using System.Buffers.Binary;
 using System.Runtime.CompilerServices;
+using Google.Protobuf;
 using Grpc.Core;
 using Microsoft.Extensions.Logging;
 using SalesforceGrpc;
@@ -82,23 +83,31 @@ internal sealed partial class ManagedEventSubscriptionTransport : ISubscriptionT
         }
     }
 
-    public async Task AcknowledgeAsync(ResponseMessageInfo response, CancellationToken ct)
+    public async Task CommitAsync(long replayId, bool isKeepAlive, CancellationToken ct)
     {
         if (_call == null)
             throw new InvalidOperationException("Transport is not connected");
 
+        // MES replay is server-side; the commit is the same whether driven by events or a keep-alive.
         var commit = new ManagedFetchRequest
         {
             DeveloperName = _subscriptionName,
-            CommitReplayIdRequest = new CommitReplayRequest { ReplayId = response.LastReplayIdByteString }
+            CommitReplayIdRequest = new CommitReplayRequest { ReplayId = ToReplayIdByteString(replayId) }
         };
 
-        LogCommittingReplayId(response.LastReplayId, _subscriptionName);
+        LogCommittingReplayId(replayId, _subscriptionName);
 
         // Write the commit regardless of cancellation so the server records our position.
         LogStarted("CommitReplayId", _subscriptionName);
         await _call.RequestStream.WriteAsync(commit).ConfigureAwait(false);
         LogFinished("CommitReplayId", _subscriptionName);
+    }
+
+    private static ByteString ToReplayIdByteString(long replayId)
+    {
+        Span<byte> buffer = stackalloc byte[sizeof(long)];
+        BinaryPrimitives.WriteInt64BigEndian(buffer, replayId);
+        return ByteString.CopyFrom(buffer);
     }
 
     public async Task RequestMoreAsync(CancellationToken ct)

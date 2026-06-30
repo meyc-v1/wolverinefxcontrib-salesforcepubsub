@@ -20,11 +20,11 @@ internal interface ISubscriptionTransport : IDisposable
     IAsyncEnumerable<ResponseMessageInfo> ReadAsync(CancellationToken ct);
 
     /// <summary>
-    /// Persists or commits the replay id after events have been processed. For topics this writes to
-    /// <see cref="IReplayIdRepository"/>; for managed subscriptions this writes a commit request back
-    /// to the stream.
+    /// Commits a single replay position (the watermark of fully-processed events). For topics this writes
+    /// to <see cref="IReplayIdRepository"/> (events vs keep-alive); for managed subscriptions it writes a
+    /// commit request back to the stream. Called by the listener's <see cref="ReplayCommitTracker"/>.
     /// </summary>
-    Task AcknowledgeAsync(ResponseMessageInfo response, CancellationToken ct);
+    Task CommitAsync(long replayId, bool isKeepAlive, CancellationToken ct);
 
     /// <summary>
     /// Sends a new fetch request when the pending request count reaches zero.

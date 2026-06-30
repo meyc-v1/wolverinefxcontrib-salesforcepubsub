@@ -59,9 +59,6 @@ public sealed class SalesforceEndpoint : Endpoint
         var services = runtime.Services;
         var client = services.GetRequiredService<PubSub.PubSubClient>();
         var settings = services.GetRequiredService<SubscriberComponentsSettings>();
-        var backoff = services.GetRequiredService<IBackoffStrategy>();
-        var deserializer = services.GetRequiredService<PlatformEventDeserializer>();
-        var tokens = services.GetRequiredService<CachingAuthenticationTokenProvider>();
         var logger = runtime.LoggerFactory.CreateLogger<SalesforceListener>();
 
         Func<ISubscriptionTransport> factory;
@@ -75,8 +72,10 @@ public sealed class SalesforceEndpoint : Endpoint
             factory = () => new ManagedEventSubscriptionTransport(client, settings, logger, Resource);
         }
 
-        var listener = new SalesforceListener(
-            Uri, Resource, factory, receiver, MessageType, deserializer, settings, backoff, tokens, logger, runtime.Cancellation);
+        // DI fills the listener's service params (deserializer, settings, backoff, token provider, logger);
+        // we supply the runtime-contextual ones.
+        var listener = ActivatorUtilities.CreateInstance<SalesforceListener>(
+            services, Uri, Resource, factory, receiver, MessageType, runtime.Cancellation);
 
         return ValueTask.FromResult((IListener)listener);
     }
