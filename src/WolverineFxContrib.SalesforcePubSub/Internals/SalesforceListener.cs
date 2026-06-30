@@ -5,7 +5,6 @@ using System.Text;
 using Grpc.Core;
 using Microsoft.Extensions.Logging;
 using Wolverine.Runtime;
-using Wolverine.SalesforcePubSub.Events;
 using Wolverine.Transports;
 using Wolverine.Util;
 
@@ -29,7 +28,7 @@ internal sealed class SalesforceListener : IListener
     private readonly Func<ISubscriptionTransport> _transportFactory;
     private readonly IReceiver _receiver;
     private readonly Type _messageType;
-    private readonly PlatformEventDeserializer _deserializer;
+    private readonly CachingSchemaRepository _schemaRepository;
     private readonly SubscriberComponentsSettings _settings;
     private readonly IBackoffStrategy _backoffStrategy;
     private readonly CachingAuthenticationTokenProvider _tokenProvider;
@@ -47,7 +46,7 @@ internal sealed class SalesforceListener : IListener
         Func<ISubscriptionTransport> transportFactory,
         IReceiver receiver,
         Type messageType,
-        PlatformEventDeserializer deserializer,
+        CachingSchemaRepository schemaRepository,
         SubscriberComponentsSettings settings,
         IBackoffStrategy backoffStrategy,
         CachingAuthenticationTokenProvider tokenProvider,
@@ -59,7 +58,7 @@ internal sealed class SalesforceListener : IListener
         _transportFactory = transportFactory;
         _receiver = receiver;
         _messageType = messageType;
-        _deserializer = deserializer;
+        _schemaRepository = schemaRepository;
         _settings = settings;
         _backoffStrategy = backoffStrategy;
         _tokenProvider = tokenProvider;
@@ -164,22 +163,24 @@ internal sealed class SalesforceListener : IListener
                     var replayId = BinaryPrimitives.ReadInt64BigEndian(consumerEvent.ReplayId.ToByteArray());
                     _commits.Track(replayId); // in flight until CompleteAsync resolves it
 
-                    var eventMessage = new EventMessage(_resource, replayId, consumerEvent);
-                    var deserialized = await _deserializer.DeserializeAsync(eventMessage, _messageType, ct).ConfigureAwait(false);
-                    deserialized.ReplayId = replayId;
+                    var schemaId = consumerEvent.Event.SchemaId;
+
+                    // Ensure the Avro schema is cached *here in the loop* so an auth failure during the fetch
+                    // surfaces to the reconnect/token-invalidate path; the serializer then decodes (sync)
+                    // from the cached schema downstream in Wolverine's pipeline.
+                    await _schemaRepository.GetDeserializationInfoBySchemaIdAsync(schemaId, ct).ConfigureAwait(false);
 
                     var envelope = new Envelope
                     {
                         // Deterministic Id from the Salesforce event id so a redelivered event is dedup-able.
                         Id = ResolveEnvelopeId(consumerEvent.Event.Id, _resource, replayId),
-                        Message = deserialized,
+                        Data = consumerEvent.Event.Payload.ToByteArray(),
+                        ContentType = SalesforceAvroSerializer.SalesforceAvroContentType,
                         MessageType = _messageType.ToMessageTypeName(),
                         TopicName = _resource,
                         Offset = replayId
                     };
-
-                    if (deserialized is PlatformEvent platformEvent)
-                        envelope.SentAt = DateTimeOffset.FromUnixTimeMilliseconds(platformEvent.CreatedDate);
+                    envelope.Headers[SalesforceAvroSerializer.SchemaIdHeader] = schemaId;
 
                     await _receiver.ReceivedAsync(this, envelope).ConfigureAwait(false);
                 }

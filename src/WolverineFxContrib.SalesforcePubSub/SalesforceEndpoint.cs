@@ -72,8 +72,12 @@ public sealed class SalesforceEndpoint : Endpoint
             factory = () => new ManagedEventSubscriptionTransport(client, settings, logger, Resource);
         }
 
-        // DI fills the listener's service params (deserializer, settings, backoff, token provider, logger);
-        // we supply the runtime-contextual ones.
+        // The serializer decodes Data-bearing envelopes by content-type in Wolverine's pipeline; the
+        // listener pre-fetches each schema (async, in its loop) before handing the envelope off.
+        RegisterSerializer(new SalesforceAvroSerializer(services.GetRequiredService<CachingSchemaRepository>()));
+
+        // DI fills the listener's service params (schema repository, settings, backoff, token provider,
+        // logger); we supply the runtime-contextual ones.
         var listener = ActivatorUtilities.CreateInstance<SalesforceListener>(
             services, Uri, Resource, factory, receiver, MessageType, runtime.Cancellation);
 

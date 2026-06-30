@@ -29,7 +29,6 @@ public static class SalesforcePubSubTransportExtensions
         services.TryAddSingleton<IBackoffStrategy, DefaultBackoffStrategy>();
         services.TryAddSingleton<ISchemaRepository, DefaultSchemaRepository>();
         services.TryAddSingleton<CachingSchemaRepository>();
-        services.TryAddSingleton<PlatformEventDeserializer>();
         services.TryAddSingleton<CachingAuthenticationTokenProvider>();
         services.AddMemoryCache();
 

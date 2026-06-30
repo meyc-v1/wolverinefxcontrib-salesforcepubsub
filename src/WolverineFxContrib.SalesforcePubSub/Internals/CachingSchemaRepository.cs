@@ -27,4 +27,20 @@ internal sealed class CachingSchemaRepository
 
         return returnable;
     }
+
+    /// <summary>
+    /// Synchronously returns a schema only if it is already cached. Used by the serializer on the dispatch
+    /// path; the listener ensures the schema is fetched/cached (async) before handing the envelope off.
+    /// </summary>
+    public bool TryGetCachedSchema(string schemaId, out SchemaInfo schema)
+    {
+        if (_memoryCache.TryGetValue(schemaId, out SchemaInfo? cached) && cached is not null)
+        {
+            schema = cached;
+            return true;
+        }
+
+        schema = null!;
+        return false;
+    }
 }
