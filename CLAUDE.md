@@ -52,8 +52,15 @@ endpoints. Package id `WolverineFxContrib.SalesforcePubSub`; root namespace `Wol
   `ISalesforceClient`.
 
 ## Conventions
+- **Do it the Wolverine way.** This is a community Wolverine transport and should look/behave like a
+  native one. When in doubt about API shape, naming, or behavior, mirror how Wolverine's own transports
+  do it rather than inventing. The full Wolverine source is cloned locally at `a local Wolverine clone` —
+  trace it to confirm conventions before deciding (**Kafka** is the primary reference transport,
+  **Azure Service Bus** secondary). Where the port diverges from Wolverine or under-implements what
+  Wolverine expects, either implement it Wolverine's way or document why we can't — and record it in
+  `DECISIONS.md`.
 - Use absolute paths in commands (not `cd`); separate Bash calls (no `&&`/`||`/`;`).
 - Prefer transient DI registrations unless there's a specific reason otherwise; internal types live in
   `Internals/`.
-- Full design rationale and step-by-step history live in `git log` (tag `pre-wolverine-glue` → HEAD)
-  and the Claude project memory — not duplicated here.
+- Design decisions (what + why) live in `DECISIONS.md` at the repo root. Full step-by-step history lives
+  in `git log` (tag `pre-wolverine-glue` → HEAD) and the Claude project memory — not duplicated here.
