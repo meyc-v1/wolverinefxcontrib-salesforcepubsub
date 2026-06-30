@@ -1,9 +1,13 @@
 using System.Buffers.Binary;
 using System.Runtime.CompilerServices;
+using System.Security.Cryptography;
+using System.Text;
 using Grpc.Core;
 using Microsoft.Extensions.Logging;
 using Wolverine.Runtime;
+using Wolverine.SalesforcePubSub.Events;
 using Wolverine.Transports;
+using Wolverine.Util;
 
 namespace Wolverine.SalesforcePubSub.Internals;
 
@@ -134,10 +138,16 @@ internal sealed class SalesforceListener : IListener
 
                 var envelope = new Envelope
                 {
+                    // Deterministic Id from the Salesforce event id so a redelivered event is dedup-able.
+                    Id = ResolveEnvelopeId(consumerEvent.Event.Id, _resource, replayId),
                     Message = deserialized,
+                    MessageType = _messageType.ToMessageTypeName(),
                     TopicName = _resource,
                     Offset = replayId
                 };
+
+                if (deserialized is PlatformEvent platformEvent)
+                    envelope.SentAt = DateTimeOffset.FromUnixTimeMilliseconds(platformEvent.CreatedDate);
 
                 await _receiver.ReceivedAsync(this, envelope).ConfigureAwait(false);
             }
@@ -147,6 +157,20 @@ internal sealed class SalesforceListener : IListener
             if (response.PendingNumberRequested <= 0)
                 await transport.RequestMoreAsync(ct).ConfigureAwait(false);
         }
+    }
+
+    /// <summary>
+    /// Maps the Salesforce event id to a stable <see cref="Envelope.Id"/> so a redelivered event always
+    /// yields the same Id (enables inbox dedup). The SF event id is normally a guid; when it isn't, derive
+    /// a deterministic guid — falling back to resource+replayId when no id is present.
+    /// </summary>
+    internal static Guid ResolveEnvelopeId(string? salesforceEventId, string resource, long replayId)
+    {
+        if (Guid.TryParse(salesforceEventId, out var parsed))
+            return parsed;
+
+        var key = string.IsNullOrEmpty(salesforceEventId) ? $"{resource}:{replayId}" : salesforceEventId;
+        return new Guid(MD5.HashData(Encoding.UTF8.GetBytes(key)));
     }
 
     private async Task HandleStreamExceptionAsync(ISubscriptionTransport transport, Exception ex, CancellationToken ct)
