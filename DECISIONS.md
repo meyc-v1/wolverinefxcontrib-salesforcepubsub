@@ -147,7 +147,10 @@ contracts + Kafka/ASB. The port is largely conformant; findings below._
   Salesforce event can't be deduped — derive `envelope.Id` from the Salesforce event id
   (`consumerEvent.Event.Id`/EventUuid; confirm exact field). Pairs with #2 — at-least-once needs a stable
   id for inbox idempotency. Minor parity: set `SentAt` from the event `CreatedDate` (telemetry) and the
-  `MessageType` string (Kafka sets it). → **Open** (Id is correctness; SentAt/MessageType cosmetic).
+  `MessageType` string (Kafka sets it). → **Resolved (Phase 1)** — `envelope.Id` via
+  `SalesforceListener.ResolveEnvelopeId` (`consumerEvent.Event.Id` guid passthrough, else a deterministic
+  guid; resource+replayId fallback), `SentAt` from `PlatformEvent.CreatedDate`, `MessageType` via
+  `ToMessageTypeName()`.
 - **`CompleteAsync`/`DeferAsync` are no-ops** — Wolverine's `IListener` contract expects per-envelope
   ack/defer; we commit replay at the batch level in the consume loop instead. The most significant
   under-implementation of what Wolverine expects. → **Open / Deferred** (the at-least-once seam — #2).
