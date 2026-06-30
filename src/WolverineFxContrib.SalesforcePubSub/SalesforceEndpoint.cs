@@ -25,6 +25,12 @@ public sealed class SalesforceEndpoint : Endpoint
     internal SalesforceResourceKind Kind { get; }
     internal string Resource { get; }
 
+    // Per-endpoint overrides (null = inherit the transport-level default). Set via the fluent
+    // SalesforceListenerConfiguration and merged into the effective settings in BuildListenerAsync.
+    internal int? FetchCount { get; set; }
+    internal TimeSpan? FetchTimeout { get; set; }
+    internal bool? StartFromEarliest { get; set; }
+
     internal SalesforceEndpoint(SalesforcePubSubTransport parent, SalesforceResourceKind kind, string resource, EndpointRole role)
         : base(BuildUri(kind, resource), role)
     {
@@ -58,31 +64,43 @@ public sealed class SalesforceEndpoint : Endpoint
 
         var services = runtime.Services;
         var client = services.GetRequiredService<PubSub.PubSubClient>();
-        var settings = services.GetRequiredService<SubscriberComponentsSettings>();
+        var effective = ResolveEffectiveSettings(services.GetRequiredService<SubscriberComponentsSettings>());
         var logger = runtime.LoggerFactory.CreateLogger<SalesforceListener>();
 
         Func<ISubscriptionTransport> factory;
         if (Kind == SalesforceResourceKind.Topic)
         {
             var replayRepository = services.GetRequiredService<IReplayIdRepository>();
-            factory = () => new TopicTransport(client, replayRepository, settings, logger, Resource);
+            factory = () => new TopicTransport(client, replayRepository, effective, logger, Resource);
         }
         else
         {
-            factory = () => new ManagedEventSubscriptionTransport(client, settings, logger, Resource);
+            factory = () => new ManagedEventSubscriptionTransport(client, effective, logger, Resource);
         }
 
         // The serializer decodes Data-bearing envelopes by content-type in Wolverine's pipeline; the
         // listener pre-fetches each schema (async, in its loop) before handing the envelope off.
         RegisterSerializer(new SalesforceAvroSerializer(services.GetRequiredService<CachingSchemaRepository>()));
 
-        // DI fills the listener's service params (schema repository, settings, backoff, token provider,
-        // logger); we supply the runtime-contextual ones.
+        // DI fills the listener's service params (schema repository, backoff, token provider, logger); we
+        // supply the runtime-contextual ones, including the per-endpoint effective settings.
         var listener = ActivatorUtilities.CreateInstance<SalesforceListener>(
-            services, Uri, Resource, factory, receiver, MessageType, runtime.Cancellation);
+            services, Uri, Resource, factory, receiver, MessageType, effective, runtime.Cancellation);
 
         return ValueTask.FromResult((IListener)listener);
     }
+
+    /// <summary>Merge this endpoint's per-endpoint overrides over the transport-level defaults.</summary>
+    internal SubscriberComponentsSettings ResolveEffectiveSettings(SubscriberComponentsSettings defaults) => new()
+    {
+        PubSubUri = defaults.PubSubUri,
+        TokenCacheDuration = defaults.TokenCacheDuration,
+        FetchCount = FetchCount ?? defaults.FetchCount,
+        FetchTimeout = FetchTimeout ?? defaults.FetchTimeout,
+        StartFromEarliest = StartFromEarliest ?? defaults.StartFromEarliest,
+        ProcessNewEventsIfReplayIdValidationFails = defaults.ProcessNewEventsIfReplayIdValidationFails,
+        ReplayIdValidationFailedErrorCode = defaults.ReplayIdValidationFailedErrorCode
+    };
 
     protected override ISender CreateSender(IWolverineRuntime runtime)
         => throw new NotSupportedException("The Salesforce Pub/Sub transport is listen-only; publishing is not supported.");

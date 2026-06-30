@@ -21,7 +21,7 @@ builder.Services.AddHostedService<PublisherWorker>();
 
 builder.UseWolverine(opts =>
 {
-    opts.UseSalesforcePubSub(s => s.PubSubUri = sf.PubSubUri)
+    opts.UseSalesforcePubSub(sf.PubSubUri)
         .UseAuthenticationHandler<SalesforceAuthenticationTokenHandler>();
 
     foreach (var sub in sf.Subscriptions)

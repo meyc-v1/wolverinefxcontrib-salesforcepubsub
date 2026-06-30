@@ -13,15 +13,18 @@ public static class SalesforcePubSubTransportExtensions
 {
     /// <summary>
     /// Enables the Salesforce Pub/Sub transport and registers its services (gRPC client, schema repo,
-    /// deserializer, and default replay/backoff strategies). Register an
-    /// <see cref="IAuthenticationTokenHandler"/> via <see cref="SalesforcePubSubConfiguration.UseAuthenticationHandler{T}"/>.
+    /// replay/backoff defaults, token cache). Optionally override the gRPC endpoint; transport-level tuning
+    /// and the <see cref="IAuthenticationTokenHandler"/> are configured on the returned
+    /// <see cref="SalesforcePubSubConfiguration"/>, and per-endpoint tuning on each
+    /// <see cref="SalesforceListenerConfiguration"/>.
     /// </summary>
-    public static SalesforcePubSubConfiguration UseSalesforcePubSub(this WolverineOptions options, Action<SubscriberComponentsSettings>? configure = null)
+    public static SalesforcePubSubConfiguration UseSalesforcePubSub(this WolverineOptions options, Uri? pubSubUri = null)
     {
         var transport = options.Transports.GetOrCreate<SalesforcePubSubTransport>();
 
         var settings = new SubscriberComponentsSettings();
-        configure?.Invoke(settings);
+        if (pubSubUri is not null)
+            settings.PubSubUri = pubSubUri;
 
         var services = options.Services;
         services.TryAddSingleton(settings);
@@ -50,7 +53,7 @@ public static class SalesforcePubSubTransportExtensions
                 metadata.Add("tenantid", tokenResponse.TenantId);
             });
 
-        return new SalesforcePubSubConfiguration(transport, options);
+        return new SalesforcePubSubConfiguration(transport, options, settings);
     }
 
     /// <summary>Listen to a Salesforce topic (e.g. a Platform Event channel) with client-side replay tracking.</summary>
@@ -87,19 +90,26 @@ public static class SalesforcePubSubTransportExtensions
 /// <summary>Fluent configuration returned by <c>UseSalesforcePubSub</c>.</summary>
 public sealed class SalesforcePubSubConfiguration
 {
-    private readonly SalesforcePubSubTransport _transport;
     private readonly WolverineOptions _options;
+    private readonly SubscriberComponentsSettings _settings;
 
-    internal SalesforcePubSubConfiguration(SalesforcePubSubTransport transport, WolverineOptions options)
+    internal SalesforcePubSubConfiguration(SalesforcePubSubTransport transport, WolverineOptions options, SubscriberComponentsSettings settings)
     {
-        _transport = transport;
         _options = options;
+        _settings = settings;
     }
 
     public SalesforcePubSubConfiguration UseAuthenticationHandler<T>(ServiceLifetime lifetime = ServiceLifetime.Singleton)
         where T : class, IAuthenticationTokenHandler
     {
         _options.Services.Add(new ServiceDescriptor(typeof(IAuthenticationTokenHandler), typeof(T), lifetime));
+        return this;
+    }
+
+    /// <summary>How long the transport caches a Salesforce access token before re-fetching it (default 60 min).</summary>
+    public SalesforcePubSubConfiguration TokenCacheDuration(TimeSpan duration)
+    {
+        _settings.TokenCacheDuration = duration;
         return this;
     }
 }
@@ -123,6 +133,27 @@ public class SalesforceListenerConfiguration
     {
     }
 
-    // Salesforce-specific listener knobs would be added here later (e.g. a per-endpoint replay start),
-    // each queued via add(e => …) following the Kafka transport's pattern.
+    /// <summary>Override the fetch batch size for this listener (default 10).</summary>
+    public SalesforceListenerConfiguration FetchCount(int count)
+    {
+        add(e => e.FetchCount = count);
+        return this;
+    }
+
+    /// <summary>Override the idle/fetch timeout that triggers a reconnect for this listener (default 270s).</summary>
+    public SalesforceListenerConfiguration FetchTimeout(TimeSpan timeout)
+    {
+        add(e => e.FetchTimeout = timeout);
+        return this;
+    }
+
+    /// <summary>
+    /// On a cold start (no stored replay id) begin from the earliest retained event instead of the latest.
+    /// Topic subscriptions only; ignored once a replay id is known.
+    /// </summary>
+    public SalesforceListenerConfiguration StartFromEarliest(bool fromEarliest = true)
+    {
+        add(e => e.StartFromEarliest = fromEarliest);
+        return this;
+    }
 }

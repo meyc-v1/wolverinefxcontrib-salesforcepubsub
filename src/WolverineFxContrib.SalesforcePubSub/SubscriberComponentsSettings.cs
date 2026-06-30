@@ -1,10 +1,13 @@
 namespace Wolverine.SalesforcePubSub;
 
 /// <summary>
-/// Transport-level tuning for a Salesforce Pub/Sub subscription. Per-endpoint configuration on the
-/// Wolverine endpoint will layer on top of these defaults.
+/// Internal, effective per-listener settings. Transport-level values (PubSubUri, TokenCacheDuration) and
+/// defaults are configured via <c>UseSalesforcePubSub</c> / <see cref="SalesforcePubSubConfiguration"/>;
+/// per-endpoint overrides (fetch count/timeout, start-from-earliest) layer on top via
+/// <see cref="SalesforceListenerConfiguration"/> and are merged into an effective instance in
+/// <see cref="SalesforceEndpoint.BuildListenerAsync"/>. Not part of the public surface.
 /// </summary>
-public sealed class SubscriberComponentsSettings
+internal sealed class SubscriberComponentsSettings
 {
     internal static readonly int DefaultFetchCount = 10;
     internal static readonly TimeSpan DefaultFetchTimeout = TimeSpan.FromSeconds(270);
