@@ -13,7 +13,10 @@ Status legend: **Accepted** (in effect) · **Deferred** (deliberately not now) �
 This is a community Wolverine transport, so it should look and behave like a native one. The default for
 any design question is **how does Wolverine itself do it** — the full Wolverine source is cloned locally
 at `a local Wolverine clone`, so tracing the real implementation (Kafka primary, Azure Service Bus
-secondary) is the basis for resolving indecision, not guesswork. Where the port strays from Wolverine's
+secondary) is the basis for resolving indecision, not guesswork. **Caveat:** the clone tracks `main` and
+can be ahead of the pinned package (currently **WolverineFx 6.12.0**) — confirm an API exists in the
+pinned version before relying on it (e.g. `DescribeEndpoint` / `IReportReceiveLoopHealth` are main-only,
+which blocked Phase 6). Where the port strays from Wolverine's
 conventions or doesn't fully implement what Wolverine expects, the rule is: **implement it Wolverine's
 way, or document why we aren't/can't** — and capture it under "Divergences & gaps" below.
 
@@ -196,9 +199,12 @@ contracts + Kafka/ASB. The port is largely conformant; findings below._
   kept** (existing test coverage outweighs the Kafka-shape cleanup; do not refactor without re-validating).
 - **`findEndpointByUri` throws on an unknown URI** (Kafka creates on demand) — fine for listen-only, where
   endpoints exist only from `ListenTo…` config. → **Intentional**.
-- **No diagnostics surface** — `DescribeEndpoint()` returns null (no sanitized broker host) and the listener
-  exposes no health snapshot (Kafka's `ReceiveLoopStatus`, GH-3236). → **Open / optional** (observability,
-  low priority).
+- **No diagnostics surface** — `DescribeEndpoint()` (sanitized broker host) and a listener health snapshot
+  (Kafka's `ReceiveLoopStatus`/`IReportReceiveLoopHealth`, GH-3236). → **Blocked (Phase 6 attempted, then
+  reverted)** — both APIs are **post-6.12.0**: `Endpoint.DescribeEndpoint` (virtual) and
+  `IReportReceiveLoopHealth`/`ReceiveLoopStatus` don't exist in WolverineFx **6.12.0** (the local clone is
+  `main`, ahead of the pinned package). Deferred until a WolverineFx upgrade; not worth upgrading for
+  optional diagnostics alone.
 
 ## Cleanups / tech-debt
 
