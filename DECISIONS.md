@@ -162,11 +162,14 @@ contracts + Kafka/ASB. The port is largely conformant; findings below._
   the durability agent provides recovery + dedup — exactly how Kafka's `ProcessConcurrentlyByKey` works.
   Mostly **free from Wolverine** once a message store is configured (SQL Server / Postgres-Marten / EF +
   the `WolverineFx.*` package; tables auto-provisioned) — that store is the consumer-side infra.
-  Transport-side work is small: allow `Durable` in `supportsMode`, rely on the **deterministic envelope
-  `Id`** (inbox dedups by it — prerequisite), and align the replay commit with `DurableReceiver`'s
-  persist-then-complete timing. NB: low-water-marking on **BufferedInMemory** is *not* a path here — it
-  acks at receipt, before handling. → **Open / aspirational** (future; distinct from #2, which stays
-  Inline-scoped).
+  **Depends on #2** (verified in `DurableReceiver`): it persists to the inbox (`StoreIncomingAsync`) and
+  *then* calls `listener.CompleteAsync` (`:518`/`:663`); `ReceivedAsync` returns *before* the persist, so
+  our current batch-level `AcknowledgeAsync`-after-dispatch is **premature** in Durable (it would commit
+  replay before durability). The only correct commit signal is `CompleteAsync` (post-persist in Durable,
+  post-handler in Inline) — i.e. the #2 seam. So Durable can't be done correctly until #2 lands; after it,
+  the remaining transport work is small: allow `Durable` in `supportsMode` + the **deterministic envelope
+  `Id`** (inbox dedups by it). NB: low-water-marking on **BufferedInMemory** is *not* a path — it acks at
+  receipt. → **Open / aspirational** (future; **built on #2**, not independent of it).
 - **No sender (listen-only)** — `SalesforceEndpoint.CreateSender` throws. Confirmed **safe**:
   `AutoStartSendingAgent()` is false for a pure listener (no `Subscriptions`), so Wolverine never calls
   `StartSending`/`CreateSender`; only reachable if a consumer publishes to an `sfpubsub://` URI (throws
