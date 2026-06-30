@@ -17,6 +17,11 @@ secondary) is the basis for resolving indecision, not guesswork. Where the port 
 conventions or doesn't fully implement what Wolverine expects, the rule is: **implement it Wolverine's
 way, or document why we aren't/can't** — and capture it under "Divergences & gaps" below.
 
+This extends to **code shape, not just behavior**: prefer mirroring the reference transport's *structure*
+(Kafka primary) — how listeners are constructed, where config lives, how pieces are wired — so the
+implementation **reads** like a Wolverine transport, not merely behaves like one. Structural gaps that
+aren't conformance issues go under "Cleanups / tech-debt".
+
 ---
 
 ## 7. Inherited `ListenerConfiguration` serializer/encryption knobs left inert (no guard)
@@ -130,6 +135,19 @@ contracts + Kafka/ASB. The port is largely conformant; findings below._
   `ListenerConfiguration<,>`. → **Resolved** (now derives — #5).
 - **Inherited serializer/encryption knobs are inert** — Wolverine assumes its serialization pipeline; we
   bypass it by deserializing Avro ourselves. → **Resolved / documented** (#7).
+- **Config lives off-endpoint, not on it** — Wolverine reference endpoints carry per-endpoint tuning on the
+  endpoint (`KafkaTopic.CommitMode`/`ConsumerConfig`/`NativeDeadLetterQueueEnabled`, …); ours puts all
+  tuning on the global `SubscriberComponentsSettings` singleton, so `SalesforceEndpoint` carries only
+  `Kind`/`Resource`/`MessageType` and there's no per-endpoint override (e.g. per-topic
+  `StartFromEarliest`/`FetchCount`). → **Open** (reshape toward Kafka's per-endpoint config). **Stipulation
+  (user):** the reshape must drop `SubscriberComponentsSettings` as a *public, Options-configured* type —
+  move the defaults onto `SalesforceEndpoint` (and/or a non-public defaults type), not an exposed options class.
+- **Envelope is under-populated** — the listener sets only `Message`/`TopicName`/`Offset`. Most important:
+  **`Id` is not set deterministically**, so Wolverine assigns a fresh `Guid` per receive and a *redelivered*
+  Salesforce event can't be deduped — derive `envelope.Id` from the Salesforce event id
+  (`consumerEvent.Event.Id`/EventUuid; confirm exact field). Pairs with #2 — at-least-once needs a stable
+  id for inbox idempotency. Minor parity: set `SentAt` from the event `CreatedDate` (telemetry) and the
+  `MessageType` string (Kafka sets it). → **Open** (Id is correctness; SentAt/MessageType cosmetic).
 - **`CompleteAsync`/`DeferAsync` are no-ops** — Wolverine's `IListener` contract expects per-envelope
   ack/defer; we commit replay at the batch level in the consume loop instead. The most significant
   under-implementation of what Wolverine expects. → **Open / Deferred** (the at-least-once seam — #2).
@@ -142,11 +160,43 @@ contracts + Kafka/ASB. The port is largely conformant; findings below._
   `AutoStartSendingAgent()` is false for a pure listener (no `Subscriptions`), so Wolverine never calls
   `StartSending`/`CreateSender`; only reachable if a consumer publishes to an `sfpubsub://` URI (throws
   clearly). → **Intentional / verified**.
+- **Owns its reconnect loop + per-attempt transport factory** — `SalesforceListener` runs the
+  connect/process/backoff/reconnect loop and `_transportFactory()` yields a *fresh*
+  `ISubscriptionTransport` per attempt (disposed via `using`), rather than Kafka's single long-lived
+  auto-reconnecting consumer. Driven by single-use gRPC duplex streams. A single reusable transport would
+  read more Kafka-like and shed a listener ctor param, **but** the lifted `TopicTransport`/MES transports
+  are written single-use and already **well-tested that way**; reshaping them would change
+  `ConnectAsync`/`Dispose` lifecycle semantics on validated code for a stylistic gain. → **Intentional —
+  kept** (existing test coverage outweighs the Kafka-shape cleanup; do not refactor without re-validating).
 - **`findEndpointByUri` throws on an unknown URI** (Kafka creates on demand) — fine for listen-only, where
   endpoints exist only from `ListenTo…` config. → **Intentional**.
 - **No diagnostics surface** — `DescribeEndpoint()` returns null (no sanitized broker host) and the listener
   exposes no health snapshot (Kafka's `ReceiveLoopStatus`, GH-3236). → **Open / optional** (observability,
   low priority).
+
+## Cleanups / tech-debt
+
+Non-conformance, code-quality items — places to make the implementation **read** more like Wolverine's
+reference transports (Kafka primary), not just behave like one. Tackle in an update pass.
+
+- **`SalesforceListener` construction is service-locator-ish** — `SalesforceEndpoint.BuildListenerAsync`
+  does five `runtime.Services.GetRequiredService<…>()` calls and threads the results into an 11-arg
+  constructor. Manual `new` in `BuildListenerAsync` is itself fine and Wolverine-idiomatic (Kafka `new`s
+  its listener too), but the shape is heavier than Kafka's. Make it more Kafka-like:
+  `ActivatorUtilities.CreateInstance<SalesforceListener>(runtime.Services, <contextual args>)` so DI fills
+  the service params (deserializer, settings, backoff, token provider, logger), and/or pass the
+  `SalesforceEndpoint` in and read `Resource`/`MessageType`/`Uri` off it to shrink the param list.
+  Internal-only; no behavior or public-surface change. (Observed during the runtime-implementation review.)
+- **Deserialize through Wolverine's serializer pipeline, keeping Avro (option "b")** — today the listener
+  Avro-decodes and sets `envelope.Message` directly (the in-process pattern), bypassing Wolverine's
+  serializer (#7). Candidate: set `envelope.Data` = raw Avro bytes + a content-type + a schema-id header,
+  and register a **sync** custom `IMessageSerializer` that reads the (already-cached) schema and
+  Avro-decodes to the type — mirroring how Confluent Schema-Registry resolves-then-decodes. Reactivates
+  the serializer/encryption pipeline and makes us read like a broker transport (`Data`-based) instead of
+  the local/in-process shape. **Hard constraint:** the **async schema lookup must stay in the transport
+  consume loop** (the listener pre-fetches/ensures-cached before handoff), NOT in the serializer — so a
+  revoked/expired-token `GetSchema` failure still surfaces to the reconnect loop and triggers the
+  token-invalidate. Moving the fetch into the (pipeline-run) serializer would break that auth recovery.
 
 ## Inherited from the original port — pending ratification
 
