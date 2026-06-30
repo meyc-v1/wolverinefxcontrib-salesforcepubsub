@@ -145,6 +145,11 @@ contracts + Kafka/ASB. The port is largely conformant; findings below._
   `StartFromEarliest`/`FetchCount`). → **Open** (reshape toward Kafka's per-endpoint config). **Stipulation
   (user):** the reshape must drop `SubscriberComponentsSettings` as a *public, Options-configured* type —
   move the defaults onto `SalesforceEndpoint` (and/or a non-public defaults type), not an exposed options class.
+  → **Resolved (Phase 4)** — `SubscriberComponentsSettings` is now `internal` (effective per-listener
+  settings); `UseSalesforcePubSub(Uri? pubSubUri)` + fluent `TokenCacheDuration` replace the `Action<>`
+  config; per-endpoint `FetchCount`/`FetchTimeout`/`StartFromEarliest` overrides live on
+  `SalesforceEndpoint` with fluent setters on `SalesforceListenerConfiguration`, merged into an effective
+  instance in `BuildListenerAsync`.
 - **Envelope is under-populated** — the listener sets only `Message`/`TopicName`/`Offset`. Most important:
   **`Id` is not set deterministically**, so Wolverine assigns a fresh `Guid` per receive and a *redelivered*
   Salesforce event can't be deduped — derive `envelope.Id` from the Salesforce event id
