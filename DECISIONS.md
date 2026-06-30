@@ -88,7 +88,7 @@ aren't conformance issues go under "Cleanups / tech-debt".
 - **Consequences:** Consumer handlers must not cache. TestHost bridge fetches with `refresh: true`.
 
 ## 2. Delivery guarantee: ship effective at-least-once (Inline); formal seam deferred
-- **Date:** 2026-06-24 (scope refined 2026-06-30) · **Status:** Deferred — **required for Wolverine conformance** (the interim no-op `CompleteAsync`/`DeferAsync` has a known handler-failure data-loss gap under Inline; deferred timing, not optional scope)
+- **Date:** 2026-06-24 (implemented 2026-06-30, Phase 2) · **Status:** **Resolved (Phase 2)** for Inline at-least-once — per-envelope `ReplayCommitTracker` watermark; `CompleteAsync` advances the position, `DeferAsync` holds it; Topic + MES (MES commit serialized through the request stream); keep-alive advance + commit throttle + flush-on-stop; commits route to the current transport. **Buffered remains at-most-once** by design; parallel at-least-once via the durable inbox is the aspirational entry (built on this).
 - **Context:** Replay is committed after the batch is dispatched; `CompleteAsync`/`DeferAsync` are no-ops.
 - **Decision:** Ship with the default **Inline** mode, where `ReceivedAsync` runs the handler before the
   ack → effective at-least-once for the crash case (crash mid-batch ⇒ re-delivery). Defer the robust seam.
@@ -153,7 +153,8 @@ contracts + Kafka/ASB. The port is largely conformant; findings below._
   `ToMessageTypeName()`.
 - **`CompleteAsync`/`DeferAsync` are no-ops** — Wolverine's `IListener` contract expects per-envelope
   ack/defer; we commit replay at the batch level in the consume loop instead. The most significant
-  under-implementation of what Wolverine expects. → **Open / Deferred** (the at-least-once seam — #2).
+  under-implementation of what Wolverine expects. → **Resolved (Phase 2)** — wired to the
+  `ReplayCommitTracker` watermark (Complete advances, Defer holds); Inline at-least-once (#2).
 - **`ReplyEndpoint()` returned a listener** — `TransportBase`'s default advertised our listen-only endpoint
   as a request/reply target, but we can't send. → **Resolved** (overridden to return `null`; a listen-only
   transport has no reply target — every sendable transport overrides this with its real one).
@@ -204,6 +205,7 @@ reference transports (Kafka primary), not just behave like one. Tackle in an upd
   the service params (deserializer, settings, backoff, token provider, logger), and/or pass the
   `SalesforceEndpoint` in and read `Resource`/`MessageType`/`Uri` off it to shrink the param list.
   Internal-only; no behavior or public-surface change. (Observed during the runtime-implementation review.)
+  → **Resolved (Phase 2)** via `ActivatorUtilities.CreateInstance` (DI fills the service params).
 - **Deserialize through Wolverine's serializer pipeline, keeping Avro (option "b")** — today the listener
   Avro-decodes and sets `envelope.Message` directly (the in-process pattern), bypassing Wolverine's
   serializer (#7). Candidate: set `envelope.Data` = raw Avro bytes + a content-type + a schema-id header,
