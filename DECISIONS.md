@@ -83,15 +83,28 @@ way, or document why we aren't/can't** — and capture it under "Divergences & g
 - **Consequences:** Consumer handlers must not cache. TestHost bridge fetches with `refresh: true`.
 
 ## 2. Delivery guarantee: ship effective at-least-once (Inline); formal seam deferred
-- **Date:** 2026-06-24 · **Status:** Deferred
+- **Date:** 2026-06-24 (scope refined 2026-06-30) · **Status:** Deferred — **required for Wolverine conformance** (the interim no-op `CompleteAsync`/`DeferAsync` has a known handler-failure data-loss gap under Inline; deferred timing, not optional scope)
 - **Context:** Replay is committed after the batch is dispatched; `CompleteAsync`/`DeferAsync` are no-ops.
 - **Decision:** Ship with the default **Inline** mode, where `ReceivedAsync` runs the handler before the
-  ack → effective at-least-once (crash mid-batch ⇒ re-delivery). Defer the robust seam (per-envelope
-  commit, keepalive-advance, handler-failure policy, safe Buffered).
-- **Why:** Matches the old library's behavior and is acceptable for now; the robust seam is significant
-  work not currently needed.
-- **Consequences:** Buffered mode is at-most-once until the seam is built. Revisit when durability needs
-  harden.
+  ack → effective at-least-once for the crash case (crash mid-batch ⇒ re-delivery). Defer the robust seam.
+- **Scope when the seam IS built — no partial:** it must ship covering **Topic and MES together**, never
+  a transport-only partial. A half-wired `IListener` ack contract (real on Topic, no-op on MES) silently
+  differs by endpoint kind and is worse than today's honest no-op-on-both. The unit of work is: a shared
+  per-envelope replay **watermark** (Kafka `KafkaOffsetCommitter`-style — `Track` on receive, advance
+  only through successfully-handled events on `CompleteAsync`, hold on `DeferAsync`), a commit throttle,
+  and the **MES serialized writer** (commits share the gRPC `RequestStream` with fetch requests, and
+  concurrent `WriteAsync` throws).
+- **Buffered stays at-most-once — by design; the seam does NOT change it.** `BufferedReceiver` calls
+  `CompleteAsync` at *receipt* time (posts the complete-block right after enqueue, before the handler
+  runs — `BufferedReceiver.cs:242`), so replay would advance when an event is buffered, not when handled.
+  At-least-once is therefore inherently an **Inline** property. Documenting this is part of the scope,
+  not something to implement for Buffered.
+- **Current gap the seam also closes:** today a handler *failure* under Inline is swallowed by
+  `InlineReceiver` (it calls our no-op `DeferAsync`) and the batch ack still advances past the failed
+  event → that event is lost. So current Inline is at-least-once for crashes but not for handler
+  failures; the seam fixes this via per-envelope `Complete`-on-success / `Defer`-holds.
+- **Why deferred:** significant cross-cutting work; current behavior is acceptable for now and matches
+  the old library.
 
 ## 1. Test framework xUnit v3; integration tests deferred
 - **Date:** 2026-06-24 · **Status:** Accepted / Deferred
