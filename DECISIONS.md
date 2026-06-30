@@ -185,6 +185,18 @@ contracts + Kafka/ASB. The port is largely conformant; findings below._
   the remaining transport work is small: allow `Durable` in `supportsMode` + the **deterministic envelope
   `Id`** (inbox dedups by it). NB: low-water-marking on **BufferedInMemory** is *not* a path — it acks at
   receipt. → **Open / aspirational** (future; **built on #2**, not independent of it).
+  - **Store decision: `WolverineFx.SqlServer`** (matches the stack). Parked pending live testing.
+  - **Open gap — schema availability on restart-recovery (revisit after testing):** the durable inbox
+    persists the envelope's raw `Data` (Avro) + headers; on a fresh-process restart the durability agent
+    re-runs persisted envelopes through the pipeline → our **sync** `SalesforceAvroSerializer` reads the
+    schema from the **in-memory** cache, which is empty on restart (the listener pre-fetches at receive,
+    but recovery bypasses the listener). So recovered events would **dead-letter** — Durable wouldn't
+    survive a restart, defeating its purpose. The hot path is unaffected (listener pre-fetch → cache hit).
+    Candidate fixes to weigh after testing: (A) make the serializer `IAsyncMessageSerializer` — cache-hit
+    fast path (hot path keeps auth-in-loop) + async schema fetch on miss (recovery); (B) persist the
+    schema JSON in an envelope header (self-contained, storage bloat per event); (C) a durable
+    schema-by-id cache/table (compact, more infra). Leaning A. **Do not implement until live testing
+    informs the choice** (per user, 2026-06-30).
 - **No sender (listen-only)** — `SalesforceEndpoint.CreateSender` throws. Confirmed **safe**:
   `AutoStartSendingAgent()` is false for a pure listener (no `Subscriptions`), so Wolverine never calls
   `StartSending`/`CreateSender`; only reachable if a consumer publishes to an `sfpubsub://` URI (throws
