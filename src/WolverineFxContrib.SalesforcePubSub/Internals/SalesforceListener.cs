@@ -38,6 +38,7 @@ internal sealed class SalesforceListener : IListener
     private readonly Task _runner;
 
     private long _consecutiveErrors;
+    private DateTimeOffset _lastSuccessUtc = DateTimeOffset.UtcNow;
     private ISubscriptionTransport? _currentTransport;
 
     public SalesforceListener(
@@ -149,7 +150,7 @@ internal sealed class SalesforceListener : IListener
     {
         await foreach (var response in WithIdleTimeout(transport.ReadAsync(ct), _settings.FetchTimeout, ct).ConfigureAwait(false))
         {
-            _consecutiveErrors = 0;
+            OnSuccessfulResponse();
 
             if (response.Events.Count == 0)
             {
@@ -194,6 +195,24 @@ internal sealed class SalesforceListener : IListener
     }
 
     /// <summary>
+    /// A response (event batch or keep-alive) arrived: the stream is healthy. Stamp the last-success time
+    /// and, if we were recovering from errors, log a single recovery line with the observed downtime.
+    /// </summary>
+    private void OnSuccessfulResponse()
+    {
+        if (_consecutiveErrors > 0)
+        {
+            var downtime = DateTimeOffset.UtcNow - _lastSuccessUtc;
+            _logger.LogInformation(
+                "Stream recovered for {Resource} after {ConsecutiveErrors} consecutive error(s); ~{Downtime} since last successful response.",
+                _resource, _consecutiveErrors, downtime);
+            _consecutiveErrors = 0;
+        }
+
+        _lastSuccessUtc = DateTimeOffset.UtcNow;
+    }
+
+    /// <summary>
     /// Commits a replay position to whichever transport is currently connected (the MES stream rotates on
     /// reconnect; the topic repository is long-lived). Best-effort — a commit racing a reconnect is fine.
     /// </summary>
@@ -206,6 +225,8 @@ internal sealed class SalesforceListener : IListener
         try
         {
             await transport.CommitAsync(replayId, isKeepAlive, CancellationToken.None).ConfigureAwait(false);
+            _logger.LogDebug("Committed replay position {ReplayId} for {Resource} (keepAlive: {IsKeepAlive}).",
+                replayId, _resource, isKeepAlive);
         }
         catch (Exception ex)
         {
@@ -249,13 +270,15 @@ internal sealed class SalesforceListener : IListener
             _logger.LogError(inner, "Transport error handling failed for resource: {Resource}", _resource);
         }
 
+        var sinceLastSuccess = DateTimeOffset.UtcNow - _lastSuccessUtc;
+
         _logger.Log(LogLevel.Warning, ex is TimeoutException ? null : ex,
-            "{ExceptionType} in resource: {Resource}, ConsecutiveErrors: {ConsecutiveErrors}",
-            ex.GetType().Name, _resource, _consecutiveErrors);
+            "{ExceptionType} in resource: {Resource}, ConsecutiveErrors: {ConsecutiveErrors}, SinceLastSuccess: {SinceLastSuccess}",
+            ex.GetType().Name, _resource, _consecutiveErrors, sinceLastSuccess);
 
         try
         {
-            await _backoffStrategy.BackoffAsync(_consecutiveErrors, TimeSpan.Zero, _resource, ct).ConfigureAwait(false);
+            await _backoffStrategy.BackoffAsync(_consecutiveErrors, sinceLastSuccess, _resource, ct).ConfigureAwait(false);
         }
         catch (OperationCanceledException)
         {

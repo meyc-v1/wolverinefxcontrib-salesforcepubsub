@@ -5,8 +5,11 @@ namespace WolverineFxContrib.SalesforcePubSub.TestHost.Handlers;
 
 public class TestEventOneHandler
 {
-    public void Handle(TestEventOne message, ILogger<TestEventOneHandler> logger)
-        => logger.LogInformation(
-            "Handled TestEventOne (topic) — ReplayId {ReplayId}, CreatedById {CreatedById}, CreatedDate {CreatedDate}",
+    public void Handle(TestEventOne message, RunMetrics metrics, ILogger<TestEventOneHandler> logger)
+    {
+        metrics.RecordHandled(nameof(TestEventOne), message.ReplayId);
+        logger.LogInformation(
+            "Handled TestEventOne (MES) — ReplayId {ReplayId}, CreatedById {CreatedById}, CreatedDate {CreatedDate}",
             message.ReplayId, message.CreatedById, message.CreatedDate);
+    }
 }

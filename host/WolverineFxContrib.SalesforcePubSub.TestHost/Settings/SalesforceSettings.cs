@@ -70,4 +70,13 @@ public sealed class SalesforceSubscriptionOptions
 
     /// <summary>Simple or full name of the <c>PubSubEvent</c>-derived type to deserialize events into.</summary>
     public string MessageType { get; set; } = "";
+
+    /// <summary>Wire this subscription as a listener. Set false to run isolated topic-only / MES-only passes.</summary>
+    public bool Enabled { get; set; } = true;
+
+    /// <summary>Override the idle/fetch timeout that triggers a reconnect (default 270s). Set ~30s to force the timeout-loop test.</summary>
+    public TimeSpan? FetchTimeout { get; set; }
+
+    /// <summary>Topic only: on a cold start (no stored replay id) begin from the earliest retained event.</summary>
+    public bool? StartFromEarliest { get; set; }
 }
