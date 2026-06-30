@@ -134,7 +134,10 @@ contracts + Kafka/ASB. The port is largely conformant; findings below._
 - **Hand-rolled listener config** — the port wrote a bespoke fluent class instead of deriving from
   `ListenerConfiguration<,>`. → **Resolved** (now derives — #5).
 - **Inherited serializer/encryption knobs are inert** — Wolverine assumes its serialization pipeline; we
-  bypass it by deserializing Avro ourselves. → **Resolved / documented** (#7).
+  bypass it by deserializing Avro ourselves. → **Superseded (Phase 3)** — option b now routes inbound
+  through Wolverine's pipeline, so those knobs are *live*: `DefaultSerializer` is moot (our content-type
+  serializer is registered), and the encryption gate is dormant unless a consumer calls `RequireEncryption`
+  on a SF listener — which would now dead-letter every event (don't). Was #7.
 - **Config lives off-endpoint, not on it** — Wolverine reference endpoints carry per-endpoint tuning on the
   endpoint (`KafkaTopic.CommitMode`/`ConsumerConfig`/`NativeDeadLetterQueueEnabled`, …); ours puts all
   tuning on the global `SubscriberComponentsSettings` singleton, so `SalesforceEndpoint` carries only
@@ -216,6 +219,10 @@ reference transports (Kafka primary), not just behave like one. Tackle in an upd
   consume loop** (the listener pre-fetches/ensures-cached before handoff), NOT in the serializer — so a
   revoked/expired-token `GetSchema` failure still surfaces to the reconnect loop and triggers the
   token-invalidate. Moving the fetch into the (pipeline-run) serializer would break that auth recovery.
+  → **Resolved (Phase 3)** — `SalesforceAvroSerializer` (sync, registered on the endpoint by content-type)
+  decodes from the cached schema and stamps `ReplayId`/`SentAt`; the listener sets `Data` + content-type +
+  `sfdc-schema-id` header and pre-fetches the schema in the loop (auth recovery preserved). The now-dead
+  `PlatformEventDeserializer`/`EventMessage`/`IEventDeserializer` were removed.
 
 ## Inherited from the original port — pending ratification
 
