@@ -54,7 +54,8 @@ public sealed class PublisherWorker(
                 }
                 catch (Exception ex)
                 {
-                    logger.LogError(ex, "Failed to publish {Event}", eventName);
+                    // Terse — during a network-death test this fires every interval; the full stack is noise.
+                    logger.LogWarning("Failed to publish {Event}: {Error}", eventName, ex.Message);
                 }
             }
         }

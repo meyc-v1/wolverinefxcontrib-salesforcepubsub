@@ -27,6 +27,29 @@ aren't conformance issues go under "Cleanups / tech-debt".
 
 ---
 
+## 8. In-process reconnect resumes from the handled watermark, not the durable store
+- **Date:** 2026-07-01 · **Status:** Accepted
+- **Context:** A topic reconnect (`TopicTransport.WriteFetchRequestAsync`) originally always resolved its
+  resume position from `IReplayIdRepository.GetLastReplayIdAsync` — the last *durably-committed* replay
+  id. Because commits are throttled (`commitEvery`, or an idle keep-alive), that position lags the
+  actually-handled position by up to `commitEvery` events. The Layer-A **WiFi-death** test surfaced the
+  effect: a reconnect redelivered every event handled since the last commit (7 duplicates in that run,
+  because no commit had occurred pre-outage). Safe (at-least-once), but more redelivery than necessary.
+- **Decision:** On an **in-process reconnect**, resume from the listener's in-memory *handled* watermark
+  (`ReplayCommitTracker.TryGetResumePosition()` = lowest in-flight − 1, else high-water). A true **cold
+  start** (fresh process — tracker empty → `null`) still reads the durable store. The value is threaded
+  `tracker → listener → transport factory (Func<long?, ISubscriptionTransport>) → TopicTransport` and
+  applied to the **initial** fetch only; `RequestMoreAsync` (mid-stream flow control) is unchanged. MES
+  ignores it (server-side replay).
+- **Why:** In-process we *know* which events were handled (`CompleteAsync` drove the watermark), so
+  redelivering them on reconnect is wasteful. Resuming from the handled watermark eliminates reconnect
+  duplicates while preserving at-least-once on a real restart (which reads the durable store, behind =
+  safe). The resume anchor is the fully-handled watermark, not the raw received high-water, so in-flight
+  (received-but-not-completed) events are still redelivered — no loss.
+- **Consequences:** Verified on the WiFi-death rerun: reconnect resumed at the handled id, zero
+  redelivery, contiguous ledger, no gap. The durable store can legitimately trail the in-memory position
+  during a DB outage; the next successful commit writes the latest (monotonic) position and self-heals.
+
 ## 7. Inherited `ListenerConfiguration` serializer/encryption knobs left inert (no guard)
 - **Date:** 2026-06-30 · **Status:** Accepted
 - **Context:** Deriving from `ListenerConfiguration<,>` (see #5) inherits `DefaultSerializer`,

@@ -14,6 +14,13 @@ internal sealed partial class TopicTransport : ISubscriptionTransport
     private readonly SubscriberComponentsSettings _settings;
     private readonly ILogger _logger;
     private readonly string _topicName;
+
+    // In-process reconnect resume anchor (the listener's handled watermark). When set, the initial fetch
+    // resumes from it instead of re-reading the repository — so a reconnect does not redeliver events that
+    // were handled but not yet durably committed. Null on a true cold start (read the repository/SQL).
+    private readonly long? _resumeFromReplayId;
+    private bool _initialFetchSent;
+
     private AsyncDuplexStreamingCall<FetchRequest, FetchResponse>? _call;
 
     public TopicTransport(
@@ -21,13 +28,15 @@ internal sealed partial class TopicTransport : ISubscriptionTransport
         IReplayIdRepository replayIdRepository,
         SubscriberComponentsSettings settings,
         ILogger logger,
-        string topicName)
+        string topicName,
+        long? resumeFromReplayId = null)
     {
         _client = client ?? throw new ArgumentNullException(nameof(client));
         _replayIdRepository = replayIdRepository ?? throw new ArgumentNullException(nameof(replayIdRepository));
         _settings = settings ?? throw new ArgumentNullException(nameof(settings));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _topicName = topicName ?? throw new ArgumentNullException(nameof(topicName));
+        _resumeFromReplayId = resumeFromReplayId;
     }
 
     public async Task ConnectAsync(CancellationToken ct)
@@ -133,9 +142,21 @@ internal sealed partial class TopicTransport : ISubscriptionTransport
         if (_call?.RequestStream == null)
             throw new InvalidOperationException("The request stream has not been initialized");
 
-        LogStarted("GetReplayId", _topicName);
-        var replayId = await _replayIdRepository.GetLastReplayIdAsync(_topicName, ct).ConfigureAwait(false);
-        LogFinished("GetReplayId", _topicName);
+        long replayId;
+        if (!_initialFetchSent && _resumeFromReplayId is { } resume)
+        {
+            // In-process reconnect: resume from the listener's handled watermark, not the (possibly stale)
+            // repository — avoids redelivering events already handled since the last durable commit.
+            replayId = resume;
+        }
+        else
+        {
+            LogStarted("GetReplayId", _topicName);
+            replayId = await _replayIdRepository.GetLastReplayIdAsync(_topicName, ct).ConfigureAwait(false);
+            LogFinished("GetReplayId", _topicName);
+        }
+
+        _initialFetchSent = true;
 
         var req = new FetchRequest
         {

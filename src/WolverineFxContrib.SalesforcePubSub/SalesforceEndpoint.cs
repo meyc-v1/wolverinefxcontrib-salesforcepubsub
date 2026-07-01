@@ -67,15 +67,17 @@ public sealed class SalesforceEndpoint : Endpoint
         var effective = ResolveEffectiveSettings(services.GetRequiredService<SubscriberComponentsSettings>());
         var logger = runtime.LoggerFactory.CreateLogger<SalesforceListener>();
 
-        Func<ISubscriptionTransport> factory;
+        // The resume anchor is the listener's in-memory handled watermark on reconnect, null on cold start.
+        // Topic uses it to resume without re-reading the repository; MES ignores it (server-side replay).
+        Func<long?, ISubscriptionTransport> factory;
         if (Kind == SalesforceResourceKind.Topic)
         {
             var replayRepository = services.GetRequiredService<IReplayIdRepository>();
-            factory = () => new TopicTransport(client, replayRepository, effective, logger, Resource);
+            factory = resumeFrom => new TopicTransport(client, replayRepository, effective, logger, Resource, resumeFrom);
         }
         else
         {
-            factory = () => new ManagedEventSubscriptionTransport(client, effective, logger, Resource);
+            factory = _ => new ManagedEventSubscriptionTransport(client, effective, logger, Resource);
         }
 
         // The serializer decodes Data-bearing envelopes by content-type in Wolverine's pipeline; the

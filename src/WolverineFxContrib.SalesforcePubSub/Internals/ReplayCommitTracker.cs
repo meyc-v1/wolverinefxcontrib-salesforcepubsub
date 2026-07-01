@@ -78,6 +78,22 @@ internal sealed class ReplayCommitTracker
         return position is { } p ? CommitAsync(p, isKeepAlive: true) : Task.CompletedTask;
     }
 
+    /// <summary>
+    /// The position to resume an <b>in-process reconnect</b> from: the highest replayId with every event
+    /// ≤ it completed (lowest in-flight − 1, otherwise the high-water). Salesforce delivers events strictly
+    /// after this id, so in-flight (received-but-not-completed) events are re-delivered while handled ones
+    /// are not. Returns null until something has been observed — the caller then falls back to the durable
+    /// store (a true cold start). Non-mutating; does not touch commit state.
+    /// </summary>
+    public long? TryGetResumePosition()
+    {
+        lock (_lock)
+        {
+            if (!_seen) return null;
+            return _inflight.Count == 0 ? _highWater : _inflight.Min - 1;
+        }
+    }
+
     /// <summary>Force a final commit of the current safe position (shutdown).</summary>
     public Task FlushAsync()
     {

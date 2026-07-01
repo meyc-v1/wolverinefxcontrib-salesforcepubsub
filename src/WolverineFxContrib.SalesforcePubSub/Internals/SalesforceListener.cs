@@ -25,7 +25,7 @@ namespace Wolverine.SalesforcePubSub.Internals;
 internal sealed class SalesforceListener : IListener
 {
     private readonly string _resource;
-    private readonly Func<ISubscriptionTransport> _transportFactory;
+    private readonly Func<long?, ISubscriptionTransport> _transportFactory;
     private readonly IReceiver _receiver;
     private readonly Type _messageType;
     private readonly CachingSchemaRepository _schemaRepository;
@@ -44,7 +44,7 @@ internal sealed class SalesforceListener : IListener
     public SalesforceListener(
         Uri address,
         string resource,
-        Func<ISubscriptionTransport> transportFactory,
+        Func<long?, ISubscriptionTransport> transportFactory,
         IReceiver receiver,
         Type messageType,
         CachingSchemaRepository schemaRepository,
@@ -126,7 +126,13 @@ internal sealed class SalesforceListener : IListener
 
         while (!ct.IsCancellationRequested)
         {
-            using var transport = _transportFactory();
+            // Cold start → null → the transport reads the durable store. Reconnect → the in-memory handled
+            // watermark, so we resume after what was handled rather than the last durably-committed position.
+            var resumeFrom = _commits.TryGetResumePosition();
+            if (resumeFrom is { } r)
+                _logger.LogDebug("Reconnecting listener for {Resource}; resuming after handled replayId {ReplayId} (in-memory).", _resource, r);
+
+            using var transport = _transportFactory(resumeFrom);
             _currentTransport = transport;
             try
             {
