@@ -5,6 +5,7 @@ using OpenTelemetry.Trace;
 using Wolverine;
 using Wolverine.SalesforcePubSub;
 using WolverineFxContrib.SalesforcePubSub.TestHost;
+using WolverineFxContrib.SalesforcePubSub.TestHost.Replay;
 using WolverineFxContrib.SalesforcePubSub.TestHost.Salesforce;
 using WolverineFxContrib.SalesforcePubSub.TestHost.Settings;
 
@@ -51,6 +52,22 @@ builder.Services.AddSingleton<RunMetrics>();
 builder.Services.AddHostedService<HeartbeatService>();
 builder.Services.Configure<PublisherSettings>(builder.Configuration.GetSection("publisherSettings"));
 builder.Services.AddHostedService<PublisherWorker>();
+
+// Replay store / fault injection. Registered before UseWolverine so the transport's TryAdd default
+// (in-memory) is skipped. Precedence: bad-replay fault seam (isolated test) > persistent SQL store >
+// lib in-memory default. Topic only — MES uses server-side replay.
+builder.Services.Configure<ReplaySettings>(builder.Configuration.GetSection("salesforceReplaySettings"));
+var replay = builder.Configuration.GetSection("salesforceReplaySettings").Get<ReplaySettings>() ?? new ReplaySettings();
+if (replay.SeedBadReplayId is { } badReplayId)
+{
+    builder.Services.AddSingleton<IReplayIdRepository>(sp =>
+        new FaultInjectingReplayIdRepository(badReplayId, sp.GetRequiredService<ILogger<FaultInjectingReplayIdRepository>>()));
+}
+else if (!string.IsNullOrWhiteSpace(replay.ConnectionString))
+{
+    SqlAadAuthentication.Register();
+    builder.Services.AddSingleton<IReplayIdRepository, SqlReplayIdRepository>();
+}
 
 builder.UseWolverine(opts =>
 {
