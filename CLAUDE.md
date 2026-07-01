@@ -31,10 +31,15 @@ endpoints. Package id `WolverineFxContrib.SalesforcePubSub`; root namespace `Wol
 - **net10.0 only** — WolverineFx 6.x dropped net8, so the lib does too.
 - **Listen-only** — there is no sender. Publishing a platform event is a REST POST and lives outside
   this transport. CDC is intentionally out of scope (Platform Events only for now).
-- **Delivery guarantee is per-endpoint** via Inline vs Buffered. The replay commit is currently the
-  **at-most-once first cut**: committed in the `SalesforceListener` loop after dispatch;
-  `CompleteAsync`/`DeferAsync` are no-ops. At-least-once (per-envelope commit + a keepalive-advance
-  path + a handler-failure policy) is **not yet built** — it's the main open work item.
+- **Delivery guarantee is per-endpoint** via Inline (at-least-once) vs BufferedInMemory (at-most-once).
+  Replay is a per-envelope **watermark** (`ReplayCommitTracker`): `Track` on receive, `CompleteAsync`
+  advances the safe position (lowest in-flight − 1), keep-alives advance during idle, and commits are
+  throttled + serialized. `DeferAsync` re-injects for an in-memory retry (Kafka-style). In-process
+  reconnects resume from the handled watermark; cold start / restart reads the durable store. Topic commits
+  client-side (`IReplayIdRepository`); MES commits server-side (`CommitReplayIdRequest` on the stream). See
+  DECISIONS #2/#8/#10/#11. **Open work item: `EndpointMode.Durable`** (inbox) for at-least-once *with
+  parallelism* + a real DLQ — without a durable store, a poison message is dead-lettered to a no-op and
+  discarded (DECISIONS #10).
 - The listener owns its own reconnect loop (ported from the original `SubscriptionOrchestrator`); it
   must never throw out, because Wolverine does not auto-restart a faulted listener.
 - Keep the public surface minimal (the three interfaces + event types + Wolverine config classes);
