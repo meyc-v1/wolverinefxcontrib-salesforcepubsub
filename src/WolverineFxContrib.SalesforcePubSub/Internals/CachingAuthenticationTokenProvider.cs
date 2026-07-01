@@ -44,6 +44,16 @@ internal sealed class CachingAuthenticationTokenProvider
                         ?? throw new InvalidOperationException(
                             $"{nameof(IAuthenticationTokenHandler)}.{nameof(IAuthenticationTokenHandler.GetAuthenticationTokenAsync)} returned null.");
 
+            // Never cache an incomplete token. A failed/empty fetch (e.g. authentication unavailable, or a
+            // handler that swallows an error response) must not be cached, or it would wedge the transport
+            // for the full cache duration and never self-heal. Throwing here caches nothing, so each
+            // reconnect re-fetches and recovery is automatic once authentication is restored. All three
+            // fields are attached to the gRPC call metadata, so an empty one would otherwise blow up there.
+            if (string.IsNullOrEmpty(token.AccessToken) || string.IsNullOrEmpty(token.InstanceUri) || string.IsNullOrEmpty(token.TenantId))
+                throw new InvalidOperationException(
+                    $"{nameof(IAuthenticationTokenHandler)}.{nameof(IAuthenticationTokenHandler.GetAuthenticationTokenAsync)} returned an incomplete token " +
+                    "(missing AccessToken, InstanceUri, or TenantId); not caching. Authentication may be unavailable.");
+
             _entry = new Entry(token, DateTimeOffset.UtcNow.Add(_settings.TokenCacheDuration));
             return token;
         }

@@ -27,6 +27,26 @@ aren't conformance issues go under "Cleanups / tech-debt".
 
 ---
 
+## 9. Never cache an incomplete / failed authentication token
+- **Date:** 2026-07-01 · **Status:** Accepted
+- **Context:** The Layer-A "OAuth disabled at startup" test wedged the listener **permanently** (even after
+  OAuth was re-enabled). Root cause chain: the consumer token handler returned a response with a **null
+  `AccessToken`** (the TestHost token client deserialized a `400 invalid_client` body instead of throwing);
+  `CachingAuthenticationTokenProvider` only null-checked the *response object*, not its contents, so it
+  **cached the null-token entry** for the full TTL; `AddCallCredentials` then threw `ArgumentNullException`
+  on `metadata.Add(…, null)`, surfacing as `RpcException Internal` — **not** `Unauthenticated` — so the
+  `Invalidate()` path never fired and the poisoned cache entry was never cleared.
+- **Decision:** The provider **validates the token before caching** — if `AccessToken`/`InstanceUri`/
+  `TenantId` is empty it throws and caches nothing. The TestHost token client also **fails loud** on a
+  non-success token response instead of producing a null-token.
+- **Why:** A failed/empty fetch must not poison the cache. Caching nothing means every reconnect re-fetches,
+  so recovery is automatic once auth is restored — without relying on the invalidate path, which only
+  covers a gRPC auth *rejection* of an already-cached token (#3). Complements #3: #3 clears a
+  cached-but-revoked token; #9 ensures a never-valid token is never cached in the first place.
+- **Consequences:** Verified — OAuth-disabled now yields a clear `token request failed (400 …)` error, a
+  graceful backoff loop (no crash), and recovery on re-enable. Regression tests added (incomplete token
+  throws and is not cached → recovers on the next valid fetch).
+
 ## 8. In-process reconnect resumes from the handled watermark, not the durable store
 - **Date:** 2026-07-01 · **Status:** Accepted
 - **Context:** A topic reconnect (`TopicTransport.WriteFetchRequestAsync`) originally always resolved its

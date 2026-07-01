@@ -77,4 +77,39 @@ public class CachingAuthenticationTokenProviderTests
 
         await Assert.ThrowsAsync<InvalidOperationException>(() => provider.GetTokenAsync(ct));
     }
+
+    [Theory]
+    [InlineData("", "https://instance", "tenant")]      // no access token (e.g. auth unavailable)
+    [InlineData("token", "", "tenant")]                 // no instance uri
+    [InlineData("token", "https://instance", "")]       // no tenant id
+    public async Task Throws_when_the_token_is_incomplete(string accessToken, string instanceUri, string tenantId)
+    {
+        var ct = TestContext.Current.CancellationToken;
+        var handler = new FakeHandler { OnGet = _ => new AuthenticationTokenResponse(accessToken, instanceUri, tenantId) };
+        var provider = new CachingAuthenticationTokenProvider(handler, new SubscriberComponentsSettings());
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() => provider.GetTokenAsync(ct));
+    }
+
+    [Fact]
+    public async Task Does_not_cache_an_incomplete_token_so_it_recovers_when_auth_returns()
+    {
+        var ct = TestContext.Current.CancellationToken;
+        // First fetch returns an incomplete token (auth unavailable); the second returns a good one.
+        var handler = new FakeHandler
+        {
+            OnGet = n => n == 1
+                ? new AuthenticationTokenResponse("", "https://instance", "tenant")
+                : new AuthenticationTokenResponse($"token-{n}", "https://instance", "tenant")
+        };
+        var provider = new CachingAuthenticationTokenProvider(handler, new SubscriberComponentsSettings());
+
+        // The incomplete token throws and must NOT be cached...
+        await Assert.ThrowsAsync<InvalidOperationException>(() => provider.GetTokenAsync(ct));
+
+        // ...so the next call re-fetches and recovers once the handler returns a valid token.
+        var recovered = await provider.GetTokenAsync(ct);
+        Assert.Equal("token-2", recovered.AccessToken);
+        Assert.Equal(2, handler.Calls);
+    }
 }

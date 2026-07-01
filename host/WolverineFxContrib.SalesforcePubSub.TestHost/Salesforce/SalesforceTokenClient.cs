@@ -72,6 +72,12 @@ internal sealed class SalesforceTokenClient : ISalesforceTokenClient
         using var resp = await _client.SendAsync(req).ConfigureAwait(false);
         var raw = await resp.Content.ReadAsStringAsync().ConfigureAwait(false);
 
+        // Fail loud on a non-success response (e.g. 400 invalid_client when the connected app's OAuth is
+        // disabled). Otherwise the error JSON deserializes into a response with a null AccessToken, which
+        // silently produces an unusable token.
+        if (!resp.IsSuccessStatusCode)
+            throw new InvalidOperationException($"Salesforce token request failed ({(int)resp.StatusCode} {resp.StatusCode}): {raw}");
+
         return JsonSerializer.Deserialize<SalesforceTokenResponse>(raw)
                ?? throw new InvalidOperationException("Could not deserialize Salesforce authentication response");
     }
