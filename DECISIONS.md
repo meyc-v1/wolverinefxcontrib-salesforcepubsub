@@ -27,6 +27,51 @@ aren't conformance issues go under "Cleanups / tech-debt".
 
 ---
 
+## 11. MES graceful-shutdown commit: flush before cancel + serialize stream writes
+- **Date:** 2026-07-01 · **Status:** Accepted
+- **Context:** The MES throwing-handler test showed the graceful-shutdown flush failing with
+  `ObjectDisposedException`. `StopAsync` cancelled `_cts` — which aborts the MES gRPC call (created with that
+  token) and disposes the transport — **before** calling `FlushAsync`, so the final `CommitReplayIdRequest`
+  wrote to a dead stream. Topic was immune (it commits out-of-band to the repository). Separately, MES fetch
+  requests and commits share one `RequestStream` and concurrent `WriteAsync` throws, so the flush could race
+  an in-flight `RequestMore` — the "MES serialized writer" #2 anticipated but that wasn't wired.
+- **Decision:** `StopAsync` flushes the final committable position **before** cancelling (bounded to 5s so a
+  dead stream can't hang shutdown); `ManagedEventSubscriptionTransport` serializes **all** request-stream
+  writes (fetch + commit) through a `_writeLock`.
+- **Why:** MES commits on the gRPC stream, which cancellation aborts — the flush must run while the stream is
+  live. The write lock stops the flush racing a fetch. The timeout means a dead stream degrades to
+  at-least-once (the tail re-delivers on restart) instead of hanging shutdown.
+- **Consequences:** Verified — a graceful MES shutdown now logs `Finished CommitReplayId` + `Committed replay
+  position X` **before** the stream cancels, no `ObjectDisposedException`; the server records the final
+  position so a restart doesn't redeliver the uncommitted tail. Topic unchanged (out-of-band SQL commit).
+
+## 10. `DeferAsync` re-injects for an in-memory retry (Kafka precedent), not hold-idle or discard
+- **Date:** 2026-07-01 · **Status:** Accepted
+- **Context:** `DeferAsync` was a no-op that left the envelope in flight, holding the replay watermark until a
+  reconnect happened to re-deliver it. On a healthy long-running stream that reconnect may never come, so a
+  deferred message was **never retried** and the watermark stalled — and a stalled watermark risks the
+  committed replay id **aging out of Salesforce's 72h retention** (→ `InvalidArgument` → reset-to-Latest,
+  losing far more than the one message) plus mass replay on the eventual reconnect. Investigated how
+  Wolverine's own stream transports handle this: **Kafka's `DeferAsync` re-injects the envelope into the
+  pipeline (`_receiver.ReceivedAsync(this, envelope)`) — an in-memory retry — without advancing the offset**
+  (Pulsar: native redelivery or re-produce; queues re-send a copy — not applicable to a replay stream).
+- **Decision:** Mirror Kafka — `DeferAsync` re-injects for an in-memory retry. The envelope was `Track`ed on
+  first receive and is not re-tracked, so the watermark holds below it until it is finally resolved by
+  `CompleteAsync`.
+- **Why:** It honors "defer = try again", is the Wolverine-idiomatic behavior for an offset/replay stream,
+  and — crucially — is **bounded** under Wolverine's default failure handling: an unconfigured handler
+  exception requeues (Defer → re-inject) for `MaximumAttempts−1` (default **2**) attempts, then
+  `MoveToErrorQueue` → `CompleteAsync`, so the watermark **always advances** and there is no aging/stall.
+  The old no-op neither retried nor terminated. A stall now only happens under a deliberately *unbounded*
+  requeue policy (a consumer misconfiguration Kafka shares).
+- **Consequences / caveat:** In **Inline/BufferedInMemory with no durable store**, `MoveToErrorQueue` writes
+  to the `NullMessageStore` (a **no-op**) and then `CompleteAsync`s anyway — so a poison message is retried,
+  then **silently discarded** (lost) while the watermark advances. No exception, no loop, no stall, but the
+  message is gone. **Preserving poison messages requires a durable store / real DLQ** — i.e. the Durable
+  inbox work (aspirational, see the divergences list). The consumer's standard Wolverine error policies
+  (`RetryTimes`, `MaximumAttempts`, `MoveToErrorQueue`, scheduled retry) govern the outcome, so no separate
+  defer-policy interface is added (keeps the public surface minimal).
+
 ## 9. Never cache an incomplete / failed authentication token
 - **Date:** 2026-07-01 · **Status:** Accepted
 - **Context:** The Layer-A "OAuth disabled at startup" test wedged the listener **permanently** (even after

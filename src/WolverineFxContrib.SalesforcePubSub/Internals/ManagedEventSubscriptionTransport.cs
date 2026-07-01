@@ -13,6 +13,11 @@ internal sealed partial class ManagedEventSubscriptionTransport : ISubscriptionT
     private readonly SubscriberComponentsSettings _settings;
     private readonly ILogger _logger;
     private readonly string _subscriptionName;
+
+    // Fetch requests and replay commits share one gRPC RequestStream, and concurrent WriteAsync throws.
+    // Serialize every write through this gate — in particular so the shutdown flush can't race an in-flight
+    // RequestMore. (Topic commits out-of-band to the repository and needs no such gate.)
+    private readonly SemaphoreSlim _writeLock = new(1, 1);
     private AsyncDuplexStreamingCall<ManagedFetchRequest, ManagedFetchResponse>? _call;
 
     public ManagedEventSubscriptionTransport(
@@ -97,9 +102,10 @@ internal sealed partial class ManagedEventSubscriptionTransport : ISubscriptionT
 
         LogCommittingReplayId(replayId, _subscriptionName);
 
-        // Write the commit regardless of cancellation so the server records our position.
+        // Write the commit regardless of cancellation so the server records our position (used by the
+        // shutdown flush, which runs while the stream is still live — see SalesforceListener.StopAsync).
         LogStarted("CommitReplayId", _subscriptionName);
-        await _call.RequestStream.WriteAsync(commit).ConfigureAwait(false);
+        await WriteToStreamAsync(commit, CancellationToken.None).ConfigureAwait(false);
         LogFinished("CommitReplayId", _subscriptionName);
     }
 
@@ -133,6 +139,7 @@ internal sealed partial class ManagedEventSubscriptionTransport : ISubscriptionT
     public void Dispose()
     {
         _call?.Dispose();
+        _writeLock.Dispose();
     }
 
     private async Task WriteFetchRequestAsync(CancellationToken ct)
@@ -149,8 +156,25 @@ internal sealed partial class ManagedEventSubscriptionTransport : ISubscriptionT
         LogSendingManagedFetchRequest(_subscriptionName, _settings.FetchCount);
 
         LogStarted("WriteToStream", _subscriptionName);
-        await _call.RequestStream.WriteAsync(req, ct).ConfigureAwait(false);
+        await WriteToStreamAsync(req, ct).ConfigureAwait(false);
         LogFinished("WriteToStream", _subscriptionName);
+    }
+
+    /// <summary>Serializes all writes to the shared gRPC request stream (fetch requests and replay commits).</summary>
+    private async Task WriteToStreamAsync(ManagedFetchRequest request, CancellationToken ct)
+    {
+        if (_call?.RequestStream == null)
+            throw new InvalidOperationException("The request stream has not been initialized");
+
+        await _writeLock.WaitAsync(ct).ConfigureAwait(false);
+        try
+        {
+            await _call.RequestStream.WriteAsync(request, ct).ConfigureAwait(false);
+        }
+        finally
+        {
+            _writeLock.Release();
+        }
     }
 
     [LoggerMessage(EventId = 1, Level = LogLevel.Debug, Message = "gRPC stream cancelled for {Resource}")]

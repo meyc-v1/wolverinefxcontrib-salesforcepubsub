@@ -8,9 +8,9 @@ namespace Wolverine.SalesforcePubSub.Internals;
 ///
 /// <para>Lifecycle: <see cref="Track"/> on receive (marks in-flight); <see cref="CompleteAsync"/> on a
 /// resolved envelope — success, dead-letter, discard, or no-handler — which removes it and advances the
-/// position. A <b>deferred</b> (requeued) envelope is intentionally left in flight so it holds the floor
-/// until it is eventually completed or re-delivered on reconnect: this transport has no native per-message
-/// requeue, so the supported failure model is inline-retry + DLQ (see DECISIONS #2).
+/// position. A <b>deferred</b> (requeued) envelope stays in flight — the listener re-injects it for an
+/// in-memory retry (Kafka-style; DECISIONS #10), never re-tracking it — so it holds the floor until it is
+/// finally completed (handler success, or the terminal <c>MoveToErrorQueue</c>, which also completes).
 /// <see cref="ObserveKeepAliveAsync"/> advances the position during idle periods when nothing is in
 /// flight.</para>
 ///

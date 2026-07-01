@@ -77,17 +77,38 @@ internal sealed class SalesforceListener : IListener
     public ValueTask CompleteAsync(Envelope envelope) => new(_commits.CompleteAsync(envelope.Offset));
 
     /// <summary>
-    /// Requeue requested. Leave the event in flight so the watermark holds below it; it re-delivers on the
-    /// next reconnect. No native per-message requeue here — inline-retry + DLQ are the failure model (#2).
+    /// Requeue requested — Wolverine's default retry vehicle (requeue for the first <c>MaximumAttempts</c>−1
+    /// attempts, then <c>MoveToErrorQueue</c>). A Salesforce replay stream has no per-message requeue, so —
+    /// mirroring Wolverine's Kafka listener — we re-inject the envelope for an in-memory retry. The event was
+    /// <see cref="ReplayCommitTracker.Track"/>ed on first receive and is never re-tracked, so the replay
+    /// watermark holds below it until it is finally resolved by <see cref="CompleteAsync"/> (handler success,
+    /// or the terminal <c>MoveToErrorQueue</c> which also completes). We neither hold the floor idle nor
+    /// discard. See DECISIONS #10.
     /// </summary>
     public ValueTask DeferAsync(Envelope envelope)
     {
-        _logger.LogDebug("Defer requested for {Resource} (replayId {ReplayId}); holding replay position.", _resource, envelope.Offset);
-        return ValueTask.CompletedTask;
+        _logger.LogDebug("Requeue (defer) for {Resource} replayId {ReplayId}, attempt {Attempts}; re-injecting for in-memory retry.",
+            _resource, envelope.Offset, envelope.Attempts);
+        return _receiver.ReceivedAsync(this, envelope);
     }
 
     public async ValueTask StopAsync()
     {
+        // Persist the final committable replay position (the commit throttle may be holding one) BEFORE
+        // cancelling. MES commits on the gRPC stream, which cancellation aborts — so the flush must run while
+        // the transport is still live; the MES transport serializes this write against any in-flight fetch.
+        // (Topic commits out-of-band to the repository, so ordering doesn't matter for it.) Bounded so a dead
+        // stream can't hang shutdown — if it can't commit in time we fall through to cancel and rely on
+        // at-least-once (the tail re-delivers on restart).
+        try
+        {
+            await _commits.FlushAsync().WaitAsync(TimeSpan.FromSeconds(5)).ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "Final replay commit failed during stop for {Resource}", _resource);
+        }
+
         if (!_cts.IsCancellationRequested)
             _cts.Cancel();
 
@@ -101,16 +122,6 @@ internal sealed class SalesforceListener : IListener
         catch (Exception ex)
         {
             _logger.LogDebug(ex, "Listener runner faulted during stop for {Resource}", _resource);
-        }
-
-        // Persist the final committable replay position (the commit throttle may be holding one).
-        try
-        {
-            await _commits.FlushAsync().ConfigureAwait(false);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogDebug(ex, "Final replay commit failed during stop for {Resource}", _resource);
         }
     }
 
