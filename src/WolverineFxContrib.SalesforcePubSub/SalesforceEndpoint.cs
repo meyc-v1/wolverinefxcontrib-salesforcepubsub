@@ -30,6 +30,10 @@ public sealed class SalesforceEndpoint : Endpoint
     internal int? FetchCount { get; set; }
     internal TimeSpan? FetchTimeout { get; set; }
     internal bool? StartFromEarliest { get; set; }
+    internal TimeSpan? HeartbeatInterval { get; set; }
+    internal LogLevel? HeartbeatLogLevel { get; set; }
+    internal TimeSpan? StaleStreamThreshold { get; set; }
+    internal LogLevel? StaleStreamLogLevel { get; set; }
 
     internal SalesforceEndpoint(SalesforcePubSubTransport parent, SalesforceResourceKind kind, string resource, EndpointRole role)
         : base(BuildUri(kind, resource), role)
@@ -104,6 +108,11 @@ public sealed class SalesforceEndpoint : Endpoint
         FetchCount = FetchCount ?? defaults.FetchCount,
         FetchTimeout = FetchTimeout ?? defaults.FetchTimeout,
         StartFromEarliest = StartFromEarliest ?? defaults.StartFromEarliest,
+        HeartbeatInterval = HeartbeatInterval ?? defaults.HeartbeatInterval,
+        HeartbeatLogLevel = HeartbeatLogLevel ?? defaults.HeartbeatLogLevel,
+        StaleStreamThreshold = StaleStreamThreshold ?? defaults.StaleStreamThreshold,
+        StaleStreamLogLevel = StaleStreamLogLevel ?? defaults.StaleStreamLogLevel,
+        WatchdogPollingPeriod = defaults.WatchdogPollingPeriod,
         ProcessNewEventsIfReplayIdValidationFails = defaults.ProcessNewEventsIfReplayIdValidationFails,
         ReplayIdValidationFailedErrorCode = defaults.ReplayIdValidationFailedErrorCode
     };

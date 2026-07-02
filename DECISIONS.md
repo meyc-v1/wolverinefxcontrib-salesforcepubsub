@@ -27,6 +27,37 @@ aren't conformance issues go under "Cleanups / tech-debt".
 
 ---
 
+## 15. Listener heartbeat + silent-cold watchdog (observability port-back from the orchestrator)
+- **Date:** 2026-07-02 · **Status:** Accepted
+- **Context:** During steady healthy running the listener logged nothing at Information (only
+  start/stop/recovery), and at Warning — the operational default — it was fully silent: healthy-idle and
+  silently-wedged were indistinguishable. Run-2's overnight incident made it concrete: a 21-minute MES
+  outage surfaced only as repeated Warning-level `AlreadyExists` noise with no alertable Error. The
+  operational model is **traces + logs, not OTEL metrics**, so the answer is log-based. The original
+  `SubscriptionOrchestrator` had two periodic loops the Wolverine port dropped: a heartbeat
+  (Info counters line every 15 min) and a silent-cold monitor (Error when nothing has been received for
+  15 min — the "connected but delivering nothing" prod failure mode).
+- **Decision:** Port both back into `SalesforceListener` as `PeriodicTimer` loops started/awaited by
+  `RunAsync` (same never-throw-out discipline as the consume loop), with counters + trip logic in a new
+  testable `Internals/ListenerDiagnostics` (lock-guarded; explicit timestamps). Wording of both log lines
+  matches the old orchestrator. Config follows the Phase-4 pattern — transport-level defaults with
+  per-endpoint overrides: `HeartbeatInterval` (15 min) + `HeartbeatLogLevel` (Information),
+  `StaleStreamThreshold` (15 min) + `StaleStreamLogLevel` (Error), watchdog polling period internal
+  (1 min). `TimeSpan.Zero` disables; explicit `DisableHeartbeat()` / `DisableStaleStreamWatchdog()`
+  fluent methods for discoverability. The watchdog deliberately logs **every poll** while the stream
+  stays cold (alert-friendly), and the reconnect-failure log **escalates Warning → `StaleStreamLogLevel`**
+  once past the same threshold (restoring the orchestrator's escalation, but tied to the configured
+  threshold instead of its hardcoded 30 min) — one knob governs alert severity for both signals.
+- **Why:** The watchdog turns a wedged stream into an alertable Error instead of Warning noise; the
+  heartbeat makes healthy-idle visibly alive. Keep-alives arrive ~every 2 min and stamp last-success, so
+  the 15-min threshold only trips on a genuinely cold stream — it complements the 270s `FetchTimeout`
+  reconnect (which handles idle-timeout) rather than overlapping it. Library-level because the listener
+  is the orchestrator's equivalent (per-resource counters/loops live with the stream they observe).
+- **Consequences / divergences from the old code:** `Reconnects` now counts actual **recoveries** (one
+  per error streak) rather than being incremented on every error alongside `TotalErrors` (the old
+  counter was a duplicate). Log levels are configurable (old: fixed). Unit tests 63 (was 46). TestHost
+  gained per-subscription `heartbeatInterval` / `staleStreamThreshold` knobs for live verification.
+
 ## 14. Custom channels (multi-type streams) — design holistically with Durable mode + a unified registration surface
 - **Date:** 2026-07-02 · **Status:** Deferred (design item; captured now, build later)
 - **Context:** Salesforce **custom channels** (`/event/<Name>__chn`, created via `PlatformEventChannel` +
@@ -100,9 +131,11 @@ aren't conformance issues go under "Cleanups / tech-debt".
 - **Consequences / options not taken:** Documented so consumers pick transport by recovery tolerance. A
   **dual-developer-name MES failover** (two slots on one channel, fail over to the un-held slot on `AlreadyExists`)
   was considered as an escape hatch for "MES + fast recovery" but **not adopted** — 2× config plus server-checkpoint
-  reconciliation (bounded redelivery) is complexity only justified if Topics genuinely can't be used. Two smaller
-  follow-ups remain open: an `AlreadyExists`-aware longer backoff (log-noise reduction, doesn't speed recovery),
-  and the observability watchdog (surface a stuck MES as an alertable Error instead of Warning noise).
+  reconciliation (bounded redelivery) is complexity only justified if Topics genuinely can't be used. One smaller
+  follow-up remains open: the observability watchdog (surface a stuck MES as an alertable Error instead of
+  Warning noise). An `AlreadyExists`-aware longer backoff was considered and **dropped** (2026-07-02): run-2
+  showed the real incident is the ~15-min slot hold, which no backoff tuning shortens — it would only reduce log
+  noise in the sub-15s clean-close race, which already self-heals in one retry.
 
 ## 12. MES re-affirms its replay commit on idle keep-alives (server 1800s no-commit deadline)
 - **Date:** 2026-07-02 · **Status:** Accepted

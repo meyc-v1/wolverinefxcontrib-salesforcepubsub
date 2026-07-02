@@ -34,12 +34,11 @@ internal sealed class SalesforceListener : IListener
     private readonly IBackoffStrategy _backoffStrategy;
     private readonly CachingAuthenticationTokenProvider _tokenProvider;
     private readonly ReplayCommitTracker _commits;
+    private readonly ListenerDiagnostics _diagnostics = new(DateTimeOffset.UtcNow);
     private readonly ILogger _logger;
     private readonly CancellationTokenSource _cts;
     private readonly Task _runner;
 
-    private long _consecutiveErrors;
-    private DateTimeOffset _lastSuccessUtc = DateTimeOffset.UtcNow;
     private ISubscriptionTransport? _currentTransport;
 
     public SalesforceListener(
@@ -141,6 +140,15 @@ internal sealed class SalesforceListener : IListener
     {
         _logger.LogInformation("Starting Salesforce listener for resource: {Resource}", _resource);
 
+        // Observability sidecars (DECISIONS #15): a periodic heartbeat plus a silent-cold watchdog that
+        // surfaces a stream receiving nothing at an alertable level. Both end on shutdown cancellation.
+        var heartbeat = _settings.HeartbeatInterval > TimeSpan.Zero
+            ? HeartbeatLoopAsync(ct)
+            : Task.CompletedTask;
+        var watchdog = _settings.StaleStreamThreshold > TimeSpan.Zero
+            ? WatchdogLoopAsync(ct)
+            : Task.CompletedTask;
+
         while (!ct.IsCancellationRequested)
         {
             // Cold start → null → the transport reads the durable store. Reconnect → the in-memory handled
@@ -173,6 +181,9 @@ internal sealed class SalesforceListener : IListener
             }
         }
 
+        await heartbeat.ConfigureAwait(false);
+        await watchdog.ConfigureAwait(false);
+
         _logger.LogInformation("Salesforce listener stopped for resource: {Resource}", _resource);
     }
 
@@ -180,7 +191,7 @@ internal sealed class SalesforceListener : IListener
     {
         await foreach (var response in WithIdleTimeout(transport.ReadAsync(ct), _settings.FetchTimeout, ct).ConfigureAwait(false))
         {
-            OnSuccessfulResponse();
+            OnSuccessfulResponse(response.Events.Count);
 
             if (response.Events.Count == 0)
             {
@@ -225,21 +236,83 @@ internal sealed class SalesforceListener : IListener
     }
 
     /// <summary>
-    /// A response (event batch or keep-alive) arrived: the stream is healthy. Stamp the last-success time
-    /// and, if we were recovering from errors, log a single recovery line with the observed downtime.
+    /// A response (event batch or keep-alive) arrived: the stream is healthy. Record it in the diagnostics
+    /// and, if this ends an error streak, log a single recovery line with the observed downtime.
     /// </summary>
-    private void OnSuccessfulResponse()
+    private void OnSuccessfulResponse(int eventCount)
     {
-        if (_consecutiveErrors > 0)
+        if (_diagnostics.RecordSuccess(eventCount, DateTimeOffset.UtcNow) is { } recovery)
         {
-            var downtime = DateTimeOffset.UtcNow - _lastSuccessUtc;
             _logger.LogInformation(
                 "Stream recovered for {Resource} after {ConsecutiveErrors} consecutive error(s); ~{Downtime} since last successful response.",
-                _resource, _consecutiveErrors, downtime);
-            _consecutiveErrors = 0;
+                _resource, recovery.ConsecutiveErrors, recovery.Downtime);
         }
+    }
 
-        _lastSuccessUtc = DateTimeOffset.UtcNow;
+    /// <summary>
+    /// Periodic health snapshot so a steadily-running listener is visibly alive in the logs (ported from
+    /// the original orchestrator's HeartbeatAsync — DECISIONS #15). Never throws out.
+    /// </summary>
+    private async Task HeartbeatLoopAsync(CancellationToken ct)
+    {
+        using var timer = new PeriodicTimer(_settings.HeartbeatInterval);
+
+        while (!ct.IsCancellationRequested)
+        {
+            try
+            {
+                if (!await timer.WaitForNextTickAsync(ct).ConfigureAwait(false))
+                    return;
+
+                var s = _diagnostics.Snapshot();
+                _logger.Log(_settings.HeartbeatLogLevel,
+                    "Heartbeat for resource: {Resource}, Running since {Start}, Responses: {Responses}, Events: {Events}, Errors: {Errors}, Reconnects: {Reconnects}, LastSuccess: {LastSuccess}, LastError: {LastError}",
+                    _resource, s.StartedOn, s.Responses, s.Events, s.Errors, s.Reconnects, s.LastSuccess, s.LastError);
+            }
+            catch (OperationCanceledException)
+            {
+                return;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Heartbeat failed for resource: {Resource}", _resource);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Silent-cold watchdog (ported from the original orchestrator's MonitorAsync — DECISIONS #15): a
+    /// stream can be connected yet delivering nothing, which the consume loop's own error logging never
+    /// surfaces. Once nothing has succeeded for the stale threshold, log at the alertable level on every
+    /// poll until the stream recovers. Never throws out.
+    /// </summary>
+    private async Task WatchdogLoopAsync(CancellationToken ct)
+    {
+        using var timer = new PeriodicTimer(_settings.WatchdogPollingPeriod);
+
+        while (!ct.IsCancellationRequested)
+        {
+            try
+            {
+                if (!await timer.WaitForNextTickAsync(ct).ConfigureAwait(false))
+                    return;
+
+                if (_diagnostics.CheckStale(_settings.StaleStreamThreshold, DateTimeOffset.UtcNow, out var sinceLastSuccess))
+                {
+                    _logger.Log(_settings.StaleStreamLogLevel,
+                        "Resource: {Resource} has not received a response in {Duration}",
+                        _resource, sinceLastSuccess);
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                return;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Stale-stream watchdog failed for resource: {Resource}", _resource);
+            }
+        }
     }
 
     /// <summary>
@@ -281,7 +354,7 @@ internal sealed class SalesforceListener : IListener
 
     private async Task HandleStreamExceptionAsync(ISubscriptionTransport transport, Exception ex, CancellationToken ct)
     {
-        _consecutiveErrors++;
+        var (consecutiveErrors, sinceLastSuccess) = _diagnostics.RecordError(DateTimeOffset.UtcNow);
 
         // An auth failure means the token was rejected (expired or revoked). Drop the cached token so the
         // reconnect below fetches a fresh one — gated on the auth status codes so ordinary reconnects keep it.
@@ -300,15 +373,19 @@ internal sealed class SalesforceListener : IListener
             _logger.LogError(inner, "Transport error handling failed for resource: {Resource}", _resource);
         }
 
-        var sinceLastSuccess = DateTimeOffset.UtcNow - _lastSuccessUtc;
+        // Past the stale threshold this is no longer a routine reconnect — escalate to the alertable level
+        // so the actual exception rides along with the watchdog's duration-only line.
+        var level = _settings.StaleStreamThreshold > TimeSpan.Zero && sinceLastSuccess >= _settings.StaleStreamThreshold
+            ? _settings.StaleStreamLogLevel
+            : LogLevel.Warning;
 
-        _logger.Log(LogLevel.Warning, ex is TimeoutException ? null : ex,
+        _logger.Log(level, ex is TimeoutException ? null : ex,
             "{ExceptionType} in resource: {Resource}, ConsecutiveErrors: {ConsecutiveErrors}, SinceLastSuccess: {SinceLastSuccess}",
-            ex.GetType().Name, _resource, _consecutiveErrors, sinceLastSuccess);
+            ex.GetType().Name, _resource, consecutiveErrors, sinceLastSuccess);
 
         try
         {
-            await _backoffStrategy.BackoffAsync(_consecutiveErrors, sinceLastSuccess, _resource, ct).ConfigureAwait(false);
+            await _backoffStrategy.BackoffAsync(consecutiveErrors, sinceLastSuccess, _resource, ct).ConfigureAwait(false);
         }
         catch (OperationCanceledException)
         {

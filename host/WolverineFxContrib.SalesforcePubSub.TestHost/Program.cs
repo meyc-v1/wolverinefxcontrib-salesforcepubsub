@@ -94,6 +94,10 @@ builder.UseWolverine(opts =>
             listener.FetchTimeout(timeout);
         if (sub.StartFromEarliest is { } earliest)
             listener.StartFromEarliest(earliest);
+        if (sub.HeartbeatInterval is { } heartbeat)
+            listener.HeartbeatInterval(heartbeat);
+        if (sub.StaleStreamThreshold is { } staleThreshold)
+            listener.StaleStreamThreshold(staleThreshold);
     }
 });
 

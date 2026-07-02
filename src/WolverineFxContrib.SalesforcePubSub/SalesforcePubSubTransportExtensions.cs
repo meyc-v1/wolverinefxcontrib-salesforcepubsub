@@ -1,6 +1,7 @@
 using System.Net.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Logging;
 using Wolverine.Configuration;
 using Wolverine.SalesforcePubSub.Events;
 using Wolverine.SalesforcePubSub.Internals;
@@ -112,6 +113,49 @@ public sealed class SalesforcePubSubConfiguration
         _settings.TokenCacheDuration = duration;
         return this;
     }
+
+    /// <summary>
+    /// Cadence of each listener's periodic heartbeat log line (default 15 min; <see cref="TimeSpan.Zero"/>
+    /// disables it), optionally with its log level (default Information; null leaves the level unchanged).
+    /// </summary>
+    public SalesforcePubSubConfiguration HeartbeatInterval(TimeSpan interval, LogLevel? logLevel = null)
+    {
+        _settings.HeartbeatInterval = interval;
+        if (logLevel is { } level)
+            _settings.HeartbeatLogLevel = level;
+        return this;
+    }
+
+    /// <summary>Disables the periodic heartbeat log line for all listeners.</summary>
+    public SalesforcePubSubConfiguration DisableHeartbeat()
+    {
+        _settings.HeartbeatInterval = TimeSpan.Zero;
+        return this;
+    }
+
+    /// <summary>
+    /// How long a listener may go without any successful response before the stale-stream watchdog logs
+    /// "has not received a response" each poll and reconnect-failure logs escalate from Warning — both at
+    /// the given log level (default Error; null leaves the level unchanged). Defaults to 15 min;
+    /// <see cref="TimeSpan.Zero"/> disables the watchdog and the escalation.
+    /// </summary>
+    public SalesforcePubSubConfiguration StaleStreamThreshold(TimeSpan threshold, LogLevel? logLevel = null)
+    {
+        _settings.StaleStreamThreshold = threshold;
+        if (logLevel is { } level)
+            _settings.StaleStreamLogLevel = level;
+        return this;
+    }
+
+    /// <summary>
+    /// Disables the stale-stream watchdog for all listeners — and with it the reconnect-failure log-level
+    /// escalation (those logs stay at Warning).
+    /// </summary>
+    public SalesforcePubSubConfiguration DisableStaleStreamWatchdog()
+    {
+        _settings.StaleStreamThreshold = TimeSpan.Zero;
+        return this;
+    }
 }
 
 /// <summary>
@@ -154,6 +198,54 @@ public class SalesforceListenerConfiguration
     public SalesforceListenerConfiguration StartFromEarliest(bool fromEarliest = true)
     {
         add(e => e.StartFromEarliest = fromEarliest);
+        return this;
+    }
+
+    /// <summary>
+    /// Override the heartbeat cadence for this listener (transport default 15 min; <see cref="TimeSpan.Zero"/>
+    /// disables it), optionally with its log level (null inherits the transport-level log level).
+    /// </summary>
+    public SalesforceListenerConfiguration HeartbeatInterval(TimeSpan interval, LogLevel? logLevel = null)
+    {
+        add(e =>
+        {
+            e.HeartbeatInterval = interval;
+            if (logLevel is { } level)
+                e.HeartbeatLogLevel = level;
+        });
+        return this;
+    }
+
+    /// <summary>Disables the periodic heartbeat log line for this listener.</summary>
+    public SalesforceListenerConfiguration DisableHeartbeat()
+    {
+        add(e => e.HeartbeatInterval = TimeSpan.Zero);
+        return this;
+    }
+
+    /// <summary>
+    /// Override the stale-stream threshold for this listener (transport default 15 min;
+    /// <see cref="TimeSpan.Zero"/> disables the watchdog and the reconnect-failure log escalation),
+    /// optionally with the stale log level (null inherits the transport-level log level).
+    /// </summary>
+    public SalesforceListenerConfiguration StaleStreamThreshold(TimeSpan threshold, LogLevel? logLevel = null)
+    {
+        add(e =>
+        {
+            e.StaleStreamThreshold = threshold;
+            if (logLevel is { } level)
+                e.StaleStreamLogLevel = level;
+        });
+        return this;
+    }
+
+    /// <summary>
+    /// Disables the stale-stream watchdog for this listener — and with it the reconnect-failure log-level
+    /// escalation (those logs stay at Warning).
+    /// </summary>
+    public SalesforceListenerConfiguration DisableStaleStreamWatchdog()
+    {
+        add(e => e.StaleStreamThreshold = TimeSpan.Zero);
         return this;
     }
 }

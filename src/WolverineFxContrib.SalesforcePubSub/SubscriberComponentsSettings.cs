@@ -1,3 +1,5 @@
+using Microsoft.Extensions.Logging;
+
 namespace Wolverine.SalesforcePubSub;
 
 /// <summary>
@@ -13,6 +15,9 @@ internal sealed class SubscriberComponentsSettings
     internal static readonly TimeSpan DefaultFetchTimeout = TimeSpan.FromSeconds(270);
     internal static readonly TimeSpan DefaultTokenCacheDuration = TimeSpan.FromMinutes(60);
     internal static readonly Uri DefaultPubSubUri = new("https://api.pubsub.salesforce.com:7443");
+    internal static readonly TimeSpan DefaultHeartbeatInterval = TimeSpan.FromMinutes(15);
+    internal static readonly TimeSpan DefaultStaleStreamThreshold = TimeSpan.FromMinutes(15);
+    internal static readonly TimeSpan DefaultWatchdogPollingPeriod = TimeSpan.FromMinutes(1);
 
     public static readonly string DefaultReplayIdValidationFailedErrorCode =
         "sfdc.platform.eventbus.grpc.subscription.fetch.replayid.corrupted";
@@ -37,4 +42,32 @@ internal sealed class SubscriberComponentsSettings
 
     public bool ProcessNewEventsIfReplayIdValidationFails { get; set; } = true;
     public string ReplayIdValidationFailedErrorCode { get; set; } = DefaultReplayIdValidationFailedErrorCode;
+
+    /// <summary>
+    /// Cadence of the listener's periodic heartbeat log line (uptime, response/event/error/reconnect
+    /// counters, last success/error). Defaults to 15 minutes; <see cref="TimeSpan.Zero"/> disables it.
+    /// </summary>
+    public TimeSpan HeartbeatInterval { get; set; } = DefaultHeartbeatInterval;
+
+    /// <summary>Log level of the heartbeat line. Defaults to <see cref="LogLevel.Information"/>.</summary>
+    public LogLevel HeartbeatLogLevel { get; set; } = LogLevel.Information;
+
+    /// <summary>
+    /// How long a listener may go without any successful response (event batch or keep-alive) before the
+    /// stream is considered silently cold: the watchdog starts logging at <see cref="StaleStreamLogLevel"/>
+    /// each poll, and reconnect-failure logs escalate from Warning to that same level. Keep-alives arrive
+    /// roughly every 2 minutes on a healthy idle stream, so this only trips on a genuinely cold one.
+    /// Defaults to 15 minutes; <see cref="TimeSpan.Zero"/> disables both the watchdog and the escalation.
+    /// </summary>
+    public TimeSpan StaleStreamThreshold { get; set; } = DefaultStaleStreamThreshold;
+
+    /// <summary>
+    /// Log level used once <see cref="StaleStreamThreshold"/> is exceeded — by the watchdog's
+    /// "has not received a response" line and by escalated reconnect-failure logs. Defaults to
+    /// <see cref="LogLevel.Error"/> (the alertable severity).
+    /// </summary>
+    public LogLevel StaleStreamLogLevel { get; set; } = LogLevel.Error;
+
+    /// <summary>How often the stale-stream watchdog polls. Defaults to 1 minute; not exposed fluently.</summary>
+    public TimeSpan WatchdogPollingPeriod { get; set; } = DefaultWatchdogPollingPeriod;
 }

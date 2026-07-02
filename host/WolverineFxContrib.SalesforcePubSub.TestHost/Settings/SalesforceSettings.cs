@@ -79,4 +79,10 @@ public sealed class SalesforceSubscriptionOptions
 
     /// <summary>Topic only: on a cold start (no stored replay id) begin from the earliest retained event.</summary>
     public bool? StartFromEarliest { get; set; }
+
+    /// <summary>Override the listener heartbeat cadence (default 15m; 00:00:00 disables). Set ~2m to observe it live.</summary>
+    public TimeSpan? HeartbeatInterval { get; set; }
+
+    /// <summary>Override the stale-stream watchdog threshold (default 15m; 00:00:00 disables). Set short + kill the network to observe a trip.</summary>
+    public TimeSpan? StaleStreamThreshold { get; set; }
 }
