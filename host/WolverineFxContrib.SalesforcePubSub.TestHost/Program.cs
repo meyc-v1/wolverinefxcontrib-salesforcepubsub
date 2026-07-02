@@ -3,7 +3,9 @@ using Microsoft.Extensions.DependencyInjection;
 using OpenTelemetry;
 using OpenTelemetry.Trace;
 using Wolverine;
+using Wolverine.Configuration;
 using Wolverine.SalesforcePubSub;
+using Wolverine.SqlServer;
 using WolverineFxContrib.SalesforcePubSub.TestHost;
 using WolverineFxContrib.SalesforcePubSub.TestHost.Replay;
 using WolverineFxContrib.SalesforcePubSub.TestHost.Salesforce;
@@ -77,17 +79,50 @@ builder.UseWolverine(opts =>
     opts.UseSalesforcePubSub(sf.PubSubUri)
         .UseAuthenticationHandler<SalesforceAuthenticationTokenHandler>();
 
+    // Durable-mode message store (inbox/DLQ), opt-in: only wired when a connection string is configured
+    // (user secrets — "durabilitySettings:connectionString"). Endpoints opt in per-sub via "mode": "Durable".
+    var durabilityConnectionString = builder.Configuration.GetValue<string>("durabilitySettings:connectionString");
+    if (!string.IsNullOrWhiteSpace(durabilityConnectionString))
+        opts.PersistMessagesWithSqlServer(durabilityConnectionString);
+
     foreach (var sub in sf.Subscriptions)
     {
         if (!sub.Enabled)
             continue;
 
-        var messageType = ResolveEventType(sub.MessageType)
-            ?? throw new InvalidOperationException($"Could not resolve message type '{sub.MessageType}' for channel '{sub.Channel}'.");
+        // Single-type (messageType, seals the map) vs map-style (events list) registration.
+        var singleType = string.IsNullOrWhiteSpace(sub.MessageType)
+            ? null
+            : ResolveEventType(sub.MessageType!)
+              ?? throw new InvalidOperationException($"Could not resolve message type '{sub.MessageType}' for channel '{sub.Channel}'.");
 
-        var listener = sub.Type == SalesforceResourceKind.ManagedSubscription
-            ? opts.ListenToManagedSubscription(sub.Channel, messageType)
-            : opts.ListenToSalesforceTopic(sub.Channel, messageType);
+        var listener = sub.Type switch
+        {
+            SalesforceSubscriptionType.ManagedSubscription => singleType is null
+                ? opts.ListenToManagedSubscription(sub.Channel)
+                : opts.ListenToManagedSubscription(sub.Channel, singleType),
+            SalesforceSubscriptionType.Channel => opts.ListenToSalesforceChannel(sub.Channel),
+            _ => singleType is null
+                ? opts.ListenToSalesforceTopic(sub.Channel)
+                : opts.ListenToSalesforceTopic(sub.Channel, singleType)
+        };
+
+        foreach (var evt in sub.Events)
+        {
+            var eventType = ResolveEventType(evt.MessageType)
+                ?? throw new InvalidOperationException($"Could not resolve message type '{evt.MessageType}' for channel '{sub.Channel}'.");
+            listener.MapEvent(eventType, evt.EventApiName);
+        }
+
+        switch (sub.Mode)
+        {
+            case EndpointMode.Durable:
+                listener.UseDurableInbox();
+                break;
+            case EndpointMode.BufferedInMemory:
+                listener.BufferedInMemory();
+                break;
+        }
 
         // Per-endpoint resiliency knobs (e.g. a short FetchTimeout to force the timeout-loop test).
         if (sub.FetchTimeout is { } timeout)

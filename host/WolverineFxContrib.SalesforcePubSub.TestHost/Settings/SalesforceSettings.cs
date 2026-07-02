@@ -50,29 +50,74 @@ internal sealed class SalesforceSettingsValidator : AbstractValidator<Salesforce
         RuleForEach(x => x.Subscriptions).ChildRules(sub =>
         {
             sub.RuleFor(x => x.Channel).NotEmpty();
-            sub.RuleFor(x => x.MessageType).NotEmpty();
             sub.RuleFor(x => x.Type).IsInEnum();
+
+            // Single-type (messageType) XOR map-style (events) — the single-type registration seals the map.
+            sub.RuleFor(x => x)
+                .Must(x => !string.IsNullOrWhiteSpace(x.MessageType) ^ x.Events.Count > 0)
+                .WithMessage("A subscription needs either a messageType or an events list (not both).");
+
+            sub.RuleFor(x => x.Events)
+                .Must(events => events.Count > 0)
+                .When(x => x.Type == SalesforceSubscriptionType.Channel)
+                .WithMessage("A Channel subscription requires an events list (one entry per event type).");
+
+            sub.RuleForEach(x => x.Events).ChildRules(evt =>
+            {
+                evt.RuleFor(x => x.MessageType).NotEmpty();
+            });
         });
     }
 }
 
-/// <summary>One Salesforce subscription: its kind, the channel/MES name, and the .NET event type it maps to.</summary>
+/// <summary>The kind of Salesforce subscription to wire (Channel = custom channel, multi-type).</summary>
+public enum SalesforceSubscriptionType
+{
+    Topic,
+    ManagedSubscription,
+    Channel
+}
+
+/// <summary>One event-type mapping on a multi-type subscription (MapEvent entry).</summary>
+public sealed class SalesforceSubscriptionEventOptions
+{
+    /// <summary>Simple or full name of the <c>PubSubEvent</c>-derived type to deserialize into.</summary>
+    public string MessageType { get; set; } = "";
+
+    /// <summary>The event API name (Avro record name), e.g. <c>CM_Test_Event_One__e</c>. Optional only on a single-entry topic/MES.</summary>
+    public string? EventApiName { get; set; }
+}
+
+/// <summary>One Salesforce subscription: its kind, the channel/MES name, and the .NET event type(s) it maps to.</summary>
 public sealed class SalesforceSubscriptionOptions
 {
-    /// <summary>Topic or ManagedSubscription.</summary>
-    public SalesforceResourceKind Type { get; set; }
+    /// <summary>Topic, ManagedSubscription, or Channel (custom channel, multi-type).</summary>
+    public SalesforceSubscriptionType Type { get; set; }
 
     /// <summary>
-    /// For a topic, the channel path (e.g. <c>/event/CM_Test_Event_Two__e</c>).
-    /// For MES, the ManagedEventSubscription DeveloperName (e.g. <c>CM_Test_Event_One</c>).
+    /// For a topic, the channel path (e.g. <c>/event/CM_Test_Event_Two__e</c>); for a custom channel the
+    /// __chn path (e.g. <c>/event/CM_Test_Channel__chn</c>). For MES, the ManagedEventSubscription
+    /// DeveloperName (e.g. <c>CM_Test_Event_One</c>).
     /// </summary>
     public string Channel { get; set; } = "";
 
-    /// <summary>Simple or full name of the <c>PubSubEvent</c>-derived type to deserialize events into.</summary>
-    public string MessageType { get; set; } = "";
+    /// <summary>
+    /// Single-type form: the <c>PubSubEvent</c>-derived type to deserialize every event into. Mutually
+    /// exclusive with <see cref="Events"/> (the single-type registration seals the event map).
+    /// </summary>
+    public string? MessageType { get; set; }
+
+    /// <summary>Map-style form: one entry per event type (required for Channel subscriptions).</summary>
+    public List<SalesforceSubscriptionEventOptions> Events { get; set; } = [];
 
     /// <summary>Wire this subscription as a listener. Set false to run isolated topic-only / MES-only passes.</summary>
     public bool Enabled { get; set; } = true;
+
+    /// <summary>
+    /// Endpoint delivery mode: Inline (default, at-least-once), BufferedInMemory (at-most-once), or
+    /// Durable (inbox-backed; requires <c>durabilitySettings:connectionString</c>).
+    /// </summary>
+    public Wolverine.Configuration.EndpointMode? Mode { get; set; }
 
     /// <summary>Override the idle/fetch timeout that triggers a reconnect (default 270s). Set ~30s to force the timeout-loop test.</summary>
     public TimeSpan? FetchTimeout { get; set; }

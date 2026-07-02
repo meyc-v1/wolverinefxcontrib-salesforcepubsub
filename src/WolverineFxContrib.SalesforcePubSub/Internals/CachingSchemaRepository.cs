@@ -29,6 +29,22 @@ internal sealed class CachingSchemaRepository
     }
 
     /// <summary>
+    /// Eager pre-warm (DECISIONS #17): resolves a topic's current schema (GetTopic → GetSchema) and caches
+    /// it under its schema id, so per-event and recovery lookups by id hit the cache. Used by the listener
+    /// at connect; best-effort — a failure just means the schema is fetched lazily on the first event.
+    /// </summary>
+    public async Task<SchemaInfo> PrewarmByTopicNameAsync(string topicName, CancellationToken cancellationToken)
+    {
+        var info = await _repository.GetDeserializationInfoByTopicNameAsync(topicName, cancellationToken).ConfigureAwait(false);
+
+        using var entry = _memoryCache.CreateEntry(info.SchemaId);
+        entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(24);
+        entry.Value = info;
+
+        return info;
+    }
+
+    /// <summary>
     /// Synchronously returns a schema only if it is already cached. Used by the serializer on the dispatch
     /// path; the listener ensures the schema is fetched/cached (async) before handing the envelope off.
     /// </summary>

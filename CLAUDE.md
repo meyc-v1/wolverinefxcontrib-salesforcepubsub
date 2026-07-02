@@ -10,8 +10,9 @@ endpoints. Package id `WolverineFxContrib.SalesforcePubSub`; root namespace `Wol
     `IBackoffStrategy`, `IAuthenticationTokenHandler`; event base types `PubSubEvent` / `PlatformEvent`
     (in the `Wolverine.SalesforcePubSub.Events` namespace — consumers add a `using` for it); and the
     Wolverine config surface — `UseSalesforcePubSub`, `ListenToSalesforceTopic[<T>]`,
-    `ListenToManagedSubscription[<T>]` (generic + `Type`-based overloads), `SalesforcePubSubTransport`,
-    `SalesforceEndpoint`.
+    `ListenToSalesforceChannel` (custom `__chn` channels, multi-type), `ListenToManagedSubscription[<T>]`
+    (generic sugar seals the type map; non-generic overloads + `MapEvent<T>("Api_Name__e")` declare it —
+    DECISIONS #16), `SalesforcePubSubTransport`, `SalesforceEndpoint`.
   - **Namespaces are folder-based:** root files → `Wolverine.SalesforcePubSub`, `Events/` →
     `Wolverine.SalesforcePubSub.Events`, `Internals/` → `Wolverine.SalesforcePubSub.Internals`.
   - **`Internals/`** (all `internal`, `sealed`): `ISubscriptionTransport` + `TopicTransport` /
@@ -31,15 +32,17 @@ endpoints. Package id `WolverineFxContrib.SalesforcePubSub`; root namespace `Wol
 - **net10.0 only** — WolverineFx 6.x dropped net8, so the lib does too.
 - **Listen-only** — there is no sender. Publishing a platform event is a REST POST and lives outside
   this transport. CDC is intentionally out of scope (Platform Events only for now).
-- **Delivery guarantee is per-endpoint** via Inline (at-least-once) vs BufferedInMemory (at-most-once).
+- **Delivery guarantee is per-endpoint** via Inline (at-least-once), BufferedInMemory (at-most-once), or
+  **Durable** (inbox-backed at-least-once with parallelism + a real DLQ; needs a consumer-side Wolverine
+  message store, e.g. `WolverineFx.SqlServer` — DECISIONS #17. Restart-recovery decodes via the
+  auth-hardened async serializer fetch-on-miss; the replay id and schema id ride persisted headers).
   Replay is a per-envelope **watermark** (`ReplayCommitTracker`): `Track` on receive, `CompleteAsync`
   advances the safe position (lowest in-flight − 1), keep-alives advance during idle, and commits are
   throttled + serialized. `DeferAsync` re-injects for an in-memory retry (Kafka-style). In-process
   reconnects resume from the handled watermark; cold start / restart reads the durable store. Topic commits
   client-side (`IReplayIdRepository`); MES commits server-side (`CommitReplayIdRequest` on the stream). See
-  DECISIONS #2/#8/#10/#11. **Open work item: `EndpointMode.Durable`** (inbox) for at-least-once *with
-  parallelism* + a real DLQ — without a durable store, a poison message is dead-lettered to a no-op and
-  discarded (DECISIONS #10).
+  DECISIONS #2/#8/#10/#11. Without a durable store, a poison message is dead-lettered to a no-op and
+  discarded (DECISIONS #10); under Durable it is preserved in the store's dead-letter table (#17).
 - The listener owns its own reconnect loop (ported from the original `SubscriptionOrchestrator`); it
   must never throw out, because Wolverine does not auto-restart a faulted listener.
 - Keep the public surface minimal (the three interfaces + event types + Wolverine config classes);
@@ -50,11 +53,15 @@ endpoints. Package id `WolverineFxContrib.SalesforcePubSub`; root namespace `Wol
   the deprecated `a deprecated shared auth package` package). Config split:
   - `salesforceAuthenticationSettings` (user-secrets, id `wolverine.salesforcepubsub`): `ClientId`,
     `ClientSecret`, `LoginUri`.
-  - `salesforceSettings` (appsettings): `baseUri` (REST data API), `pubSubUri` (gRPC), and
-    `subscriptions[]` — each `{ type: Topic|ManagedSubscription, channel, messageType }`.
+  - `salesforceSettings` (appsettings; `baseUri` lives in user secrets): `pubSubUri` (gRPC) and
+    `subscriptions[]` — each `{ type: Topic|ManagedSubscription|Channel, channel, messageType | events[]
+    {messageType, eventApiName}, mode: Inline|BufferedInMemory|Durable, enabled, … }`.
+  - `durabilitySettings:connectionString` (user secrets) opts into the Wolverine SQL Server message store
+    for Durable-mode endpoints.
 - Wired against **the sandbox org**: Test Event One → MES `CM_Test_Event_One`; Test Event Two → topic
-  `/event/CM_Test_Event_Two__e`. Publisher: console keys `[1]`/`[2]` POST the test PEs via
-  `ISalesforceClient`.
+  `/event/CM_Test_Event_Two__e`; custom channel `CM_Test_Channel__chn` carries both (created via the sf
+  CLI Tooling API). Timed `PublisherWorker` (opt-in `publisherSettings`) POSTs the test PEs; handler seams:
+  `Message__c` = "poison" (throws) / "slow" (30s delay) drive the Durable DLQ / restart-recovery tests.
 
 ## Conventions
 - **Do it the Wolverine way.** This is a community Wolverine transport and should look/behave like a

@@ -57,32 +57,85 @@ public static class SalesforcePubSubTransportExtensions
         return new SalesforcePubSubConfiguration(transport, options, settings);
     }
 
-    /// <summary>Listen to a Salesforce topic (e.g. a Platform Event channel) with client-side replay tracking.</summary>
+    /// <summary>
+    /// Listen to a Salesforce platform-event topic (client-side replay tracking), bound to a single event
+    /// type. Sugar for the non-generic overload + a single unnamed <c>MapEvent</c>; the map is sealed, so
+    /// combining this with <c>MapEvent</c> fails at startup.
+    /// </summary>
     public static SalesforceListenerConfiguration ListenToSalesforceTopic<T>(this WolverineOptions options, string topicName)
         where T : PubSubEvent
         => options.ListenToSalesforceTopic(topicName, typeof(T));
 
-    /// <summary>Listen to a Salesforce topic with the message type supplied at runtime (e.g. from configuration).</summary>
+    /// <summary>Single-type topic listener with the message type supplied at runtime (e.g. from configuration).</summary>
     public static SalesforceListenerConfiguration ListenToSalesforceTopic(this WolverineOptions options, string topicName, Type messageType)
-        => ConfigureListener(options, SalesforceResourceKind.Topic, topicName, messageType);
+    {
+        GuardNotChannel(topicName);
+        return ConfigureListener(options, SalesforceResourceKind.Topic, topicName, messageType);
+    }
 
-    /// <summary>Listen to a Salesforce managed event subscription (MES) with server-side replay tracking.</summary>
+    /// <summary>
+    /// Listen to a Salesforce platform-event topic, declaring its event type via <c>MapEvent&lt;T&gt;()</c>
+    /// (a plain topic delivers exactly one event type; multiple mappings fail at startup).
+    /// </summary>
+    public static SalesforceListenerConfiguration ListenToSalesforceTopic(this WolverineOptions options, string topicName)
+    {
+        GuardNotChannel(topicName);
+        return ConfigureListener(options, SalesforceResourceKind.Topic, topicName, messageType: null);
+    }
+
+    /// <summary>
+    /// Listen to a Salesforce custom channel (…__chn) — one stream carrying multiple event types. Declare
+    /// each type with <c>MapEvent&lt;T&gt;("Api_Name__e")</c>; an event with no mapping is stamped with its
+    /// raw record name and handled by Wolverine's missing-handler policy (dead-letter by default).
+    /// </summary>
+    public static SalesforceListenerConfiguration ListenToSalesforceChannel(this WolverineOptions options, string channelName)
+    {
+        if (!channelName.EndsWith("__chn", StringComparison.Ordinal))
+            throw new ArgumentException(
+                $"'{channelName}' is not a custom channel (expected a …__chn suffix). For a platform-event topic use ListenToSalesforceTopic.",
+                nameof(channelName));
+
+        return ConfigureListener(options, SalesforceResourceKind.Topic, channelName, messageType: null);
+    }
+
+    /// <summary>
+    /// Listen to a Salesforce managed event subscription (MES, server-side replay tracking), bound to a
+    /// single event type. Sugar for the non-generic overload + a single unnamed <c>MapEvent</c>; the map is
+    /// sealed, so combining this with <c>MapEvent</c> fails at startup.
+    /// </summary>
     public static SalesforceListenerConfiguration ListenToManagedSubscription<T>(this WolverineOptions options, string subscriptionName)
         where T : PubSubEvent
         => options.ListenToManagedSubscription(subscriptionName, typeof(T));
 
-    /// <summary>Listen to a managed event subscription with the message type supplied at runtime.</summary>
+    /// <summary>Single-type MES listener with the message type supplied at runtime.</summary>
     public static SalesforceListenerConfiguration ListenToManagedSubscription(this WolverineOptions options, string subscriptionName, Type messageType)
         => ConfigureListener(options, SalesforceResourceKind.ManagedSubscription, subscriptionName, messageType);
 
-    private static SalesforceListenerConfiguration ConfigureListener(WolverineOptions options, SalesforceResourceKind kind, string resource, Type messageType)
-    {
-        if (!typeof(PubSubEvent).IsAssignableFrom(messageType))
-            throw new ArgumentException($"Message type '{messageType}' must derive from {nameof(PubSubEvent)}.", nameof(messageType));
+    /// <summary>
+    /// Listen to a managed event subscription, declaring event types via <c>MapEvent</c>. A MES may target
+    /// a custom channel server-side, so multiple named mappings are allowed; a single unnamed mapping
+    /// behaves like the single-type form.
+    /// </summary>
+    public static SalesforceListenerConfiguration ListenToManagedSubscription(this WolverineOptions options, string subscriptionName)
+        => ConfigureListener(options, SalesforceResourceKind.ManagedSubscription, subscriptionName, messageType: null);
 
+    private static void GuardNotChannel(string topicName)
+    {
+        if (topicName.EndsWith("__chn", StringComparison.Ordinal))
+            throw new ArgumentException(
+                $"'{topicName}' is a custom channel; use ListenToSalesforceChannel with MapEvent<T>(\"Api_Name__e\") per event type.",
+                nameof(topicName));
+    }
+
+    private static SalesforceListenerConfiguration ConfigureListener(WolverineOptions options, SalesforceResourceKind kind, string resource, Type? messageType)
+    {
         var transport = options.Transports.GetOrCreate<SalesforcePubSubTransport>();
         var endpoint = transport.EndpointForResource(kind, resource);
-        endpoint.MessageType = messageType;
+
+        // The single-type registrations create the one unconditional entry and seal the map (DECISIONS #16).
+        if (messageType is not null)
+            endpoint.AddEventMapping(messageType, eventApiName: null, seal: true);
+
         endpoint.IsListener = true;
         return new SalesforceListenerConfiguration(endpoint);
     }
@@ -175,6 +228,23 @@ public class SalesforceListenerConfiguration
 
     internal SalesforceListenerConfiguration(Func<SalesforceEndpoint> source) : base(source)
     {
+    }
+
+    /// <summary>
+    /// Maps a Salesforce event to the .NET type it deserializes into. On a custom channel (or a MES that
+    /// targets one), give each entry the event API name (e.g. <c>MapEvent&lt;MyEvent&gt;("My_Event__e")</c>)
+    /// — it is matched against each event's Avro record name. On a plain topic the name may be omitted
+    /// (the topic carries exactly one event type). Cannot be combined with the single-type
+    /// <c>ListenTo…&lt;T&gt;</c> registrations, which seal the map.
+    /// </summary>
+    public SalesforceListenerConfiguration MapEvent<T>(string? eventApiName = null) where T : PubSubEvent
+        => MapEvent(typeof(T), eventApiName);
+
+    /// <summary>Runtime-typed overload of <see cref="MapEvent{T}"/> (e.g. for configuration-driven wiring).</summary>
+    public SalesforceListenerConfiguration MapEvent(Type messageType, string? eventApiName = null)
+    {
+        add(e => e.AddEventMapping(messageType, eventApiName));
+        return this;
     }
 
     /// <summary>Override the fetch batch size for this listener (default 10).</summary>

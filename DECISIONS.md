@@ -27,6 +27,78 @@ aren't conformance issues go under "Cleanups / tech-debt".
 
 ---
 
+## 17. Durable mode: schema strategy A (auth-hardened fetch-on-miss) + eager pre-warm; replay id persisted as a header
+- **Date:** 2026-07-02 · **Status:** Accepted
+- **Context:** `EndpointMode.Durable` (at-least-once with parallelism + a real DLQ; without it a poison
+  message is silently discarded, #10) was parked on the schema-on-recovery gap: the durable inbox persists
+  raw Avro `Data`, and on restart the durability agent replays it with an **empty in-memory schema cache**
+  (no listener pre-fetch ran) — the sync serializer would throw and every recovered event would dead-letter.
+  Candidates: (A) async serializer with fetch-on-miss; (B) persist the schema JSON per envelope; (C) a
+  durable schema table. Measured B live: a platform-event compact schema is **352 bytes** (scales ~100 B
+  per field), and the inbox's `varbinary(max)` body column handles any size — B is affordable. **Rejected
+  anyway on the Kafka precedent**: Wolverine's own `SchemaRegistryAvroSerializer` ships the schema as a
+  persisted *pointer* (the Confluent wire-format id ≙ our `sfdc-schema-id` header) and its cached registry
+  client fetch-on-misses over the network wherever decoding runs, including durable recovery — embedding
+  the schema per message is the pattern that wire format exists to avoid. Schema evolution also demands
+  fetch-by-id regardless: a recovered envelope must decode with the **writer's** schema id, which eager
+  loading of the *current* schema cannot satisfy.
+- **Decision:** (1) `supportsMode` allows `Durable`. (2) `SalesforceAvroSerializer : IAsyncMessageSerializer`
+  (verified in the pinned 6.12.0): sync path stays cache-only; the async path fetch-on-misses by the
+  persisted schema-id header **with the listener's auth contract** — an auth-rejected fetch calls
+  `CachingAuthenticationTokenProvider.Invalidate()` and retries once with a fresh token (no revoked-token
+  cache poisoning can dead-letter a whole recovery batch), then propagates to the durable DLQ (parked,
+  replayable). (3) **Eager pre-warm** in the listener startup path: topic endpoints warm their own schema
+  via GetTopic→GetSchema; channel/MES endpoints use the named `MapEvent` entries as the manifest — so
+  recovery is a cache hit except for the startup race and schema evolution, which the fallback covers.
+  (4) The event **replay id is persisted as an `sfdc-replay-id` header** — found live: `Envelope.Offset`
+  is a runtime property the inbox does NOT round-trip, so recovered events decoded with `ReplayId 0`
+  until the header was added (serializer prefers the header, falls back to Offset).
+- **Why:** A is the Wolverine/Kafka-native shape adapted for Salesforce's shared event-bus token (Confluent
+  registry clients carry independent credentials; our invalidate+retry supplies the equivalent recovery
+  semantics). The hot path is untouched — the listener still pre-fetches in the consume loop, so the
+  Phase-3 auth constraint (schema-fetch auth failures surface to the reconnect/invalidate path) holds.
+- **Consequences:** Verified live on the sandbox org: restart-recovery (kill mid-handle → node reassignment (~90s)
+  → inbox replay → decode → handled **with the real ReplayId**); poison message → moved to the durable
+  dead-letter table (preserved, not discarded — closes #10's caveat); Wolverine auto-provisions its
+  envelope storage. Consumer infra: a Wolverine message store (`WolverineFx.SqlServer` here) + note that
+  Microsoft.Data.SqlClient 7.x needs `Microsoft.Data.SqlClient.Extensions.Azure` for Entra auth.
+  **Fan-out caveat (observed live):** our deterministic envelope Id means the *same Salesforce event*
+  delivered to two **Durable** endpoints is deduped by the inbox (`DuplicateIncomingEnvelopeException`,
+  logged at Error) — process-once per event across durable endpoints. Guidance: subscribe an event durably
+  on one endpoint, or accept process-once; Inline endpoints fan out normally.
+
+## 16. Custom channels: map-only registration, per-event type resolution, missing-handler policy for unmapped events
+- **Date:** 2026-07-02 · **Status:** Accepted (resolves #14)
+- **Context:** A custom channel (`/event/<Name>__chn`) delivers multiple event types on one stream; the
+  one-`Type`-per-endpoint model would mis-decode. Per-event type identity comes only from each event's
+  schema: **verified live (REST `eventSchema?payloadFormat=COMPACT` + gRPC `GetSchema`, identical): the
+  Avro record top-level `name` is the full event API name including `__e`** (namespace
+  `com.sforce.eventbus`) — the natural map key. Wolverine natively routes per-message via
+  `envelope.MessageType` → `HandlerGraph.TryFindMessageType`; unknown names take `IMissingHandler`
+  (dead-letter + log) and the envelope completes, so the replay watermark advances.
+- **Decision:** **Map-only registration** (rejected Kafka's default+map: a catch-all default on a
+  multi-type stream silently mis-decodes). Everything declares types via `MapEvent`; kind constrains
+  cardinality — Topic `__e` exactly 1 (name optional), Channel `__chn` 1..N (all named), MES 1..N (its
+  server-side channel may be a `__chn`; one unnamed entry = unconditional stamp). The `ListenTo…<T>`
+  generics remain as sugar creating a **sealed** single-entry map — `.MapEvent` after sugar throws at
+  startup, as do cardinality/suffix violations (`ListenToSalesforceTopic` rejects `__chn` and vice versa).
+  Channels are **Topic-kind endpoints** (same Subscribe RPC, client-side replay, SQL store, watermark
+  resume #8). The listener resolves each event via schema-id → memoized record name → map, stamping
+  `MessageType` per event; the single-unconditional case skips parsing (exact pre-channel parity).
+  **Unmapped events**: warn once per record name, stamp the raw record name, let Wolverine's
+  missing-handler policy dead-letter it — which also makes `[MessageIdentity("Api_Name__e")]` on a handled
+  type a zero-config opt-in.
+- **Why:** Per-event stamping is Wolverine's own multi-type model; map-only keeps a multi-type stream's
+  contract explicit at the registration site and eliminates the mis-decode foot-gun by construction. The
+  same type may be mapped on multiple endpoints (Topic + Channel + MES) — handlers are type-routed,
+  per-endpoint state is independent; `Envelope.TopicName` identifies the source.
+- **Consequences:** Verified live on the sandbox org against `CM_Test_Channel__chn` (created via the sf CLI Tooling
+  API): both test events decode to their mapped types off one stream; fan-out of one event to Topic +
+  Channel fires the handler once per endpoint under Inline (see #17 for the Durable dedup); an unmapped
+  event warns, dead-letters via the missing-handler path, and the watermark advances past it. New public
+  surface: `ListenToSalesforceChannel`, non-generic `ListenToSalesforceTopic`/`ListenToManagedSubscription`
+  overloads, `MapEvent<T>`/`MapEvent(Type, string?)`. Unit tests 63 → 94.
+
 ## 15. Listener heartbeat + silent-cold watchdog (observability port-back from the orchestrator)
 - **Date:** 2026-07-02 · **Status:** Accepted
 - **Context:** During steady healthy running the listener logged nothing at Information (only
@@ -59,7 +131,7 @@ aren't conformance issues go under "Cleanups / tech-debt".
   gained per-subscription `heartbeatInterval` / `staleStreamThreshold` knobs for live verification.
 
 ## 14. Custom channels (multi-type streams) — design holistically with Durable mode + a unified registration surface
-- **Date:** 2026-07-02 · **Status:** Deferred (design item; captured now, build later)
+- **Date:** 2026-07-02 · **Status:** Resolved — implemented by #16 (channels/registration) + #17 (Durable/schema strategy)
 - **Context:** Salesforce **custom channels** (`/event/<Name>__chn`, created via `PlatformEventChannel` +
   `PlatformEventChannelMember` Tooling/Metadata API) group **multiple custom platform events** into one stream
   (custom high-volume PEs + Real-Time Event Monitoring only; standard PEs excluded; one event product per channel).
@@ -399,7 +471,10 @@ contracts + Kafka/ASB. The port is largely conformant; findings below._
   transport has no reply target — every sendable transport overrides this with its real one).
 - **Batch receive overload unused** — Wolverine's `IReceiver` offers `ReceivedAsync(Envelope[])`; we feed
   one envelope at a time. → **Deferred** (#6) — and it matches Kafka, which also dispatches singly.
-- **No `Durable` (inbox) mode → no at-least-once *with parallelism*** — `supportsMode` allows only
+- **No `Durable` (inbox) mode → no at-least-once *with parallelism*** — → **Resolved (#17)**:
+  `supportsMode` allows Durable; the schema-on-recovery gap is closed by the auth-hardened
+  `IAsyncMessageSerializer` fetch-on-miss + eager pre-warm; the replay id persists via header; verified
+  live (restart-recovery, durable DLQ). Historical context below. `supportsMode` previously allowed only
   Inline/BufferedInMemory. The Wolverine-idiomatic way to get at-least-once *and* throughput is the
   **durable inbox** (`EndpointMode.Durable`): "Complete" means *persisted to the inbox* (in order), and
   the durability agent provides recovery + dedup — exactly how Kafka's `ProcessConcurrentlyByKey` works.

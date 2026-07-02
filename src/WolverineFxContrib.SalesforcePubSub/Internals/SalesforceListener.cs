@@ -6,7 +6,6 @@ using Grpc.Core;
 using Microsoft.Extensions.Logging;
 using Wolverine.Runtime;
 using Wolverine.Transports;
-using Wolverine.Util;
 
 namespace Wolverine.SalesforcePubSub.Internals;
 
@@ -28,7 +27,9 @@ internal sealed class SalesforceListener : IListener
     private readonly bool _resumesFromWatermark;
     private readonly Func<long?, ISubscriptionTransport> _transportFactory;
     private readonly IReceiver _receiver;
-    private readonly Type _messageType;
+    private readonly EventTypeResolver _eventTypes;
+    private readonly IReadOnlyList<string> _prewarmTopics;
+    private readonly HashSet<string> _unmappedWarned = [];
     private readonly CachingSchemaRepository _schemaRepository;
     private readonly SubscriberComponentsSettings _settings;
     private readonly IBackoffStrategy _backoffStrategy;
@@ -47,7 +48,8 @@ internal sealed class SalesforceListener : IListener
         bool resumesFromWatermark,
         Func<long?, ISubscriptionTransport> transportFactory,
         IReceiver receiver,
-        Type messageType,
+        EventTypeResolver eventTypes,
+        IReadOnlyList<string> prewarmTopics,
         CachingSchemaRepository schemaRepository,
         SubscriberComponentsSettings settings,
         IBackoffStrategy backoffStrategy,
@@ -60,7 +62,8 @@ internal sealed class SalesforceListener : IListener
         _resumesFromWatermark = resumesFromWatermark;
         _transportFactory = transportFactory;
         _receiver = receiver;
-        _messageType = messageType;
+        _eventTypes = eventTypes;
+        _prewarmTopics = prewarmTopics;
         _schemaRepository = schemaRepository;
         _settings = settings;
         _backoffStrategy = backoffStrategy;
@@ -149,6 +152,8 @@ internal sealed class SalesforceListener : IListener
             ? WatchdogLoopAsync(ct)
             : Task.CompletedTask;
 
+        await PrewarmSchemasAsync(ct).ConfigureAwait(false);
+
         while (!ct.IsCancellationRequested)
         {
             // Cold start → null → the transport reads the durable store. Reconnect → the in-memory handled
@@ -212,17 +217,28 @@ internal sealed class SalesforceListener : IListener
                     // from the cached schema downstream in Wolverine's pipeline.
                     await _schemaRepository.GetDeserializationInfoBySchemaIdAsync(schemaId, ct).ConfigureAwait(false);
 
+                    // Per-event type resolution (DECISIONS #16): the record name in the (now-cached) schema
+                    // picks the mapped type. An unmapped event is stamped with its raw record name and rides
+                    // Wolverine's missing-handler path (dead-letter + complete → the watermark still advances).
+                    var (messageTypeName, mapped, recordName) = _eventTypes.Resolve(schemaId);
+                    if (!mapped && _unmappedWarned.Add(recordName))
+                        _logger.LogWarning(
+                            "{Resource}: Event type '{RecordName}' has no MapEvent registration; stamping the raw name and deferring to Wolverine's missing-handler policy (further occurrences will not be logged).",
+                            _resource, recordName);
+
                     var envelope = new Envelope
                     {
                         // Deterministic Id from the Salesforce event id so a redelivered event is dedup-able.
                         Id = ResolveEnvelopeId(consumerEvent.Event.Id, _resource, replayId),
                         Data = consumerEvent.Event.Payload.ToByteArray(),
                         ContentType = SalesforceAvroSerializer.SalesforceAvroContentType,
-                        MessageType = _messageType.ToMessageTypeName(),
+                        MessageType = messageTypeName,
                         TopicName = _resource,
                         Offset = replayId
                     };
                     envelope.Headers[SalesforceAvroSerializer.SchemaIdHeader] = schemaId;
+                    // Headers are round-tripped by the durable inbox; Offset is not (see ReplayIdHeader).
+                    envelope.Headers[SalesforceAvroSerializer.ReplayIdHeader] = replayId.ToString();
 
                     await _receiver.ReceivedAsync(this, envelope).ConfigureAwait(false);
                 }
@@ -232,6 +248,36 @@ internal sealed class SalesforceListener : IListener
 
             if (response.PendingNumberRequested <= 0)
                 await transport.RequestMoreAsync(ct).ConfigureAwait(false);
+        }
+    }
+
+    /// <summary>
+    /// Eager schema pre-warm (DECISIONS #17): fetch each mapped event's schema once at startup so the
+    /// cache is warm before any event — and, more importantly, before Wolverine's durability agent replays
+    /// recovered envelopes. Best-effort per entry: a failure logs and falls back to the lazy per-event
+    /// fetch; an auth failure will equally hit the subscribe that follows, where the reconnect/invalidate
+    /// path owns recovery.
+    /// </summary>
+    private async Task PrewarmSchemasAsync(CancellationToken ct)
+    {
+        foreach (var topic in _prewarmTopics)
+        {
+            if (ct.IsCancellationRequested)
+                return;
+
+            try
+            {
+                var info = await _schemaRepository.PrewarmByTopicNameAsync(topic, ct).ConfigureAwait(false);
+                _logger.LogDebug("{Resource}: Pre-warmed schema {SchemaId} for {Topic}.", _resource, info.SchemaId, topic);
+            }
+            catch (OperationCanceledException) when (ct.IsCancellationRequested)
+            {
+                return;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "{Resource}: Schema pre-warm failed for {Topic}; the schema will be fetched lazily on the first event.", _resource, topic);
+            }
         }
     }
 
