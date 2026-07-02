@@ -306,7 +306,7 @@ aren't conformance issues go under "Cleanups / tech-debt".
   duplicating delivery.
 
 ## 3. Transport owns Salesforce token caching + invalidates on auth failure
-- **Date:** 2026-06-24 · **Status:** Accepted · **Commit:** 52a4aa3
+- **Date:** 2026-06-24 · **Status:** Accepted · **Commit:** 9684df9
 - **Context:** Revoked-before-expiry tokens were a recurring production pain; a TTL-only cache (or a
   caching consumer handler) keeps re-handing the dead token on reconnect.
 - **Decision:** `CachingAuthenticationTokenProvider` (singleton) owns caching (default 60 min, override
