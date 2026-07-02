@@ -49,7 +49,10 @@ builder.Services.AddSalesforce(s => builder.Configuration.GetSection("salesforce
 
 // Durability-run harness: shared counters, periodic heartbeat snapshot, and the opt-in timed publisher.
 builder.Services.AddSingleton<RunMetrics>();
-builder.Services.AddHostedService<HeartbeatService>();
+// Heartbeat defaults on; set "heartbeat:enabled" false to silence the 60s snapshot (e.g. a long idle
+// baseline where the per-tick line is just noise). RunMetrics stays registered — handlers depend on it.
+if (builder.Configuration.GetValue("heartbeat:enabled", true))
+    builder.Services.AddHostedService<HeartbeatService>();
 builder.Services.Configure<PublisherSettings>(builder.Configuration.GetSection("publisherSettings"));
 builder.Services.AddHostedService<PublisherWorker>();
 
