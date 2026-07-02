@@ -27,6 +27,83 @@ aren't conformance issues go under "Cleanups / tech-debt".
 
 ---
 
+## 14. Custom channels (multi-type streams) — design holistically with Durable mode + a unified registration surface
+- **Date:** 2026-07-02 · **Status:** Deferred (design item; captured now, build later)
+- **Context:** Salesforce **custom channels** (`/event/<Name>__chn`, created via `PlatformEventChannel` +
+  `PlatformEventChannelMember` Tooling/Metadata API) group **multiple custom platform events** into one stream
+  (custom high-volume PEs + Real-Time Event Monitoring only; standard PEs excluded; one event product per channel).
+  A single subscription therefore delivers **heterogeneous event types**. Type is identified **per event** via its
+  **schema id → `GetSchema` → `schema_json` (event API name)** — the `EventApiName` header is **not** available to
+  Pub/Sub API subscribers (CometD only), so the schema is the only source of the type. This breaks the transport's
+  current **one-`Type`-per-endpoint** assumption: `ListenToSalesforceTopic<T>` binds a single type, the listener
+  stamps that fixed `envelope.MessageType`, and `SalesforceAvroSerializer.ReadFromData(messageType, …)`
+  force-decodes every event into it → mis-decode on a multi-type channel.
+- **Direction (not final; deferred):**
+  1. **Per-event type resolution.** Resolve each event's .NET type from its schema (schema record name = event API
+     name → a registered Type map) and stamp `envelope.MessageType` **per event** in the listener (where the schema
+     is already pre-fetched in the loop). Wolverine then routes by type to the right handler — its native
+     multi-type-per-endpoint model (like Kafka). The **serializer needs no change** (already type-parameterized);
+     the work is in the binding + the listener's resolution step + an unmapped-type policy (skip/dead-letter/warn).
+  2. **Co-design with the parked Durable-mode serializer gap (divergences list "No Durable mode").** They share the
+     same fault line: **schema availability outside the listener pre-fetch.** Type resolution is a *receive-time*
+     concern (schema is pre-fetched; the resolved type persists in `envelope.MessageType`), so recovery routing is
+     fine — but the **decode on Durable restart-recovery still needs the schema by id**, which is exactly the parked
+     gap (candidates A: async serializer w/ fetch-on-miss; B: persist schema JSON in a header; C: durable schema
+     table). Custom channels make the schema-on-recovery path load-bearing for *more* of the flow, so **do not solve
+     Durable's serializer in isolation** — pick a schema strategy that serves single-topic, multi-type channel, and
+     Durable recovery together.
+  3. **Unified registration surface (per user: don't bolt channels on).** Rework the fluent registration
+     holistically so **single-topic (one type), custom channel (many types), and MES** share one coherent model —
+     the single-topic case being the simplest form of the general shape, not a separate API with channels grafted
+     on. Revisit `ListenToSalesforceTopic[<T>]` / `ListenToManagedSubscription[<T>]` as a whole. Open question for
+     the mapping key: explicit `.Route<T>("Api_Name__e")` vs an attribute on the event type
+     (`[SalesforcePlatformEvent("Api_Name__e")]`) vs convention.
+- **Confirm before building:** the exact `schema_json` field that yields the event API name (Avro record `name`
+  vs namespace/fullname) — drives the map key — verified against a real channel schema.
+- **Why deferred:** it's a capability addition entangled with two in-flight design areas (Durable serializer,
+  registration shape); capturing the constraints now prevents a piecemeal serializer/registration redesign later.
+- **Scope:** primarily the **Topic** path (channels subscribe via `Subscribe` with `topic_name=/event/<Name>__chn`)
+  — aligns with #13 (Topic is target). A `ManagedEventSubscription` can also reference a channel (secondary per #13).
+
+## 13. MES has no slot force-release; Topic is the target transport (esp. prod), MES supported but secondary
+- **Date:** 2026-07-02 · **Status:** Accepted
+- **Context:** A MES subscription slot is exclusive per client (*"A managed subscription is unique per client and
+  can't be shared with other clients for the same Salesforce org"*). When Salesforce **does not observe a clean
+  TCP teardown** — a **network partition / half-open socket** (WiFi drop, edge/LB reset) — it keeps the slot
+  "active" until an internal, **undocumented** timeout (**~15 min observed**), so every reconnect returns
+  `sfdc.platform.eventbus.grpc.managed.subscription.already.active` (`ALREADY_EXISTS`) until it expires. The app
+  that *owns* the subscription has no way to reclaim its own slot. Confirmed there is **no force-release**: the
+  proto exposes only `ManagedSubscribe` (no unsubscribe/release/disconnect RPC), and the docs offer only *"there
+  can be a delay before it expires. Try subscribing again later."* The one lifecycle lever — the
+  `ManagedEventSubscription` `state` RUN/STOP field (Tooling/Metadata API) — is **not** a usable fast-release:
+  STOP→RUN carries a *"wait a few minutes"* config-propagation delay, so it's slower and more fragile than just
+  waiting out the slot. Observed live: MES #1 (clean half-close → slot released <15s); run-2 overnight **network**
+  reset (half-open → ~15-min `AlreadyExists` cascade → recovery, no loss); MES #6+#8 **local force-kill → restart**
+  (OS closes the sockets → server sees a clean teardown → **slot released in seconds, NO `AlreadyExists`**, resumed
+  from checkpoint, 1-event dup of the uncommitted tail, no loss). **Refined rule: the ~15-min hold requires the
+  server to NOT observe a clean close (network partition / half-open). A local process crash/SIGKILL closes the
+  sockets, so it recovers in seconds like a graceful stop** — the crash-recovery cost is narrower than first
+  feared (most pod terminations recover fast; only a true network partition incurs the ~15-min gap). The org has
+  independently hit MES quirks in prod and already moved those workloads to Topics.
+- **Decision:** **Topic is the target transport, especially in prod.** Topics use client-side replay (our SQL
+  `IReplayIdRepository`, already built) — no server slot, no exclusivity, no `AlreadyExists` → **instant reconnect
+  on any failure, clean or dirty.** MES remains **supported and tested** but is **secondary**: use it only where
+  the ~15-min unclean-recovery window is tolerable *and* SF-managed replay checkpointing is specifically wanted.
+  Lifecycle management: (a) keep every *voluntary* disconnect clean — the transport already half-closes
+  (`TryCompleteAsync`) on graceful stop and on error handling, which is why clean drops release fast; audit that
+  all stream-abandon paths half-close first while the socket is alive; (b) accept that **hard network loss is
+  irreducible** (can't half-close a dead socket → ~15-min hold, no client remedy).
+- **Why:** No force-release exists and none can be built client-side — SF owns the slot expiry. Given that, the
+  only real lever is transport choice, and Topics eliminate the failure mode entirely at the cost of a
+  client-side replay store we already have. MES's sole advantage (SF manages the checkpoint) isn't worth a
+  15-min recovery cliff for anything latency- or availability-sensitive.
+- **Consequences / options not taken:** Documented so consumers pick transport by recovery tolerance. A
+  **dual-developer-name MES failover** (two slots on one channel, fail over to the un-held slot on `AlreadyExists`)
+  was considered as an escape hatch for "MES + fast recovery" but **not adopted** — 2× config plus server-checkpoint
+  reconciliation (bounded redelivery) is complexity only justified if Topics genuinely can't be used. Two smaller
+  follow-ups remain open: an `AlreadyExists`-aware longer backoff (log-noise reduction, doesn't speed recovery),
+  and the observability watchdog (surface a stuck MES as an alertable Error instead of Warning noise).
+
 ## 12. MES re-affirms its replay commit on idle keep-alives (server 1800s no-commit deadline)
 - **Date:** 2026-07-02 · **Status:** Accepted
 - **Context:** The ~4.5h idle baseline (`test-results/z_long-run-1.txt`, topic + MES both on, publisher off)
@@ -54,8 +131,8 @@ aren't conformance issues go under "Cleanups / tech-debt".
 - **Consequences:** Fixes the 30-min teardown; the paired `AlreadyExists` disappears with it. Unit tests
   46 (was 43). **Residual (not addressed, benign):** on any *other* server-initiated MES close, the first
   reconnect (0s backoff) can still race the slot teardown for a single self-healing `AlreadyExists` (same as
-  DECISIONS-observed in MES #1) — acceptable, rides the backoff. **Not yet re-verified live** — the next idle
-  baseline should show steady ~2-min MES commits and zero `DeadlineExceeded`/`AlreadyExists`.
+  DECISIONS-observed in MES #1) — acceptable, rides the backoff. **Verified live (2026-07-02):** rerun idle
+  baseline passed the 30-min mark with steady ~2-min MES keep-alive commits and zero `DeadlineExceeded`.
 
 ## 11. MES graceful-shutdown commit: flush before cancel + serialize stream writes
 - **Date:** 2026-07-01 · **Status:** Accepted
@@ -314,7 +391,10 @@ contracts + Kafka/ASB. The port is largely conformant; findings below._
     fast path (hot path keeps auth-in-loop) + async schema fetch on miss (recovery); (B) persist the
     schema JSON in an envelope header (self-contained, storage bloat per event); (C) a durable
     schema-by-id cache/table (compact, more infra). Leaning A. **Do not implement until live testing
-    informs the choice** (per user, 2026-06-30).
+    informs the choice** (per user, 2026-06-30). **Co-design with #14 (custom channels):** both depend on
+    schema-by-id availability outside the listener pre-fetch, so pick one schema strategy that serves
+    single-topic decode, multi-type channel type-resolution, and Durable recovery — don't solve this in
+    isolation.
 - **No sender (listen-only)** — `SalesforceEndpoint.CreateSender` throws. Confirmed **safe**:
   `AutoStartSendingAgent()` is false for a pure listener (no `Subscriptions`), so Wolverine never calls
   `StartSending`/`CreateSender`; only reachable if a consumer publishes to an `sfpubsub://` URI (throws
