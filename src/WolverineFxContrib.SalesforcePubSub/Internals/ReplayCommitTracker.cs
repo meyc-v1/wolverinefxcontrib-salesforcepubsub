@@ -25,6 +25,12 @@ internal sealed class ReplayCommitTracker
     private readonly Func<long, bool, Task> _commit;
     private readonly int _commitEvery;
 
+    // MES closes a managed subscription that receives no CommitReplayRequest within its server-side deadline
+    // (1800s). During idle the watermark doesn't advance, so nothing would be committed and the subscription
+    // is torn down every ~30 min. When true (MES), re-affirm the last committed position on each idle
+    // keep-alive to refresh that deadline. Topic commits client-side and has no such deadline → false.
+    private readonly bool _refreshOnKeepAlive;
+
     private readonly object _lock = new();
     private readonly SemaphoreSlim _writeGate = new(1, 1);
     private readonly SortedSet<long> _inflight = new();
@@ -34,10 +40,11 @@ internal sealed class ReplayCommitTracker
     private bool _seen;
     private int _sinceCommit;
 
-    public ReplayCommitTracker(Func<long, bool, Task> commit, int commitEvery)
+    public ReplayCommitTracker(Func<long, bool, Task> commit, int commitEvery, bool commitKeepAliveWhenIdle = false)
     {
         _commit = commit ?? throw new ArgumentNullException(nameof(commit));
         _commitEvery = commitEvery < 1 ? 1 : commitEvery;
+        _refreshOnKeepAlive = commitKeepAliveWhenIdle;
     }
 
     /// <summary>Marks an event in flight (received, not yet completed). Called before dispatch.</summary>
@@ -73,6 +80,13 @@ internal sealed class ReplayCommitTracker
         {
             Observe(replayId);
             position = TryTakeCommittable(force: true); // keep-alives are sparse — commit promptly
+
+            // Nothing new to commit, but MES needs a periodic CommitReplayRequest to keep the managed
+            // subscription alive (see _refreshOnKeepAlive). Re-affirm the last committed position — a no-op
+            // for the watermark (never regresses, never advances past an in-flight event) that just resets
+            // the server's deadline. Only once something has been committed (_lastCommitted >= 0).
+            if (position is null && _refreshOnKeepAlive && _lastCommitted >= 0)
+                position = _lastCommitted;
         }
 
         return position is { } p ? CommitAsync(p, isKeepAlive: true) : Task.CompletedTask;

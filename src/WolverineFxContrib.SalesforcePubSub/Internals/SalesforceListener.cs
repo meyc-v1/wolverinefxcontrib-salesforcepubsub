@@ -25,6 +25,7 @@ namespace Wolverine.SalesforcePubSub.Internals;
 internal sealed class SalesforceListener : IListener
 {
     private readonly string _resource;
+    private readonly bool _resumesFromWatermark;
     private readonly Func<long?, ISubscriptionTransport> _transportFactory;
     private readonly IReceiver _receiver;
     private readonly Type _messageType;
@@ -44,6 +45,7 @@ internal sealed class SalesforceListener : IListener
     public SalesforceListener(
         Uri address,
         string resource,
+        bool resumesFromWatermark,
         Func<long?, ISubscriptionTransport> transportFactory,
         IReceiver receiver,
         Type messageType,
@@ -56,6 +58,7 @@ internal sealed class SalesforceListener : IListener
     {
         Address = address;
         _resource = resource;
+        _resumesFromWatermark = resumesFromWatermark;
         _transportFactory = transportFactory;
         _receiver = receiver;
         _messageType = messageType;
@@ -64,7 +67,10 @@ internal sealed class SalesforceListener : IListener
         _backoffStrategy = backoffStrategy;
         _tokenProvider = tokenProvider;
         _logger = logger;
-        _commits = new ReplayCommitTracker(CommitToCurrentTransportAsync, settings.FetchCount);
+        // MES (which resumes server-side, not from the watermark) must re-commit on idle keep-alives to keep
+        // its managed subscription within Salesforce's 1800s no-commit deadline; topic has no such deadline.
+        _commits = new ReplayCommitTracker(CommitToCurrentTransportAsync, settings.FetchCount,
+            commitKeepAliveWhenIdle: !resumesFromWatermark);
         _cts = CancellationTokenSource.CreateLinkedTokenSource(runtimeCancellation);
         _runner = Task.Run(() => RunAsync(_cts.Token));
     }
@@ -141,7 +147,14 @@ internal sealed class SalesforceListener : IListener
             // watermark, so we resume after what was handled rather than the last durably-committed position.
             var resumeFrom = _commits.TryGetResumePosition();
             if (resumeFrom is { } r)
-                _logger.LogDebug("Reconnecting listener for {Resource}; resuming after handled replayId {ReplayId} (in-memory).", _resource, r);
+            {
+                // Topic feeds the watermark back into the fetch (see #8); MES ignores it and resumes from the
+                // server-side commit checkpoint — so don't claim an in-memory resume it doesn't perform.
+                if (_resumesFromWatermark)
+                    _logger.LogDebug("Reconnecting listener for {Resource}; resuming after handled replayId {ReplayId} (in-memory).", _resource, r);
+                else
+                    _logger.LogDebug("Reconnecting listener for {Resource}; resuming from the server-side commit checkpoint (in-memory handled watermark {ReplayId} is not used for MES).", _resource, r);
+            }
 
             using var transport = _transportFactory(resumeFrom);
             _currentTransport = transport;

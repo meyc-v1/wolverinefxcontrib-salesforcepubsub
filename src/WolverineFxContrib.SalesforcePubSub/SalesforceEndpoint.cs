@@ -84,10 +84,14 @@ public sealed class SalesforceEndpoint : Endpoint
         // listener pre-fetches each schema (async, in its loop) before handing the envelope off.
         RegisterSerializer(new SalesforceAvroSerializer(services.GetRequiredService<CachingSchemaRepository>()));
 
+        // Topic honors the in-memory handled watermark on reconnect (#8); MES resumes from the server-side
+        // checkpoint. The flag only governs reconnect-log accuracy — the MES factory already discards resumeFrom.
+        var resumesFromWatermark = Kind == SalesforceResourceKind.Topic;
+
         // DI fills the listener's service params (schema repository, backoff, token provider, logger); we
         // supply the runtime-contextual ones, including the per-endpoint effective settings.
         var listener = ActivatorUtilities.CreateInstance<SalesforceListener>(
-            services, Uri, Resource, factory, receiver, MessageType, effective, runtime.Cancellation);
+            services, Uri, Resource, resumesFromWatermark, factory, receiver, MessageType, effective, runtime.Cancellation);
 
         return ValueTask.FromResult((IListener)listener);
     }

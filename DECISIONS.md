@@ -27,6 +27,36 @@ aren't conformance issues go under "Cleanups / tech-debt".
 
 ---
 
+## 12. MES re-affirms its replay commit on idle keep-alives (server 1800s no-commit deadline)
+- **Date:** 2026-07-02 · **Status:** Accepted
+- **Context:** The ~4.5h idle baseline (`test-results/z_long-run-1.txt`, topic + MES both on, publisher off)
+  surfaced a recurring MES-only cycle every ~30 min: `RpcException DeadlineExceeded: "No CommitReplayRequests
+  sent in the last 1800 seconds. Closing managed subscription."` → the immediate 0-backoff reconnect on the
+  first error raced Salesforce's slot teardown → `AlreadyExists` → 15s backoff → reconnect → repeat. Root
+  cause (confirmed exactly by the log): the last MES commit was 15:32:41, first `DeadlineExceeded` at 16:02:41
+  — precisely 1800s later. Replay commits are **watermark-driven** (`ReplayCommitTracker` commits only when the
+  safe position *advances* past `_lastCommitted`). With no traffic the position never advances, so **no
+  `CommitReplayRequest` is ever sent during idle**, and Salesforce closes a managed subscription that receives
+  none within 1800s. Topic is immune (client-side commit, no server deadline). Real production impact: any
+  idle or below-`commitEvery` low-volume MES subscription would churn (tear down + rebuild) every 30 min.
+- **Decision:** MES re-affirms the last committed position on **each idle keep-alive**. `ReplayCommitTracker`
+  gained `commitKeepAliveWhenIdle` (MES `true`, topic `false`, wired in `SalesforceListener` as
+  `!resumesFromWatermark`); when a keep-alive produces no advance, it re-sends `_lastCommitted` (once something
+  has been committed) to reset the server's deadline. MES keep-alives arrive ~every 2 min, comfortably inside
+  1800s.
+- **Why:** The re-affirm is safe — it re-sends a position the server already acknowledged, so it never
+  regresses and never advances past an in-flight event (verified by test: with an event in flight, the
+  keep-alive re-affirms the floor, not the tip). It requires no clock (keep-alive arrival is the natural
+  cadence) and is scoped off for topic (which would otherwise re-write the repository pointlessly). Chose this
+  over a dedicated commit-keepalive timer in the MES transport, which would have to independently commit the
+  tip and could race past in-flight events (unsafe) — the watermark tracker is the only component that knows
+  the safe position.
+- **Consequences:** Fixes the 30-min teardown; the paired `AlreadyExists` disappears with it. Unit tests
+  46 (was 43). **Residual (not addressed, benign):** on any *other* server-initiated MES close, the first
+  reconnect (0s backoff) can still race the slot teardown for a single self-healing `AlreadyExists` (same as
+  DECISIONS-observed in MES #1) — acceptable, rides the backoff. **Not yet re-verified live** — the next idle
+  baseline should show steady ~2-min MES commits and zero `DeadlineExceeded`/`AlreadyExists`.
+
 ## 11. MES graceful-shutdown commit: flush before cancel + serialize stream writes
 - **Date:** 2026-07-01 · **Status:** Accepted
 - **Context:** The MES throwing-handler test showed the graceful-shutdown flush failing with

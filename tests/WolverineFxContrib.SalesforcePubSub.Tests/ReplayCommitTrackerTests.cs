@@ -126,4 +126,52 @@ public class ReplayCommitTrackerTests
         Assert.Equal(10, rec.Last);
         Assert.DoesNotContain(rec.Commits, c => c.ReplayId < 10);
     }
+
+    [Fact]
+    public async Task Mes_reaffirms_committed_position_on_each_idle_keepalive()
+    {
+        // MES must send a CommitReplayRequest within Salesforce's 1800s deadline or the subscription is
+        // torn down. During idle the position doesn't advance, so re-affirm it on every keep-alive.
+        var rec = new Recorder();
+        var t = new ReplayCommitTracker(rec.Commit, commitEvery: 1, commitKeepAliveWhenIdle: true);
+
+        await t.ObserveKeepAliveAsync(50); // establishes + commits 50
+        await t.ObserveKeepAliveAsync(50); // idle, unchanged — re-affirm to refresh the server deadline
+        await t.ObserveKeepAliveAsync(50);
+
+        Assert.Equal(3, rec.Commits.Count);
+        Assert.All(rec.Commits, c => Assert.Equal(50, c.ReplayId));
+        Assert.All(rec.Commits, c => Assert.True(c.KeepAlive));
+    }
+
+    [Fact]
+    public async Task Topic_does_not_recommit_an_unchanged_idle_keepalive()
+    {
+        // Topic commits client-side and has no server deadline, so an unchanged idle keep-alive is a no-op.
+        var rec = new Recorder();
+        var t = new ReplayCommitTracker(rec.Commit, commitEvery: 1); // commitKeepAliveWhenIdle defaults false
+
+        await t.ObserveKeepAliveAsync(50);
+        await t.ObserveKeepAliveAsync(50);
+        await t.ObserveKeepAliveAsync(50);
+
+        Assert.Single(rec.Commits);
+        Assert.Equal(50, rec.Last);
+    }
+
+    [Fact]
+    public async Task Mes_reaffirm_never_commits_past_an_in_flight_event()
+    {
+        // The keep-alive re-affirm re-sends the last committed position — it must never jump to the tip
+        // while an earlier event is still in flight.
+        var rec = new Recorder();
+        var t = new ReplayCommitTracker(rec.Commit, commitEvery: 1, commitKeepAliveWhenIdle: true);
+
+        await t.ObserveKeepAliveAsync(10); // commit 10
+        t.Track(11);                       // 11 now in flight
+        await t.ObserveKeepAliveAsync(20); // tip is 20, but 11 in flight → re-affirm 10, not 20
+
+        Assert.DoesNotContain(rec.Commits, c => c.ReplayId >= 11);
+        Assert.Equal(10, rec.Last);
+    }
 }
