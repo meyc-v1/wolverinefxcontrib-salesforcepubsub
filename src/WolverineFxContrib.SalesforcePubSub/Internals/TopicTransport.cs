@@ -182,15 +182,15 @@ internal sealed partial class TopicTransport : ISubscriptionTransport
         LogFinished("WriteToStream", _topicName);
     }
 
-    [LoggerMessage(EventId = 1, Level = LogLevel.Debug, Message = "gRPC stream cancelled for {Resource}")]
+    [LoggerMessage(EventId = 1, Level = LogLevel.Debug, Message = "{Resource}: gRPC stream cancelled.")]
     private partial void LogGrpcStreamCancelled(Exception ex, string resource);
 
-    [LoggerMessage(EventId = 2, Level = LogLevel.Debug, Message = "Sending FetchRequest for topic: {Topic}, FetchCount: {FetchCount}, ReplayId: {ReplayId}")]
-    private partial void LogSendingFetchRequest(string topic, int fetchCount, long replayId);
+    [LoggerMessage(EventId = 2, Level = LogLevel.Debug, Message = "{Resource}: Sending FetchRequest, FetchCount: {FetchCount}, ReplayId: {ReplayId}")]
+    private partial void LogSendingFetchRequest(string resource, int fetchCount, long replayId);
 
-    [LoggerMessage(EventId = 3, Level = LogLevel.Trace, Message = "Started {Operation} for {Resource}")]
+    [LoggerMessage(EventId = 3, Level = LogLevel.Trace, Message = "{Resource}: Started {Operation}")]
     private partial void LogStarted(string operation, string resource);
 
-    [LoggerMessage(EventId = 4, Level = LogLevel.Trace, Message = "Finished {Operation} for {Resource}")]
+    [LoggerMessage(EventId = 4, Level = LogLevel.Trace, Message = "{Resource}: Finished {Operation}")]
     private partial void LogFinished(string operation, string resource);
 }

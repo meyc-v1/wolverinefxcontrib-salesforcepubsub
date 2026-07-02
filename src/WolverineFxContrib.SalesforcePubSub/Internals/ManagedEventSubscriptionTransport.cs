@@ -177,21 +177,21 @@ internal sealed partial class ManagedEventSubscriptionTransport : ISubscriptionT
         }
     }
 
-    [LoggerMessage(EventId = 1, Level = LogLevel.Debug, Message = "gRPC stream cancelled for {Resource}")]
+    [LoggerMessage(EventId = 1, Level = LogLevel.Debug, Message = "{Resource}: gRPC stream cancelled.")]
     private partial void LogGrpcStreamCancelled(Exception ex, string resource);
 
-    [LoggerMessage(EventId = 2, Level = LogLevel.Trace, Message = "Commit acknowledged for {Resource}, ReplayId: {ReplayId}")]
+    [LoggerMessage(EventId = 2, Level = LogLevel.Trace, Message = "{Resource}: Commit acknowledged, ReplayId: {ReplayId}")]
     private partial void LogCommitAcknowledged(string resource, long replayId);
 
-    [LoggerMessage(EventId = 3, Level = LogLevel.Trace, Message = "Committing ReplayId: {ReplayId} for {Resource}")]
+    [LoggerMessage(EventId = 3, Level = LogLevel.Trace, Message = "{Resource}: Committing ReplayId: {ReplayId}")]
     private partial void LogCommittingReplayId(long replayId, string resource);
 
-    [LoggerMessage(EventId = 4, Level = LogLevel.Debug, Message = "Sending ManagedFetchRequest for {Resource}, FetchCount: {FetchCount}")]
+    [LoggerMessage(EventId = 4, Level = LogLevel.Debug, Message = "{Resource}: Sending ManagedFetchRequest, FetchCount: {FetchCount}")]
     private partial void LogSendingManagedFetchRequest(string resource, int fetchCount);
 
-    [LoggerMessage(EventId = 5, Level = LogLevel.Trace, Message = "Started {Operation} for {Resource}")]
+    [LoggerMessage(EventId = 5, Level = LogLevel.Trace, Message = "{Resource}: Started {Operation}")]
     private partial void LogStarted(string operation, string resource);
 
-    [LoggerMessage(EventId = 6, Level = LogLevel.Trace, Message = "Finished {Operation} for {Resource}")]
+    [LoggerMessage(EventId = 6, Level = LogLevel.Trace, Message = "{Resource}: Finished {Operation}")]
     private partial void LogFinished(string operation, string resource);
 }

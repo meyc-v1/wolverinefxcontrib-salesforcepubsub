@@ -24,8 +24,8 @@ internal sealed class DefaultBackoffStrategy : IBackoffStrategy
         if (duration <= TimeSpan.Zero)
             return;
 
-        _logger.LogDebug("Backing off for {Duration} for resource: {Resource}", duration, resource);
+        _logger.LogDebug("{Resource}: Backing off for {Duration}", resource, duration);
         await Task.Delay(duration, token).ConfigureAwait(false);
-        _logger.LogDebug("Completed backoff of {Duration} for resource: {Resource}", duration, resource);
+        _logger.LogDebug("{Resource}: Completed backoff of {Duration}", resource, duration);
     }
 }

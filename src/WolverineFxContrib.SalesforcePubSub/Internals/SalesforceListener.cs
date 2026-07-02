@@ -92,7 +92,7 @@ internal sealed class SalesforceListener : IListener
     /// </summary>
     public ValueTask DeferAsync(Envelope envelope)
     {
-        _logger.LogDebug("Requeue (defer) for {Resource} replayId {ReplayId}, attempt {Attempts}; re-injecting for in-memory retry.",
+        _logger.LogDebug("{Resource}: Requeue (defer) for replayId {ReplayId}, attempt {Attempts}; re-injecting for in-memory retry.",
             _resource, envelope.Offset, envelope.Attempts);
         return _receiver.ReceivedAsync(this, envelope);
     }
@@ -111,7 +111,7 @@ internal sealed class SalesforceListener : IListener
         }
         catch (Exception ex)
         {
-            _logger.LogDebug(ex, "Final replay commit failed during stop for {Resource}", _resource);
+            _logger.LogDebug(ex, "{Resource}: Final replay commit failed during stop.", _resource);
         }
 
         if (!_cts.IsCancellationRequested)
@@ -126,7 +126,7 @@ internal sealed class SalesforceListener : IListener
         }
         catch (Exception ex)
         {
-            _logger.LogDebug(ex, "Listener runner faulted during stop for {Resource}", _resource);
+            _logger.LogDebug(ex, "{Resource}: Listener runner faulted during stop.", _resource);
         }
     }
 
@@ -138,7 +138,7 @@ internal sealed class SalesforceListener : IListener
 
     private async Task RunAsync(CancellationToken ct)
     {
-        _logger.LogInformation("Starting Salesforce listener for resource: {Resource}", _resource);
+        _logger.LogInformation("{Resource}: Starting Salesforce listener.", _resource);
 
         // Observability sidecars (DECISIONS #15): a periodic heartbeat plus a silent-cold watchdog that
         // surfaces a stream receiving nothing at an alertable level. Both end on shutdown cancellation.
@@ -159,9 +159,9 @@ internal sealed class SalesforceListener : IListener
                 // Topic feeds the watermark back into the fetch (see #8); MES ignores it and resumes from the
                 // server-side commit checkpoint — so don't claim an in-memory resume it doesn't perform.
                 if (_resumesFromWatermark)
-                    _logger.LogDebug("Reconnecting listener for {Resource}; resuming after handled replayId {ReplayId} (in-memory).", _resource, r);
+                    _logger.LogDebug("{Resource}: Reconnecting listener; resuming after handled replayId {ReplayId} (in-memory).", _resource, r);
                 else
-                    _logger.LogDebug("Reconnecting listener for {Resource}; resuming from the server-side commit checkpoint (in-memory handled watermark {ReplayId} is not used for MES).", _resource, r);
+                    _logger.LogDebug("{Resource}: Reconnecting listener; resuming from the server-side commit checkpoint (in-memory handled watermark {ReplayId} is not used for MES).", _resource, r);
             }
 
             using var transport = _transportFactory(resumeFrom);
@@ -184,7 +184,7 @@ internal sealed class SalesforceListener : IListener
         await heartbeat.ConfigureAwait(false);
         await watchdog.ConfigureAwait(false);
 
-        _logger.LogInformation("Salesforce listener stopped for resource: {Resource}", _resource);
+        _logger.LogInformation("{Resource}: Salesforce listener stopped.", _resource);
     }
 
     private async Task ProcessStreamAsync(ISubscriptionTransport transport, CancellationToken ct)
@@ -244,7 +244,7 @@ internal sealed class SalesforceListener : IListener
         if (_diagnostics.RecordSuccess(eventCount, DateTimeOffset.UtcNow) is { } recovery)
         {
             _logger.LogInformation(
-                "Stream recovered for {Resource} after {ConsecutiveErrors} consecutive error(s); ~{Downtime} since last successful response.",
+                "{Resource}: Stream recovered after {ConsecutiveErrors} consecutive error(s); ~{Downtime} since last successful response.",
                 _resource, recovery.ConsecutiveErrors, recovery.Downtime);
         }
     }
@@ -266,7 +266,7 @@ internal sealed class SalesforceListener : IListener
 
                 var s = _diagnostics.Snapshot();
                 _logger.Log(_settings.HeartbeatLogLevel,
-                    "Heartbeat for resource: {Resource}, Running since {Start}, Responses: {Responses}, Events: {Events}, Errors: {Errors}, Reconnects: {Reconnects}, LastSuccess: {LastSuccess}, LastError: {LastError}",
+                    "{Resource}: Heartbeat — Running since {Start}, Responses: {Responses}, Events: {Events}, Errors: {Errors}, Reconnects: {Reconnects}, LastSuccess: {LastSuccess}, LastError: {LastError}",
                     _resource, s.StartedOn, s.Responses, s.Events, s.Errors, s.Reconnects, s.LastSuccess, s.LastError);
             }
             catch (OperationCanceledException)
@@ -275,7 +275,7 @@ internal sealed class SalesforceListener : IListener
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Heartbeat failed for resource: {Resource}", _resource);
+                _logger.LogError(ex, "{Resource}: Heartbeat failed.", _resource);
             }
         }
     }
@@ -300,7 +300,7 @@ internal sealed class SalesforceListener : IListener
                 if (_diagnostics.CheckStale(_settings.StaleStreamThreshold, DateTimeOffset.UtcNow, out var sinceLastSuccess))
                 {
                     _logger.Log(_settings.StaleStreamLogLevel,
-                        "Resource: {Resource} has not received a response in {Duration}",
+                        "{Resource}: Has not received a response in {Duration}",
                         _resource, sinceLastSuccess);
                 }
             }
@@ -310,7 +310,7 @@ internal sealed class SalesforceListener : IListener
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Stale-stream watchdog failed for resource: {Resource}", _resource);
+                _logger.LogError(ex, "{Resource}: Stale-stream watchdog failed.", _resource);
             }
         }
     }
@@ -328,13 +328,13 @@ internal sealed class SalesforceListener : IListener
         try
         {
             await transport.CommitAsync(replayId, isKeepAlive, CancellationToken.None).ConfigureAwait(false);
-            _logger.LogDebug("Committed replay position {ReplayId} for {Resource} (keepAlive: {IsKeepAlive}).",
-                replayId, _resource, isKeepAlive);
+            _logger.LogDebug("{Resource}: Committed replay position {ReplayId} (keepAlive: {IsKeepAlive}).",
+                _resource, replayId, isKeepAlive);
         }
         catch (Exception ex)
         {
             // The position is re-committed on the next event, or re-derived server-side on reconnect.
-            _logger.LogDebug(ex, "Replay commit failed for {Resource} (replayId {ReplayId}); will retry on next commit.", _resource, replayId);
+            _logger.LogDebug(ex, "{Resource}: Replay commit failed (replayId {ReplayId}); will retry on next commit.", _resource, replayId);
         }
     }
 
@@ -360,7 +360,7 @@ internal sealed class SalesforceListener : IListener
         // reconnect below fetches a fresh one — gated on the auth status codes so ordinary reconnects keep it.
         if (ex is RpcException { StatusCode: StatusCode.Unauthenticated or StatusCode.PermissionDenied })
         {
-            _logger.LogInformation("Authentication failure for {Resource}; invalidating cached token before reconnect.", _resource);
+            _logger.LogInformation("{Resource}: Authentication failure; invalidating cached token before reconnect.", _resource);
             _tokenProvider.Invalidate();
         }
 
@@ -370,7 +370,7 @@ internal sealed class SalesforceListener : IListener
         }
         catch (Exception inner)
         {
-            _logger.LogError(inner, "Transport error handling failed for resource: {Resource}", _resource);
+            _logger.LogError(inner, "{Resource}: Transport error handling failed.", _resource);
         }
 
         // Past the stale threshold this is no longer a routine reconnect — escalate to the alertable level
@@ -380,8 +380,8 @@ internal sealed class SalesforceListener : IListener
             : LogLevel.Warning;
 
         _logger.Log(level, ex is TimeoutException ? null : ex,
-            "{ExceptionType} in resource: {Resource}, ConsecutiveErrors: {ConsecutiveErrors}, SinceLastSuccess: {SinceLastSuccess}",
-            ex.GetType().Name, _resource, consecutiveErrors, sinceLastSuccess);
+            "{Resource}: {ExceptionType}, ConsecutiveErrors: {ConsecutiveErrors}, SinceLastSuccess: {SinceLastSuccess}",
+            _resource, ex.GetType().Name, consecutiveErrors, sinceLastSuccess);
 
         try
         {
@@ -417,7 +417,7 @@ internal sealed class SalesforceListener : IListener
                 if (ct.IsCancellationRequested)
                 {
                     try { await moveNext.ConfigureAwait(false); }
-                    catch (Exception ex) { _logger.LogTrace(ex, "Swallowed exception draining MoveNext on shutdown for {Resource}", _resource); }
+                    catch (Exception ex) { _logger.LogTrace(ex, "{Resource}: Swallowed exception draining MoveNext on shutdown.", _resource); }
                     yield break;
                 }
 
@@ -425,7 +425,7 @@ internal sealed class SalesforceListener : IListener
                 {
                     linkedCts.Cancel();
                     try { await moveNext.ConfigureAwait(false); }
-                    catch (Exception ex) { _logger.LogTrace(ex, "Swallowed exception draining MoveNext on timeout for {Resource}", _resource); }
+                    catch (Exception ex) { _logger.LogTrace(ex, "{Resource}: Swallowed exception draining MoveNext on timeout.", _resource); }
                     throw new TimeoutException($"No response received within {idleTimeout}.");
                 }
 
@@ -444,7 +444,7 @@ internal sealed class SalesforceListener : IListener
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, "Stream enumerator disposal failed for {Resource}, possible resource leak", _resource);
+                _logger.LogWarning(ex, "{Resource}: Stream enumerator disposal failed, possible resource leak.", _resource);
             }
         }
     }
