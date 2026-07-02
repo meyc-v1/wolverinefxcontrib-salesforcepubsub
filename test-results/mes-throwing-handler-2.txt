@@ -1,0 +1,47 @@
+C:/src/wolverine-salesforce-pubsub/host/WolverineFxContrib.SalesforcePubSub.TestHost/bin/Debug/net10.0/WolverineFxContrib.SalesforcePubSub.TestHost.exe
+14:27:11 info: Wolverine.Runtime.WolverineRuntime[0] Exporting Open Telemetry metrics from Wolverine with name Wolverine:WolverineFxContrib.SalesforcePubSub.TestHost, version 6.12.0.0
+14:27:11 info: Wolverine.Runtime.WolverineRuntime[0] Starting Wolverine messaging for application assembly WolverineFxContrib.SalesforcePubSub.TestHost, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null
+14:27:11 info: Wolverine.Runtime.WolverineRuntime[0] The Wolverine code generation mode is Dynamic. This is suitable for development, but you may want to opt into other options for production usage to reduce start up time and resource utilization.
+14:27:11 info: Wolverine.Runtime.WolverineRuntime[0] See https://wolverine.netlify.app/guide/codegen.html for more information
+14:27:11 info: WolverineFxContrib.SalesforcePubSub.TestHost.PublisherWorker[0] Publisher started: every 00:00:15, events [CM_Test_Event_One__e].
+14:27:11 info: Wolverine.Configuration.HandlerDiscovery[0] Searching assembly Wolverine.RuntimeCompilation, Version=6.12.0.0, Culture=neutral, PublicKeyToken=null for Wolverine message handlers
+14:27:11 info: Wolverine.Configuration.HandlerDiscovery[0] Searching assembly WolverineFxContrib.SalesforcePubSub.TestHost, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null for Wolverine message handlers
+14:27:11 info: Wolverine.Runtime.WolverineRuntime[0] Wolverine assigned node id for envelope persistence is 1439720179
+14:27:11 info: Wolverine.Transports.ListeningAgent[0] Started message listening at stub://replies/
+14:27:11 info: Wolverine.Transports.ListeningAgent[0] Started message listening at sfpubsub://mes/CM_Test_Event_One
+14:27:11 info: Wolverine.SalesforcePubSub.Internals.SalesforceListener[0] Starting Salesforce listener for resource: CM_Test_Event_One
+14:27:11 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started OpenStream for CM_Test_Event_One
+14:27:11 info: Microsoft.Hosting.Lifetime[0] Application started. Press Ctrl+C to shut down.
+14:27:11 info: Microsoft.Hosting.Lifetime[0] Hosting environment: Development
+14:27:11 info: Microsoft.Hosting.Lifetime[0] Content root path: C:\src\wolverine-salesforce-pubsub\host\WolverineFxContrib.SalesforcePubSub.TestHost
+14:27:11 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished OpenStream for CM_Test_Event_One
+14:27:11 dbug: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Sending ManagedFetchRequest for CM_Test_Event_One, FetchCount: 10
+14:27:11 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started WriteToStream for CM_Test_Event_One
+14:27:12 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished WriteToStream for CM_Test_Event_One
+14:27:12 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+14:27:27 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+14:27:27 info: WolverineFxContrib.SalesforcePubSub.TestHost.PublisherWorker[0] Published CM_Test_Event_One__e: msg-1-4a91e865ffe44623bbda02432c8c4c8d
+14:27:27 dbug: Wolverine.Runtime.WolverineRuntime[101] (null): Received TestEventOne#2e2839a3-9a2c-49dd-9664-14648a0179c5 at sfpubsub://mes/CM_Test_Event_One from 
+14:27:27 dbug: Wolverine.Runtime.Handlers.HandlerGraph[0] Starting to compile chain TestEventOne
+14:27:29 dbug: Wolverine.Runtime.Handlers.HandlerGraph[0] Finished building the chain TestEventOne
+14:27:29 dbug: WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventOne[102] (null): Started processing WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventOne#2e2839a3-9a2c-49dd-9664-14648a0179c5
+14:27:29 fail: WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventOne[105] Failed to process message WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventOne#2e2839a3-9a2c-49dd-9664-14648a0179c5 from sfpubsub://mes/CM_Test_Event_One System.InvalidOperationException: see what happens when I through by default    at WolverineFxContrib.SalesforcePubSub.TestHost.Handlers.TestEventOneHandler.Handle(TestEventOne message, RunMetrics metrics, ILogger`1 logger) in C:\src\wolverine-salesforce-pubsub\host\WolverineFxContrib.SalesforcePubSub.TestHost\Handlers\TestEventOneHandler.cs:line 11    at Internal.Generated.WolverineHandlers.TestEventOneHandler1696183563.HandleAsync(MessageContext context, CancellationToken cancellation)    at Wolverine.Runtime.Handlers.Executor.ExecuteAsync(MessageContext context, CancellationToken cancellation) in /home/runner/work/wolverine/wolverine/src/Wolverine/Runtime/Handlers/Executor.cs:line 232
+14:27:29 dbug: WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventOne[103] (null): Finished processing WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventOne#2e2839a3-9a2c-49dd-9664-14648a0179c5, executed in 45 ms
+14:27:29 fail: Wolverine.Runtime.WolverineRuntime[108] Envelope Envelope #2e2839a3-9a2c-49dd-9664-14648a0179c5 (WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventOne) to sfpubsub://mes/CM_Test_Event_One was moved to the error queue System.InvalidOperationException: see what happens when I through by default    at WolverineFxContrib.SalesforcePubSub.TestHost.Handlers.TestEventOneHandler.Handle(TestEventOne message, RunMetrics metrics, ILogger`1 logger) in C:\src\wolverine-salesforce-pubsub\host\WolverineFxContrib.SalesforcePubSub.TestHost\Handlers\TestEventOneHandler.cs:line 11    at Internal.Generated.WolverineHandlers.TestEventOneHandler1696183563.HandleAsync(MessageContext context, CancellationToken cancellation)    at Wolverine.Runtime.Handlers.Executor.ExecuteAsync(MessageContext context, CancellationToken cancellation) in /home/runner/work/wolverine/wolverine/src/Wolverine/Runtime/Handlers/Executor.cs:line 232
+14:27:29 dbug: Wolverine.Runtime.WorkerQueues.InlineReceiver[202] Received message from sfpubsub://mes/CM_Test_Event_One
+14:27:29 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+14:28:11 info: WolverineFxContrib.SalesforcePubSub.TestHost.HeartbeatService[0] [heartbeat] published: [CM_Test_Event_One__e=1] | handled: [TestEventOne=1 (lastReplayId 3503813)]
+14:28:14 info: Wolverine.Runtime.WolverineRuntime[0] Application stopping signal received
+14:28:14 info: Microsoft.Hosting.Lifetime[0] Application is shutting down...
+14:28:14 info: Wolverine.Transports.ListeningAgent[0] Stopped message listener at stub://replies/
+14:28:14 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Committing ReplayId: 3503813 for CM_Test_Event_One
+14:28:14 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started CommitReplayId for CM_Test_Event_One
+14:28:14 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished CommitReplayId for CM_Test_Event_One
+14:28:14 dbug: Wolverine.SalesforcePubSub.Internals.SalesforceListener[0] Committed replay position 3503813 for CM_Test_Event_One (keepAlive: False).
+14:28:14 dbug: Wolverine.SalesforcePubSub.Internals.SalesforceListener[1] gRPC stream cancelled for CM_Test_Event_One Grpc.Core.RpcException: Status(StatusCode="Cancelled", Detail="Call canceled by the client.", DebugException="System.OperationCanceledException: The operation was canceled.")  ---> System.OperationCanceledException: The operation was canceled.    --- End of inner exception stack trace ---    at Grpc.Net.Client.Internal.HttpContentClientStreamReader`2.MoveNextCore(CancellationToken cancellationToken)    at Wolverine.SalesforcePubSub.Internals.ManagedEventSubscriptionTransport.ReadAsync(CancellationToken ct)+MoveNext() in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\ManagedEventSubscriptionTransport.cs:line 55
+14:28:14 info: Wolverine.SalesforcePubSub.Internals.SalesforceListener[0] Salesforce listener stopped for resource: CM_Test_Event_One
+14:28:14 info: Wolverine.Transports.ListeningAgent[0] Stopped message listener at sfpubsub://mes/CM_Test_Event_One
+14:28:14 info: WolverineFxContrib.SalesforcePubSub.TestHost.HeartbeatService[0] [heartbeat] published: [CM_Test_Event_One__e=1] | handled: [TestEventOne=1 (lastReplayId 3503813)]
+
+Process finished with exit code 0.
+

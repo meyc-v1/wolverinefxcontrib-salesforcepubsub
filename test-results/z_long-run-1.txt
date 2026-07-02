@@ -1,0 +1,787 @@
+C:/src/wolverine-salesforce-pubsub/host/WolverineFxContrib.SalesforcePubSub.TestHost/bin/Debug/net10.0/WolverineFxContrib.SalesforcePubSub.TestHost.exe
+15:30:40 info: Wolverine.Runtime.WolverineRuntime[0] Exporting Open Telemetry metrics from Wolverine with name Wolverine:WolverineFxContrib.SalesforcePubSub.TestHost, version 6.12.0.0
+15:30:40 info: Wolverine.Runtime.WolverineRuntime[0] Starting Wolverine messaging for application assembly WolverineFxContrib.SalesforcePubSub.TestHost, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null
+15:30:40 info: WolverineFxContrib.SalesforcePubSub.TestHost.PublisherWorker[0] Publisher disabled (or no events configured); host is listen-only.
+15:30:40 info: Wolverine.Runtime.WolverineRuntime[0] The Wolverine code generation mode is Dynamic. This is suitable for development, but you may want to opt into other options for production usage to reduce start up time and resource utilization.
+15:30:40 info: Wolverine.Runtime.WolverineRuntime[0] See https://wolverine.netlify.app/guide/codegen.html for more information
+15:30:40 info: Wolverine.Configuration.HandlerDiscovery[0] Searching assembly Wolverine.RuntimeCompilation, Version=6.12.0.0, Culture=neutral, PublicKeyToken=null for Wolverine message handlers
+15:30:40 info: Wolverine.Configuration.HandlerDiscovery[0] Searching assembly WolverineFxContrib.SalesforcePubSub.TestHost, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null for Wolverine message handlers
+15:30:40 info: Wolverine.Runtime.WolverineRuntime[0] Wolverine assigned node id for envelope persistence is -1379937642
+15:30:40 info: Wolverine.Transports.ListeningAgent[0] Started message listening at stub://replies/
+15:30:40 info: WolverineFxContrib.SalesforcePubSub.TestHost.Replay.SqlReplayIdRepository[0] SQL replay store configured. Schema: dbo, Table: SalesforceSubscriberReplay, Application: wolverine-salesforcepubsub-testhost, Instance: wolverine-testhost
+15:30:40 info: Wolverine.Transports.ListeningAgent[0] Started message listening at sfpubsub://topic/%2Fevent%2FCM_Test_Event_Two__e
+15:30:40 info: Wolverine.Transports.ListeningAgent[0] Started message listening at sfpubsub://mes/CM_Test_Event_One
+15:30:40 info: Wolverine.SalesforcePubSub.Internals.SalesforceListener[0] Starting Salesforce listener for resource: /event/CM_Test_Event_Two__e
+15:30:40 info: Wolverine.SalesforcePubSub.Internals.SalesforceListener[0] Starting Salesforce listener for resource: CM_Test_Event_One
+15:30:40 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started OpenStream for CM_Test_Event_One
+15:30:40 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started OpenStream for /event/CM_Test_Event_Two__e
+15:30:40 info: Microsoft.Hosting.Lifetime[0] Application started. Press Ctrl+C to shut down.
+15:30:40 info: Microsoft.Hosting.Lifetime[0] Hosting environment: Development
+15:30:40 info: Microsoft.Hosting.Lifetime[0] Content root path: C:\src\wolverine-salesforce-pubsub\host\WolverineFxContrib.SalesforcePubSub.TestHost
+15:30:40 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished OpenStream for /event/CM_Test_Event_Two__e
+15:30:40 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started GetReplayId for /event/CM_Test_Event_Two__e
+15:30:40 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished OpenStream for CM_Test_Event_One
+15:30:40 dbug: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Sending ManagedFetchRequest for CM_Test_Event_One, FetchCount: 10
+15:30:40 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started WriteToStream for CM_Test_Event_One
+15:30:41 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished WriteToStream for CM_Test_Event_One
+15:30:41 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+15:30:43 info: WolverineFxContrib.SalesforcePubSub.TestHost.Replay.SqlReplayIdRepository[0] Cold-start read replay id 3503807 for Topic: /event/CM_Test_Event_Two__e from SQL
+15:30:43 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished GetReplayId for /event/CM_Test_Event_Two__e
+15:30:43 dbug: Wolverine.SalesforcePubSub.Internals.SalesforceListener[2] Sending FetchRequest for topic: /event/CM_Test_Event_Two__e, FetchCount: 10, ReplayId: 3503807
+15:30:43 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started WriteToStream for /event/CM_Test_Event_Two__e
+15:30:43 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished WriteToStream for /event/CM_Test_Event_Two__e
+15:30:43 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+15:32:41 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+15:32:41 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Committing ReplayId: 3503830 for CM_Test_Event_One
+15:32:41 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started CommitReplayId for CM_Test_Event_One
+15:32:41 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished CommitReplayId for CM_Test_Event_One
+15:32:41 dbug: Wolverine.SalesforcePubSub.Internals.SalesforceListener[0] Committed replay position 3503830 for CM_Test_Event_One (keepAlive: True).
+15:32:41 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+15:32:42 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+15:32:42 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[2] Commit acknowledged for CM_Test_Event_One, ReplayId: 3503830
+15:32:42 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+15:32:44 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+15:32:44 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started SaveReplayId for /event/CM_Test_Event_Two__e
+15:32:44 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished SaveReplayId for /event/CM_Test_Event_Two__e
+15:32:44 dbug: Wolverine.SalesforcePubSub.Internals.SalesforceListener[0] Committed replay position 3503807 for /event/CM_Test_Event_Two__e (keepAlive: True).
+15:32:44 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+15:34:41 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+15:34:41 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+15:34:44 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+15:34:44 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started SaveReplayId for /event/CM_Test_Event_Two__e
+15:34:44 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished SaveReplayId for /event/CM_Test_Event_Two__e
+15:34:44 dbug: Wolverine.SalesforcePubSub.Internals.SalesforceListener[0] Committed replay position 3503830 for /event/CM_Test_Event_Two__e (keepAlive: True).
+15:34:44 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+15:36:41 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+15:36:41 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+15:36:44 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+15:36:44 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+15:38:41 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+15:38:41 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+15:38:44 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+15:38:44 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+15:40:41 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+15:40:41 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+15:40:44 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+15:40:44 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+15:42:42 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+15:42:42 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+15:42:44 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+15:42:44 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+15:44:42 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+15:44:42 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+15:44:44 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+15:44:44 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+15:46:42 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+15:46:42 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+15:46:44 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+15:46:44 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+15:48:42 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+15:48:42 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+15:48:44 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+15:48:44 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+15:50:42 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+15:50:42 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+15:50:44 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+15:50:44 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+15:52:42 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+15:52:42 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+15:52:44 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+15:52:44 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+15:54:42 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+15:54:42 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+15:54:44 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+15:54:44 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+15:56:42 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+15:56:42 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+15:56:44 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+15:56:44 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+15:58:42 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+15:58:42 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+15:58:44 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+15:58:44 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+16:00:42 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+16:00:42 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+16:00:44 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+16:00:44 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+16:02:41 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started CompleteStream for CM_Test_Event_One
+16:02:41 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished CompleteStream for CM_Test_Event_One
+16:02:41 warn: Wolverine.SalesforcePubSub.Internals.SalesforceListener[0] RpcException in resource: CM_Test_Event_One, ConsecutiveErrors: 1, SinceLastSuccess: 00:01:59.8561098 Grpc.Core.RpcException: Status(StatusCode="DeadlineExceeded", Detail="No CommitReplayRequests sent in the last 1800 seconds. Closing managed subscription. rpcId: 132260033afbfdaff4ad4b72d7e71d1d")    at Grpc.Net.Client.Internal.HttpContentClientStreamReader`2.MoveNextCore(CancellationToken cancellationToken)    at Wolverine.SalesforcePubSub.Internals.ManagedEventSubscriptionTransport.ReadAsync(CancellationToken ct)+MoveNext() in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\ManagedEventSubscriptionTransport.cs:line 55    at Wolverine.SalesforcePubSub.Internals.ManagedEventSubscriptionTransport.ReadAsync(CancellationToken ct)+System.Threading.Tasks.Sources.IValueTaskSource<System.Boolean>.GetResult()    at System.Threading.Tasks.ValueTask`1.ValueTaskSourceAsTask.<>c.<.cctor>b__4_0(Object state) --- End of stack trace from previous location ---    at Wolverine.SalesforcePubSub.Internals.SalesforceListener.WithIdleTimeout(IAsyncEnumerable`1 source, TimeSpan idleTimeout, CancellationToken ct)+MoveNext() in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\SalesforceListener.cs:line 352    at Wolverine.SalesforcePubSub.Internals.SalesforceListener.WithIdleTimeout(IAsyncEnumerable`1 source, TimeSpan idleTimeout, CancellationToken ct)+MoveNext() in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\SalesforceListener.cs:line 369    at Wolverine.SalesforcePubSub.Internals.SalesforceListener.WithIdleTimeout(IAsyncEnumerable`1 source, TimeSpan idleTimeout, CancellationToken ct)+System.Threading.Tasks.Sources.IValueTaskSource<System.Boolean>.GetResult()    at Wolverine.SalesforcePubSub.Internals.SalesforceListener.ProcessStreamAsync(ISubscriptionTransport transport, CancellationToken ct) in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\SalesforceListener.cs:line 178    at Wolverine.SalesforcePubSub.Internals.SalesforceListener.ProcessStreamAsync(ISubscriptionTransport transport, CancellationToken ct) in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\SalesforceListener.cs:line 178    at Wolverine.SalesforcePubSub.Internals.SalesforceListener.RunAsync(CancellationToken ct) in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\SalesforceListener.cs:line 161
+16:02:41 dbug: Wolverine.SalesforcePubSub.Internals.SalesforceListener[0] Reconnecting listener for CM_Test_Event_One; resuming from the server-side commit checkpoint (in-memory handled watermark 3503830 is not used for MES).
+16:02:41 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started OpenStream for CM_Test_Event_One
+16:02:41 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished OpenStream for CM_Test_Event_One
+16:02:41 dbug: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Sending ManagedFetchRequest for CM_Test_Event_One, FetchCount: 10
+16:02:41 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started WriteToStream for CM_Test_Event_One
+16:02:41 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished WriteToStream for CM_Test_Event_One
+16:02:41 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+16:02:42 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started CompleteStream for CM_Test_Event_One
+16:02:42 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished CompleteStream for CM_Test_Event_One
+16:02:42 warn: Wolverine.SalesforcePubSub.Internals.SalesforceListener[0] RpcException in resource: CM_Test_Event_One, ConsecutiveErrors: 2, SinceLastSuccess: 00:02:00.1652897 Grpc.Core.RpcException: Status(StatusCode="AlreadyExists", Detail="An active managed subscription with the same ID already exists. If a previous subscription with the same ID was stopped, there can be a delay before it expires. Try subscribing again later. rpcId: d5aef52d8be19b804113af9f6fa26b36")    at Grpc.Net.Client.Internal.HttpContentClientStreamReader`2.MoveNextCore(CancellationToken cancellationToken)    at Wolverine.SalesforcePubSub.Internals.ManagedEventSubscriptionTransport.ReadAsync(CancellationToken ct)+MoveNext() in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\ManagedEventSubscriptionTransport.cs:line 55    at Wolverine.SalesforcePubSub.Internals.ManagedEventSubscriptionTransport.ReadAsync(CancellationToken ct)+System.Threading.Tasks.Sources.IValueTaskSource<System.Boolean>.GetResult()    at System.Threading.Tasks.ValueTask`1.ValueTaskSourceAsTask.<>c.<.cctor>b__4_0(Object state) --- End of stack trace from previous location ---    at Wolverine.SalesforcePubSub.Internals.SalesforceListener.WithIdleTimeout(IAsyncEnumerable`1 source, TimeSpan idleTimeout, CancellationToken ct)+MoveNext() in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\SalesforceListener.cs:line 352    at Wolverine.SalesforcePubSub.Internals.SalesforceListener.WithIdleTimeout(IAsyncEnumerable`1 source, TimeSpan idleTimeout, CancellationToken ct)+MoveNext() in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\SalesforceListener.cs:line 369    at Wolverine.SalesforcePubSub.Internals.SalesforceListener.WithIdleTimeout(IAsyncEnumerable`1 source, TimeSpan idleTimeout, CancellationToken ct)+System.Threading.Tasks.Sources.IValueTaskSource<System.Boolean>.GetResult()    at Wolverine.SalesforcePubSub.Internals.SalesforceListener.ProcessStreamAsync(ISubscriptionTransport transport, CancellationToken ct) in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\SalesforceListener.cs:line 178    at Wolverine.SalesforcePubSub.Internals.SalesforceListener.ProcessStreamAsync(ISubscriptionTransport transport, CancellationToken ct) in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\SalesforceListener.cs:line 178    at Wolverine.SalesforcePubSub.Internals.SalesforceListener.RunAsync(CancellationToken ct) in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\SalesforceListener.cs:line 161
+16:02:42 dbug: Wolverine.SalesforcePubSub.Internals.DefaultBackoffStrategy[0] Backing off for 00:00:15 for resource: CM_Test_Event_One
+16:02:44 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+16:02:44 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+16:02:57 dbug: Wolverine.SalesforcePubSub.Internals.DefaultBackoffStrategy[0] Completed backoff of 00:00:15 for resource: CM_Test_Event_One
+16:02:57 dbug: Wolverine.SalesforcePubSub.Internals.SalesforceListener[0] Reconnecting listener for CM_Test_Event_One; resuming from the server-side commit checkpoint (in-memory handled watermark 3503830 is not used for MES).
+16:02:57 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started OpenStream for CM_Test_Event_One
+16:02:57 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished OpenStream for CM_Test_Event_One
+16:02:57 dbug: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Sending ManagedFetchRequest for CM_Test_Event_One, FetchCount: 10
+16:02:57 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started WriteToStream for CM_Test_Event_One
+16:02:57 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished WriteToStream for CM_Test_Event_One
+16:02:57 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+16:04:44 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+16:04:44 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+16:04:58 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+16:04:58 info: Wolverine.SalesforcePubSub.Internals.SalesforceListener[0] Stream recovered for CM_Test_Event_One after 2 consecutive error(s); ~00:04:16.1471568 since last successful response.
+16:04:58 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+16:06:44 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+16:06:44 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+16:06:58 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+16:06:58 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+16:08:44 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+16:08:44 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+16:08:58 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+16:08:58 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+16:10:44 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+16:10:44 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+16:10:58 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+16:10:58 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+16:12:44 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+16:12:44 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+16:12:58 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+16:12:58 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+16:14:44 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+16:14:44 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+16:14:58 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+16:14:58 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+16:16:44 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+16:16:44 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+16:16:58 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+16:16:58 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+16:18:44 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+16:18:44 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+16:18:58 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+16:18:58 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+16:20:44 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+16:20:44 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+16:20:58 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+16:20:58 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+16:22:44 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+16:22:44 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+16:22:58 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+16:22:58 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+16:24:44 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+16:24:44 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+16:24:58 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+16:24:58 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+16:26:44 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+16:26:44 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+16:26:58 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+16:26:58 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+16:28:44 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+16:28:44 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+16:28:58 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+16:28:58 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+16:30:44 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+16:30:44 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+16:30:58 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+16:30:58 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+16:32:44 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+16:32:44 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+16:32:58 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+16:32:58 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+16:34:44 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+16:34:44 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+16:34:58 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started CompleteStream for CM_Test_Event_One
+16:34:58 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished CompleteStream for CM_Test_Event_One
+16:34:58 warn: Wolverine.SalesforcePubSub.Internals.SalesforceListener[0] RpcException in resource: CM_Test_Event_One, ConsecutiveErrors: 1, SinceLastSuccess: 00:01:59.7681805 Grpc.Core.RpcException: Status(StatusCode="DeadlineExceeded", Detail="No CommitReplayRequests sent in the last 1800 seconds. Closing managed subscription. rpcId: 29973fc5e9dc0dbbe3ae8c245d80cfb3")    at Grpc.Net.Client.Internal.HttpContentClientStreamReader`2.MoveNextCore(CancellationToken cancellationToken)    at Wolverine.SalesforcePubSub.Internals.ManagedEventSubscriptionTransport.ReadAsync(CancellationToken ct)+MoveNext() in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\ManagedEventSubscriptionTransport.cs:line 55    at Wolverine.SalesforcePubSub.Internals.ManagedEventSubscriptionTransport.ReadAsync(CancellationToken ct)+System.Threading.Tasks.Sources.IValueTaskSource<System.Boolean>.GetResult()    at System.Threading.Tasks.ValueTask`1.ValueTaskSourceAsTask.<>c.<.cctor>b__4_0(Object state) --- End of stack trace from previous location ---    at Wolverine.SalesforcePubSub.Internals.SalesforceListener.WithIdleTimeout(IAsyncEnumerable`1 source, TimeSpan idleTimeout, CancellationToken ct)+MoveNext() in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\SalesforceListener.cs:line 352    at Wolverine.SalesforcePubSub.Internals.SalesforceListener.WithIdleTimeout(IAsyncEnumerable`1 source, TimeSpan idleTimeout, CancellationToken ct)+MoveNext() in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\SalesforceListener.cs:line 369    at Wolverine.SalesforcePubSub.Internals.SalesforceListener.WithIdleTimeout(IAsyncEnumerable`1 source, TimeSpan idleTimeout, CancellationToken ct)+System.Threading.Tasks.Sources.IValueTaskSource<System.Boolean>.GetResult()    at Wolverine.SalesforcePubSub.Internals.SalesforceListener.ProcessStreamAsync(ISubscriptionTransport transport, CancellationToken ct) in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\SalesforceListener.cs:line 178    at Wolverine.SalesforcePubSub.Internals.SalesforceListener.ProcessStreamAsync(ISubscriptionTransport transport, CancellationToken ct) in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\SalesforceListener.cs:line 178    at Wolverine.SalesforcePubSub.Internals.SalesforceListener.RunAsync(CancellationToken ct) in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\SalesforceListener.cs:line 161
+16:34:58 dbug: Wolverine.SalesforcePubSub.Internals.SalesforceListener[0] Reconnecting listener for CM_Test_Event_One; resuming from the server-side commit checkpoint (in-memory handled watermark 3503830 is not used for MES).
+16:34:58 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started OpenStream for CM_Test_Event_One
+16:34:58 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished OpenStream for CM_Test_Event_One
+16:34:58 dbug: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Sending ManagedFetchRequest for CM_Test_Event_One, FetchCount: 10
+16:34:58 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started WriteToStream for CM_Test_Event_One
+16:34:58 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished WriteToStream for CM_Test_Event_One
+16:34:58 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+16:34:59 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started CompleteStream for CM_Test_Event_One
+16:34:59 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished CompleteStream for CM_Test_Event_One
+16:34:59 warn: Wolverine.SalesforcePubSub.Internals.SalesforceListener[0] RpcException in resource: CM_Test_Event_One, ConsecutiveErrors: 2, SinceLastSuccess: 00:02:00.6153393 Grpc.Core.RpcException: Status(StatusCode="AlreadyExists", Detail="An active managed subscription with the same ID already exists. If a previous subscription with the same ID was stopped, there can be a delay before it expires. Try subscribing again later. rpcId: bcfd81c96b3efed302a7da0cc9320d08")    at Grpc.Net.Client.Internal.HttpContentClientStreamReader`2.MoveNextCore(CancellationToken cancellationToken)    at Wolverine.SalesforcePubSub.Internals.ManagedEventSubscriptionTransport.ReadAsync(CancellationToken ct)+MoveNext() in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\ManagedEventSubscriptionTransport.cs:line 55    at Wolverine.SalesforcePubSub.Internals.ManagedEventSubscriptionTransport.ReadAsync(CancellationToken ct)+System.Threading.Tasks.Sources.IValueTaskSource<System.Boolean>.GetResult()    at System.Threading.Tasks.ValueTask`1.ValueTaskSourceAsTask.<>c.<.cctor>b__4_0(Object state) --- End of stack trace from previous location ---    at Wolverine.SalesforcePubSub.Internals.SalesforceListener.WithIdleTimeout(IAsyncEnumerable`1 source, TimeSpan idleTimeout, CancellationToken ct)+MoveNext() in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\SalesforceListener.cs:line 352    at Wolverine.SalesforcePubSub.Internals.SalesforceListener.WithIdleTimeout(IAsyncEnumerable`1 source, TimeSpan idleTimeout, CancellationToken ct)+MoveNext() in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\SalesforceListener.cs:line 369    at Wolverine.SalesforcePubSub.Internals.SalesforceListener.WithIdleTimeout(IAsyncEnumerable`1 source, TimeSpan idleTimeout, CancellationToken ct)+System.Threading.Tasks.Sources.IValueTaskSource<System.Boolean>.GetResult()    at Wolverine.SalesforcePubSub.Internals.SalesforceListener.ProcessStreamAsync(ISubscriptionTransport transport, CancellationToken ct) in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\SalesforceListener.cs:line 178    at Wolverine.SalesforcePubSub.Internals.SalesforceListener.ProcessStreamAsync(ISubscriptionTransport transport, CancellationToken ct) in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\SalesforceListener.cs:line 178    at Wolverine.SalesforcePubSub.Internals.SalesforceListener.RunAsync(CancellationToken ct) in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\SalesforceListener.cs:line 161
+16:34:59 dbug: Wolverine.SalesforcePubSub.Internals.DefaultBackoffStrategy[0] Backing off for 00:00:15 for resource: CM_Test_Event_One
+16:35:14 dbug: Wolverine.SalesforcePubSub.Internals.DefaultBackoffStrategy[0] Completed backoff of 00:00:15 for resource: CM_Test_Event_One
+16:35:14 dbug: Wolverine.SalesforcePubSub.Internals.SalesforceListener[0] Reconnecting listener for CM_Test_Event_One; resuming from the server-side commit checkpoint (in-memory handled watermark 3503830 is not used for MES).
+16:35:14 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started OpenStream for CM_Test_Event_One
+16:35:14 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished OpenStream for CM_Test_Event_One
+16:35:14 dbug: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Sending ManagedFetchRequest for CM_Test_Event_One, FetchCount: 10
+16:35:14 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started WriteToStream for CM_Test_Event_One
+16:35:14 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished WriteToStream for CM_Test_Event_One
+16:35:14 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+16:36:44 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+16:36:44 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+16:37:14 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+16:37:14 info: Wolverine.SalesforcePubSub.Internals.SalesforceListener[0] Stream recovered for CM_Test_Event_One after 2 consecutive error(s); ~00:04:16.4585545 since last successful response.
+16:37:14 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+16:38:44 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+16:38:44 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+16:39:14 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+16:39:14 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+16:40:44 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+16:40:44 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+16:41:14 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+16:41:14 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+16:42:44 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+16:42:44 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+16:43:14 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+16:43:14 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+16:44:44 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+16:44:44 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+16:45:14 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+16:45:14 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+16:46:44 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+16:46:44 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+16:47:14 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+16:47:14 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+16:48:44 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+16:48:44 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+16:49:14 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+16:49:14 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+16:50:44 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+16:50:44 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+16:51:14 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+16:51:14 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+16:52:44 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+16:52:44 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+16:53:14 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+16:53:14 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+16:54:44 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+16:54:44 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+16:55:14 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+16:55:14 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+16:56:44 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+16:56:44 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+16:57:14 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+16:57:14 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+16:58:45 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+16:58:45 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+16:59:14 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+16:59:14 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+17:00:45 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+17:00:45 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+17:01:14 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+17:01:14 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+17:02:45 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+17:02:45 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+17:03:14 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+17:03:14 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+17:04:45 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+17:04:45 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+17:05:15 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+17:05:15 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+17:06:45 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+17:06:45 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+17:07:14 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started CompleteStream for CM_Test_Event_One
+17:07:14 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished CompleteStream for CM_Test_Event_One
+17:07:14 warn: Wolverine.SalesforcePubSub.Internals.SalesforceListener[0] RpcException in resource: CM_Test_Event_One, ConsecutiveErrors: 1, SinceLastSuccess: 00:01:59.8835039 Grpc.Core.RpcException: Status(StatusCode="DeadlineExceeded", Detail="No CommitReplayRequests sent in the last 1800 seconds. Closing managed subscription. rpcId: b7b41750-25ec-4b0c-b01f-093d73da7e36")    at Grpc.Net.Client.Internal.HttpContentClientStreamReader`2.MoveNextCore(CancellationToken cancellationToken)    at Wolverine.SalesforcePubSub.Internals.ManagedEventSubscriptionTransport.ReadAsync(CancellationToken ct)+MoveNext() in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\ManagedEventSubscriptionTransport.cs:line 55    at Wolverine.SalesforcePubSub.Internals.ManagedEventSubscriptionTransport.ReadAsync(CancellationToken ct)+System.Threading.Tasks.Sources.IValueTaskSource<System.Boolean>.GetResult()    at System.Threading.Tasks.ValueTask`1.ValueTaskSourceAsTask.<>c.<.cctor>b__4_0(Object state) --- End of stack trace from previous location ---    at Wolverine.SalesforcePubSub.Internals.SalesforceListener.WithIdleTimeout(IAsyncEnumerable`1 source, TimeSpan idleTimeout, CancellationToken ct)+MoveNext() in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\SalesforceListener.cs:line 352    at Wolverine.SalesforcePubSub.Internals.SalesforceListener.WithIdleTimeout(IAsyncEnumerable`1 source, TimeSpan idleTimeout, CancellationToken ct)+MoveNext() in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\SalesforceListener.cs:line 369    at Wolverine.SalesforcePubSub.Internals.SalesforceListener.WithIdleTimeout(IAsyncEnumerable`1 source, TimeSpan idleTimeout, CancellationToken ct)+System.Threading.Tasks.Sources.IValueTaskSource<System.Boolean>.GetResult()    at Wolverine.SalesforcePubSub.Internals.SalesforceListener.ProcessStreamAsync(ISubscriptionTransport transport, CancellationToken ct) in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\SalesforceListener.cs:line 178    at Wolverine.SalesforcePubSub.Internals.SalesforceListener.ProcessStreamAsync(ISubscriptionTransport transport, CancellationToken ct) in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\SalesforceListener.cs:line 178    at Wolverine.SalesforcePubSub.Internals.SalesforceListener.RunAsync(CancellationToken ct) in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\SalesforceListener.cs:line 161
+17:07:14 dbug: Wolverine.SalesforcePubSub.Internals.SalesforceListener[0] Reconnecting listener for CM_Test_Event_One; resuming from the server-side commit checkpoint (in-memory handled watermark 3503830 is not used for MES).
+17:07:14 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started OpenStream for CM_Test_Event_One
+17:07:14 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished OpenStream for CM_Test_Event_One
+17:07:14 dbug: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Sending ManagedFetchRequest for CM_Test_Event_One, FetchCount: 10
+17:07:14 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started WriteToStream for CM_Test_Event_One
+17:07:14 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished WriteToStream for CM_Test_Event_One
+17:07:14 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+17:07:15 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started CompleteStream for CM_Test_Event_One
+17:07:15 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished CompleteStream for CM_Test_Event_One
+17:07:15 warn: Wolverine.SalesforcePubSub.Internals.SalesforceListener[0] RpcException in resource: CM_Test_Event_One, ConsecutiveErrors: 2, SinceLastSuccess: 00:02:00.2154469 Grpc.Core.RpcException: Status(StatusCode="AlreadyExists", Detail="An active managed subscription with the same ID already exists. If a previous subscription with the same ID was stopped, there can be a delay before it expires. Try subscribing again later. rpcId: 6f128abf-0845-447a-b2d1-d0742be080ab")    at Grpc.Net.Client.Internal.HttpContentClientStreamReader`2.MoveNextCore(CancellationToken cancellationToken)    at Wolverine.SalesforcePubSub.Internals.ManagedEventSubscriptionTransport.ReadAsync(CancellationToken ct)+MoveNext() in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\ManagedEventSubscriptionTransport.cs:line 55    at Wolverine.SalesforcePubSub.Internals.ManagedEventSubscriptionTransport.ReadAsync(CancellationToken ct)+System.Threading.Tasks.Sources.IValueTaskSource<System.Boolean>.GetResult()    at System.Threading.Tasks.ValueTask`1.ValueTaskSourceAsTask.<>c.<.cctor>b__4_0(Object state) --- End of stack trace from previous location ---    at Wolverine.SalesforcePubSub.Internals.SalesforceListener.WithIdleTimeout(IAsyncEnumerable`1 source, TimeSpan idleTimeout, CancellationToken ct)+MoveNext() in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\SalesforceListener.cs:line 352    at Wolverine.SalesforcePubSub.Internals.SalesforceListener.WithIdleTimeout(IAsyncEnumerable`1 source, TimeSpan idleTimeout, CancellationToken ct)+MoveNext() in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\SalesforceListener.cs:line 369    at Wolverine.SalesforcePubSub.Internals.SalesforceListener.WithIdleTimeout(IAsyncEnumerable`1 source, TimeSpan idleTimeout, CancellationToken ct)+System.Threading.Tasks.Sources.IValueTaskSource<System.Boolean>.GetResult()    at Wolverine.SalesforcePubSub.Internals.SalesforceListener.ProcessStreamAsync(ISubscriptionTransport transport, CancellationToken ct) in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\SalesforceListener.cs:line 178    at Wolverine.SalesforcePubSub.Internals.SalesforceListener.ProcessStreamAsync(ISubscriptionTransport transport, CancellationToken ct) in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\SalesforceListener.cs:line 178    at Wolverine.SalesforcePubSub.Internals.SalesforceListener.RunAsync(CancellationToken ct) in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\SalesforceListener.cs:line 161
+17:07:15 dbug: Wolverine.SalesforcePubSub.Internals.DefaultBackoffStrategy[0] Backing off for 00:00:15 for resource: CM_Test_Event_One
+17:07:30 dbug: Wolverine.SalesforcePubSub.Internals.DefaultBackoffStrategy[0] Completed backoff of 00:00:15 for resource: CM_Test_Event_One
+17:07:30 dbug: Wolverine.SalesforcePubSub.Internals.SalesforceListener[0] Reconnecting listener for CM_Test_Event_One; resuming from the server-side commit checkpoint (in-memory handled watermark 3503830 is not used for MES).
+17:07:30 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started OpenStream for CM_Test_Event_One
+17:07:30 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished OpenStream for CM_Test_Event_One
+17:07:30 dbug: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Sending ManagedFetchRequest for CM_Test_Event_One, FetchCount: 10
+17:07:30 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started WriteToStream for CM_Test_Event_One
+17:07:30 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished WriteToStream for CM_Test_Event_One
+17:07:30 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+17:08:45 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+17:08:45 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+17:09:30 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+17:09:30 info: Wolverine.SalesforcePubSub.Internals.SalesforceListener[0] Stream recovered for CM_Test_Event_One after 2 consecutive error(s); ~00:04:15.8820536 since last successful response.
+17:09:30 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+17:10:45 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+17:10:45 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+17:11:30 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+17:11:30 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+17:12:45 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+17:12:45 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+17:13:30 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+17:13:30 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+17:14:45 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+17:14:45 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+17:15:30 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+17:15:30 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+17:16:45 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+17:16:45 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+17:17:30 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+17:17:30 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+17:18:45 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+17:18:45 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+17:19:30 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+17:19:30 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+17:20:45 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+17:20:45 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+17:21:30 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+17:21:30 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+17:21:45 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started CompleteStream for /event/CM_Test_Event_Two__e
+17:21:45 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished CompleteStream for /event/CM_Test_Event_Two__e
+17:21:45 warn: Wolverine.SalesforcePubSub.Internals.SalesforceListener[0] RpcException in resource: /event/CM_Test_Event_Two__e, ConsecutiveErrors: 1, SinceLastSuccess: 00:00:59.8643702 Grpc.Core.RpcException: Status(StatusCode="Internal", Detail="Error reading next message. HttpProtocolException: The HTTP/2 server reset the stream. HTTP/2 error code 'INTERNAL_ERROR' (0x2). (HttpProtocolError)", DebugException="System.Net.Http.HttpProtocolException: The HTTP/2 server reset the stream. HTTP/2 error code 'INTERNAL_ERROR' (0x2). (HttpProtocolError)")  ---> System.Net.Http.HttpProtocolException: The HTTP/2 server reset the stream. HTTP/2 error code 'INTERNAL_ERROR' (0x2). (HttpProtocolError)    at System.Net.Http.Http2Connection.ThrowRequestAborted(Exception innerException)    at System.Net.Http.Http2Connection.Http2Stream.TryReadFromBuffer(Span`1 buffer, Boolean partOfSyncRead)    at System.Net.Http.Http2Connection.Http2Stream.ReadDataAsync(Memory`1 buffer, HttpResponseMessage responseMessage, CancellationToken cancellationToken)    at Grpc.Net.Client.Internal.StreamExtensions.ReadMessageAsync[TResponse](Stream responseStream, GrpcCall call, Func`2 deserializer, String grpcEncoding, Boolean singleMessage, CancellationToken cancellationToken)    at Grpc.Net.Client.Internal.GrpcCall`2.ReadMessageAsync(Stream responseStream, String grpcEncoding, Boolean singleMessage, CancellationToken cancellationToken)    at Grpc.Net.Client.Internal.HttpContentClientStreamReader`2.MoveNextCore(CancellationToken cancellationToken)    --- End of inner exception stack trace ---    at Grpc.Net.Client.Internal.HttpContentClientStreamReader`2.MoveNextCore(CancellationToken cancellationToken)    at Wolverine.SalesforcePubSub.Internals.TopicTransport.ReadAsync(CancellationToken ct)+MoveNext() in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\TopicTransport.cs:line 62    at Wolverine.SalesforcePubSub.Internals.TopicTransport.ReadAsync(CancellationToken ct)+System.Threading.Tasks.Sources.IValueTaskSource<System.Boolean>.GetResult()    at System.Threading.Tasks.ValueTask`1.ValueTaskSourceAsTask.<>c.<.cctor>b__4_0(Object state) --- End of stack trace from previous location ---    at Wolverine.SalesforcePubSub.Internals.SalesforceListener.WithIdleTimeout(IAsyncEnumerable`1 source, TimeSpan idleTimeout, CancellationToken ct)+MoveNext() in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\SalesforceListener.cs:line 352    at Wolverine.SalesforcePubSub.Internals.SalesforceListener.WithIdleTimeout(IAsyncEnumerable`1 source, TimeSpan idleTimeout, CancellationToken ct)+MoveNext() in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\SalesforceListener.cs:line 369    at Wolverine.SalesforcePubSub.Internals.SalesforceListener.WithIdleTimeout(IAsyncEnumerable`1 source, TimeSpan idleTimeout, CancellationToken ct)+System.Threading.Tasks.Sources.IValueTaskSource<System.Boolean>.GetResult()    at Wolverine.SalesforcePubSub.Internals.SalesforceListener.ProcessStreamAsync(ISubscriptionTransport transport, CancellationToken ct) in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\SalesforceListener.cs:line 178    at Wolverine.SalesforcePubSub.Internals.SalesforceListener.ProcessStreamAsync(ISubscriptionTransport transport, CancellationToken ct) in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\SalesforceListener.cs:line 178    at Wolverine.SalesforcePubSub.Internals.SalesforceListener.RunAsync(CancellationToken ct) in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\SalesforceListener.cs:line 161
+17:21:45 dbug: Wolverine.SalesforcePubSub.Internals.SalesforceListener[0] Reconnecting listener for /event/CM_Test_Event_Two__e; resuming after handled replayId 3503830 (in-memory).
+17:21:45 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started OpenStream for /event/CM_Test_Event_Two__e
+17:21:45 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished OpenStream for /event/CM_Test_Event_Two__e
+17:21:45 dbug: Wolverine.SalesforcePubSub.Internals.SalesforceListener[2] Sending FetchRequest for topic: /event/CM_Test_Event_Two__e, FetchCount: 10, ReplayId: 3503830
+17:21:45 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started WriteToStream for /event/CM_Test_Event_Two__e
+17:21:45 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished WriteToStream for /event/CM_Test_Event_Two__e
+17:21:45 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+17:23:30 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+17:23:30 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+17:23:45 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+17:23:45 info: Wolverine.SalesforcePubSub.Internals.SalesforceListener[0] Stream recovered for /event/CM_Test_Event_Two__e after 1 consecutive error(s); ~00:03:00.5486282 since last successful response.
+17:23:45 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+17:25:30 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+17:25:30 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+17:25:45 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+17:25:45 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+17:27:30 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+17:27:30 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+17:27:45 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+17:27:45 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+17:29:30 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+17:29:30 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+17:29:45 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+17:29:45 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+17:31:30 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+17:31:30 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+17:31:45 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+17:31:45 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+17:33:30 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+17:33:30 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+17:33:45 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+17:33:45 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+17:35:30 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+17:35:30 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+17:35:45 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+17:35:45 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+17:37:30 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+17:37:30 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+17:37:45 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+17:37:45 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+17:39:31 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started CompleteStream for CM_Test_Event_One
+17:39:31 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished CompleteStream for CM_Test_Event_One
+17:39:31 warn: Wolverine.SalesforcePubSub.Internals.SalesforceListener[0] RpcException in resource: CM_Test_Event_One, ConsecutiveErrors: 1, SinceLastSuccess: 00:02:00.2048984 Grpc.Core.RpcException: Status(StatusCode="DeadlineExceeded", Detail="No CommitReplayRequests sent in the last 1800 seconds. Closing managed subscription. rpcId: ab12e66a-91ee-45e6-a32c-67b58ce47238")    at Grpc.Net.Client.Internal.HttpContentClientStreamReader`2.MoveNextCore(CancellationToken cancellationToken)    at Wolverine.SalesforcePubSub.Internals.ManagedEventSubscriptionTransport.ReadAsync(CancellationToken ct)+MoveNext() in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\ManagedEventSubscriptionTransport.cs:line 55    at Wolverine.SalesforcePubSub.Internals.ManagedEventSubscriptionTransport.ReadAsync(CancellationToken ct)+System.Threading.Tasks.Sources.IValueTaskSource<System.Boolean>.GetResult()    at System.Threading.Tasks.ValueTask`1.ValueTaskSourceAsTask.<>c.<.cctor>b__4_0(Object state) --- End of stack trace from previous location ---    at Wolverine.SalesforcePubSub.Internals.SalesforceListener.WithIdleTimeout(IAsyncEnumerable`1 source, TimeSpan idleTimeout, CancellationToken ct)+MoveNext() in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\SalesforceListener.cs:line 352    at Wolverine.SalesforcePubSub.Internals.SalesforceListener.WithIdleTimeout(IAsyncEnumerable`1 source, TimeSpan idleTimeout, CancellationToken ct)+MoveNext() in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\SalesforceListener.cs:line 369    at Wolverine.SalesforcePubSub.Internals.SalesforceListener.WithIdleTimeout(IAsyncEnumerable`1 source, TimeSpan idleTimeout, CancellationToken ct)+System.Threading.Tasks.Sources.IValueTaskSource<System.Boolean>.GetResult()    at Wolverine.SalesforcePubSub.Internals.SalesforceListener.ProcessStreamAsync(ISubscriptionTransport transport, CancellationToken ct) in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\SalesforceListener.cs:line 178    at Wolverine.SalesforcePubSub.Internals.SalesforceListener.ProcessStreamAsync(ISubscriptionTransport transport, CancellationToken ct) in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\SalesforceListener.cs:line 178    at Wolverine.SalesforcePubSub.Internals.SalesforceListener.RunAsync(CancellationToken ct) in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\SalesforceListener.cs:line 161
+17:39:31 dbug: Wolverine.SalesforcePubSub.Internals.SalesforceListener[0] Reconnecting listener for CM_Test_Event_One; resuming from the server-side commit checkpoint (in-memory handled watermark 3503830 is not used for MES).
+17:39:31 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started OpenStream for CM_Test_Event_One
+17:39:31 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished OpenStream for CM_Test_Event_One
+17:39:31 dbug: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Sending ManagedFetchRequest for CM_Test_Event_One, FetchCount: 10
+17:39:31 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started WriteToStream for CM_Test_Event_One
+17:39:31 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished WriteToStream for CM_Test_Event_One
+17:39:31 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+17:39:31 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started CompleteStream for CM_Test_Event_One
+17:39:31 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished CompleteStream for CM_Test_Event_One
+17:39:31 warn: Wolverine.SalesforcePubSub.Internals.SalesforceListener[0] RpcException in resource: CM_Test_Event_One, ConsecutiveErrors: 2, SinceLastSuccess: 00:02:00.7680856 Grpc.Core.RpcException: Status(StatusCode="AlreadyExists", Detail="An active managed subscription with the same ID already exists. If a previous subscription with the same ID was stopped, there can be a delay before it expires. Try subscribing again later. rpcId: cc6d0e7e-cbf8-4841-b8cc-5e9cf596ffb8")    at Grpc.Net.Client.Internal.HttpContentClientStreamReader`2.MoveNextCore(CancellationToken cancellationToken)    at Wolverine.SalesforcePubSub.Internals.ManagedEventSubscriptionTransport.ReadAsync(CancellationToken ct)+MoveNext() in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\ManagedEventSubscriptionTransport.cs:line 55    at Wolverine.SalesforcePubSub.Internals.ManagedEventSubscriptionTransport.ReadAsync(CancellationToken ct)+System.Threading.Tasks.Sources.IValueTaskSource<System.Boolean>.GetResult()    at System.Threading.Tasks.ValueTask`1.ValueTaskSourceAsTask.<>c.<.cctor>b__4_0(Object state) --- End of stack trace from previous location ---    at Wolverine.SalesforcePubSub.Internals.SalesforceListener.WithIdleTimeout(IAsyncEnumerable`1 source, TimeSpan idleTimeout, CancellationToken ct)+MoveNext() in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\SalesforceListener.cs:line 352    at Wolverine.SalesforcePubSub.Internals.SalesforceListener.WithIdleTimeout(IAsyncEnumerable`1 source, TimeSpan idleTimeout, CancellationToken ct)+MoveNext() in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\SalesforceListener.cs:line 369    at Wolverine.SalesforcePubSub.Internals.SalesforceListener.WithIdleTimeout(IAsyncEnumerable`1 source, TimeSpan idleTimeout, CancellationToken ct)+System.Threading.Tasks.Sources.IValueTaskSource<System.Boolean>.GetResult()    at Wolverine.SalesforcePubSub.Internals.SalesforceListener.ProcessStreamAsync(ISubscriptionTransport transport, CancellationToken ct) in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\SalesforceListener.cs:line 178    at Wolverine.SalesforcePubSub.Internals.SalesforceListener.ProcessStreamAsync(ISubscriptionTransport transport, CancellationToken ct) in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\SalesforceListener.cs:line 178    at Wolverine.SalesforcePubSub.Internals.SalesforceListener.RunAsync(CancellationToken ct) in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\SalesforceListener.cs:line 161
+17:39:31 dbug: Wolverine.SalesforcePubSub.Internals.DefaultBackoffStrategy[0] Backing off for 00:00:15 for resource: CM_Test_Event_One
+17:39:45 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+17:39:45 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+17:39:46 dbug: Wolverine.SalesforcePubSub.Internals.DefaultBackoffStrategy[0] Completed backoff of 00:00:15 for resource: CM_Test_Event_One
+17:39:46 dbug: Wolverine.SalesforcePubSub.Internals.SalesforceListener[0] Reconnecting listener for CM_Test_Event_One; resuming from the server-side commit checkpoint (in-memory handled watermark 3503830 is not used for MES).
+17:39:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started OpenStream for CM_Test_Event_One
+17:39:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished OpenStream for CM_Test_Event_One
+17:39:46 dbug: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Sending ManagedFetchRequest for CM_Test_Event_One, FetchCount: 10
+17:39:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started WriteToStream for CM_Test_Event_One
+17:39:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished WriteToStream for CM_Test_Event_One
+17:39:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+17:41:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+17:41:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+17:41:47 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+17:41:47 info: Wolverine.SalesforcePubSub.Internals.SalesforceListener[0] Stream recovered for CM_Test_Event_One after 2 consecutive error(s); ~00:04:16.5604217 since last successful response.
+17:41:47 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+17:43:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+17:43:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+17:43:47 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+17:43:47 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+17:45:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+17:45:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+17:45:47 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+17:45:47 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+17:47:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+17:47:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+17:47:47 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+17:47:47 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+17:49:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+17:49:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+17:49:47 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+17:49:47 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+17:51:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+17:51:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+17:51:47 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+17:51:47 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+17:53:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+17:53:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+17:53:47 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+17:53:47 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+17:55:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+17:55:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+17:55:47 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+17:55:47 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+17:57:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+17:57:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+17:57:47 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+17:57:47 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+17:59:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+17:59:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+17:59:47 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+17:59:47 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+18:01:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+18:01:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+18:01:47 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+18:01:47 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+18:03:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+18:03:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+18:03:47 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+18:03:47 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+18:05:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+18:05:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+18:05:47 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+18:05:47 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+18:07:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+18:07:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+18:07:47 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+18:07:47 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+18:09:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+18:09:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+18:09:47 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+18:09:47 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+18:11:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+18:11:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+18:11:47 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started CompleteStream for CM_Test_Event_One
+18:11:47 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished CompleteStream for CM_Test_Event_One
+18:11:47 warn: Wolverine.SalesforcePubSub.Internals.SalesforceListener[0] RpcException in resource: CM_Test_Event_One, ConsecutiveErrors: 1, SinceLastSuccess: 00:01:59.7924804 Grpc.Core.RpcException: Status(StatusCode="DeadlineExceeded", Detail="No CommitReplayRequests sent in the last 1800 seconds. Closing managed subscription. rpcId: aca3977e-0d8a-4454-9bd6-e9c8658d233b")    at Grpc.Net.Client.Internal.HttpContentClientStreamReader`2.MoveNextCore(CancellationToken cancellationToken)    at Wolverine.SalesforcePubSub.Internals.ManagedEventSubscriptionTransport.ReadAsync(CancellationToken ct)+MoveNext() in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\ManagedEventSubscriptionTransport.cs:line 55    at Wolverine.SalesforcePubSub.Internals.ManagedEventSubscriptionTransport.ReadAsync(CancellationToken ct)+System.Threading.Tasks.Sources.IValueTaskSource<System.Boolean>.GetResult()    at System.Threading.Tasks.ValueTask`1.ValueTaskSourceAsTask.<>c.<.cctor>b__4_0(Object state) --- End of stack trace from previous location ---    at Wolverine.SalesforcePubSub.Internals.SalesforceListener.WithIdleTimeout(IAsyncEnumerable`1 source, TimeSpan idleTimeout, CancellationToken ct)+MoveNext() in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\SalesforceListener.cs:line 352    at Wolverine.SalesforcePubSub.Internals.SalesforceListener.WithIdleTimeout(IAsyncEnumerable`1 source, TimeSpan idleTimeout, CancellationToken ct)+MoveNext() in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\SalesforceListener.cs:line 369    at Wolverine.SalesforcePubSub.Internals.SalesforceListener.WithIdleTimeout(IAsyncEnumerable`1 source, TimeSpan idleTimeout, CancellationToken ct)+System.Threading.Tasks.Sources.IValueTaskSource<System.Boolean>.GetResult()    at Wolverine.SalesforcePubSub.Internals.SalesforceListener.ProcessStreamAsync(ISubscriptionTransport transport, CancellationToken ct) in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\SalesforceListener.cs:line 178    at Wolverine.SalesforcePubSub.Internals.SalesforceListener.ProcessStreamAsync(ISubscriptionTransport transport, CancellationToken ct) in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\SalesforceListener.cs:line 178    at Wolverine.SalesforcePubSub.Internals.SalesforceListener.RunAsync(CancellationToken ct) in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\SalesforceListener.cs:line 161
+18:11:47 dbug: Wolverine.SalesforcePubSub.Internals.SalesforceListener[0] Reconnecting listener for CM_Test_Event_One; resuming from the server-side commit checkpoint (in-memory handled watermark 3503830 is not used for MES).
+18:11:47 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started OpenStream for CM_Test_Event_One
+18:11:47 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished OpenStream for CM_Test_Event_One
+18:11:47 dbug: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Sending ManagedFetchRequest for CM_Test_Event_One, FetchCount: 10
+18:11:47 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started WriteToStream for CM_Test_Event_One
+18:11:47 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished WriteToStream for CM_Test_Event_One
+18:11:47 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+18:11:47 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started CompleteStream for CM_Test_Event_One
+18:11:47 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished CompleteStream for CM_Test_Event_One
+18:11:47 warn: Wolverine.SalesforcePubSub.Internals.SalesforceListener[0] RpcException in resource: CM_Test_Event_One, ConsecutiveErrors: 2, SinceLastSuccess: 00:02:00.0997018 Grpc.Core.RpcException: Status(StatusCode="AlreadyExists", Detail="An active managed subscription with the same ID already exists. If a previous subscription with the same ID was stopped, there can be a delay before it expires. Try subscribing again later. rpcId: 4a27d6b4-c09d-4c0c-a713-3c1c0d070c19")    at Grpc.Net.Client.Internal.HttpContentClientStreamReader`2.MoveNextCore(CancellationToken cancellationToken)    at Wolverine.SalesforcePubSub.Internals.ManagedEventSubscriptionTransport.ReadAsync(CancellationToken ct)+MoveNext() in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\ManagedEventSubscriptionTransport.cs:line 55    at Wolverine.SalesforcePubSub.Internals.ManagedEventSubscriptionTransport.ReadAsync(CancellationToken ct)+System.Threading.Tasks.Sources.IValueTaskSource<System.Boolean>.GetResult()    at System.Threading.Tasks.ValueTask`1.ValueTaskSourceAsTask.<>c.<.cctor>b__4_0(Object state) --- End of stack trace from previous location ---    at Wolverine.SalesforcePubSub.Internals.SalesforceListener.WithIdleTimeout(IAsyncEnumerable`1 source, TimeSpan idleTimeout, CancellationToken ct)+MoveNext() in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\SalesforceListener.cs:line 352    at Wolverine.SalesforcePubSub.Internals.SalesforceListener.WithIdleTimeout(IAsyncEnumerable`1 source, TimeSpan idleTimeout, CancellationToken ct)+MoveNext() in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\SalesforceListener.cs:line 369    at Wolverine.SalesforcePubSub.Internals.SalesforceListener.WithIdleTimeout(IAsyncEnumerable`1 source, TimeSpan idleTimeout, CancellationToken ct)+System.Threading.Tasks.Sources.IValueTaskSource<System.Boolean>.GetResult()    at Wolverine.SalesforcePubSub.Internals.SalesforceListener.ProcessStreamAsync(ISubscriptionTransport transport, CancellationToken ct) in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\SalesforceListener.cs:line 178    at Wolverine.SalesforcePubSub.Internals.SalesforceListener.ProcessStreamAsync(ISubscriptionTransport transport, CancellationToken ct) in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\SalesforceListener.cs:line 178    at Wolverine.SalesforcePubSub.Internals.SalesforceListener.RunAsync(CancellationToken ct) in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\SalesforceListener.cs:line 161
+18:11:47 dbug: Wolverine.SalesforcePubSub.Internals.DefaultBackoffStrategy[0] Backing off for 00:00:15 for resource: CM_Test_Event_One
+18:12:02 dbug: Wolverine.SalesforcePubSub.Internals.DefaultBackoffStrategy[0] Completed backoff of 00:00:15 for resource: CM_Test_Event_One
+18:12:02 dbug: Wolverine.SalesforcePubSub.Internals.SalesforceListener[0] Reconnecting listener for CM_Test_Event_One; resuming from the server-side commit checkpoint (in-memory handled watermark 3503830 is not used for MES).
+18:12:02 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started OpenStream for CM_Test_Event_One
+18:12:02 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished OpenStream for CM_Test_Event_One
+18:12:02 dbug: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Sending ManagedFetchRequest for CM_Test_Event_One, FetchCount: 10
+18:12:02 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started WriteToStream for CM_Test_Event_One
+18:12:02 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished WriteToStream for CM_Test_Event_One
+18:12:02 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+18:13:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+18:13:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+18:14:03 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+18:14:03 info: Wolverine.SalesforcePubSub.Internals.SalesforceListener[0] Stream recovered for CM_Test_Event_One after 2 consecutive error(s); ~00:04:15.7600778 since last successful response.
+18:14:03 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+18:15:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+18:15:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+18:16:03 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+18:16:03 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+18:17:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+18:17:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+18:18:03 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+18:18:03 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+18:19:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+18:19:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+18:20:03 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+18:20:03 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+18:21:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+18:21:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+18:22:03 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+18:22:03 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+18:23:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+18:23:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+18:24:03 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+18:24:03 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+18:25:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+18:25:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+18:26:03 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+18:26:03 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+18:27:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+18:27:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+18:28:03 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+18:28:03 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+18:29:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+18:29:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+18:30:03 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+18:30:03 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+18:31:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+18:31:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+18:32:03 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+18:32:03 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+18:33:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+18:33:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+18:34:03 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+18:34:03 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+18:35:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+18:35:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+18:36:03 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+18:36:03 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+18:37:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+18:37:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+18:38:03 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+18:38:03 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+18:39:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+18:39:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+18:40:03 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+18:40:03 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+18:41:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+18:41:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+18:42:03 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+18:42:03 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+18:43:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+18:43:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+18:44:03 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started CompleteStream for CM_Test_Event_One
+18:44:03 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished CompleteStream for CM_Test_Event_One
+18:44:03 warn: Wolverine.SalesforcePubSub.Internals.SalesforceListener[0] RpcException in resource: CM_Test_Event_One, ConsecutiveErrors: 1, SinceLastSuccess: 00:01:59.9292387 Grpc.Core.RpcException: Status(StatusCode="DeadlineExceeded", Detail="No CommitReplayRequests sent in the last 1800 seconds. Closing managed subscription. rpcId: b3770edc-03b3-45a3-9a74-454cd2cc6de3")    at Grpc.Net.Client.Internal.HttpContentClientStreamReader`2.MoveNextCore(CancellationToken cancellationToken)    at Wolverine.SalesforcePubSub.Internals.ManagedEventSubscriptionTransport.ReadAsync(CancellationToken ct)+MoveNext() in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\ManagedEventSubscriptionTransport.cs:line 55    at Wolverine.SalesforcePubSub.Internals.ManagedEventSubscriptionTransport.ReadAsync(CancellationToken ct)+System.Threading.Tasks.Sources.IValueTaskSource<System.Boolean>.GetResult()    at System.Threading.Tasks.ValueTask`1.ValueTaskSourceAsTask.<>c.<.cctor>b__4_0(Object state) --- End of stack trace from previous location ---    at Wolverine.SalesforcePubSub.Internals.SalesforceListener.WithIdleTimeout(IAsyncEnumerable`1 source, TimeSpan idleTimeout, CancellationToken ct)+MoveNext() in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\SalesforceListener.cs:line 352    at Wolverine.SalesforcePubSub.Internals.SalesforceListener.WithIdleTimeout(IAsyncEnumerable`1 source, TimeSpan idleTimeout, CancellationToken ct)+MoveNext() in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\SalesforceListener.cs:line 369    at Wolverine.SalesforcePubSub.Internals.SalesforceListener.WithIdleTimeout(IAsyncEnumerable`1 source, TimeSpan idleTimeout, CancellationToken ct)+System.Threading.Tasks.Sources.IValueTaskSource<System.Boolean>.GetResult()    at Wolverine.SalesforcePubSub.Internals.SalesforceListener.ProcessStreamAsync(ISubscriptionTransport transport, CancellationToken ct) in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\SalesforceListener.cs:line 178    at Wolverine.SalesforcePubSub.Internals.SalesforceListener.ProcessStreamAsync(ISubscriptionTransport transport, CancellationToken ct) in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\SalesforceListener.cs:line 178    at Wolverine.SalesforcePubSub.Internals.SalesforceListener.RunAsync(CancellationToken ct) in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\SalesforceListener.cs:line 161
+18:44:03 dbug: Wolverine.SalesforcePubSub.Internals.SalesforceListener[0] Reconnecting listener for CM_Test_Event_One; resuming from the server-side commit checkpoint (in-memory handled watermark 3503830 is not used for MES).
+18:44:03 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started OpenStream for CM_Test_Event_One
+18:44:03 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished OpenStream for CM_Test_Event_One
+18:44:03 dbug: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Sending ManagedFetchRequest for CM_Test_Event_One, FetchCount: 10
+18:44:03 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started WriteToStream for CM_Test_Event_One
+18:44:03 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished WriteToStream for CM_Test_Event_One
+18:44:03 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+18:44:04 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started CompleteStream for CM_Test_Event_One
+18:44:04 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished CompleteStream for CM_Test_Event_One
+18:44:04 warn: Wolverine.SalesforcePubSub.Internals.SalesforceListener[0] RpcException in resource: CM_Test_Event_One, ConsecutiveErrors: 2, SinceLastSuccess: 00:02:00.7169458 Grpc.Core.RpcException: Status(StatusCode="AlreadyExists", Detail="An active managed subscription with the same ID already exists. If a previous subscription with the same ID was stopped, there can be a delay before it expires. Try subscribing again later. rpcId: 6b40d939-dbaf-4c78-9296-5cae6eb83f8a")    at Grpc.Net.Client.Internal.HttpContentClientStreamReader`2.MoveNextCore(CancellationToken cancellationToken)    at Wolverine.SalesforcePubSub.Internals.ManagedEventSubscriptionTransport.ReadAsync(CancellationToken ct)+MoveNext() in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\ManagedEventSubscriptionTransport.cs:line 55    at Wolverine.SalesforcePubSub.Internals.ManagedEventSubscriptionTransport.ReadAsync(CancellationToken ct)+System.Threading.Tasks.Sources.IValueTaskSource<System.Boolean>.GetResult()    at System.Threading.Tasks.ValueTask`1.ValueTaskSourceAsTask.<>c.<.cctor>b__4_0(Object state) --- End of stack trace from previous location ---    at Wolverine.SalesforcePubSub.Internals.SalesforceListener.WithIdleTimeout(IAsyncEnumerable`1 source, TimeSpan idleTimeout, CancellationToken ct)+MoveNext() in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\SalesforceListener.cs:line 352    at Wolverine.SalesforcePubSub.Internals.SalesforceListener.WithIdleTimeout(IAsyncEnumerable`1 source, TimeSpan idleTimeout, CancellationToken ct)+MoveNext() in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\SalesforceListener.cs:line 369    at Wolverine.SalesforcePubSub.Internals.SalesforceListener.WithIdleTimeout(IAsyncEnumerable`1 source, TimeSpan idleTimeout, CancellationToken ct)+System.Threading.Tasks.Sources.IValueTaskSource<System.Boolean>.GetResult()    at Wolverine.SalesforcePubSub.Internals.SalesforceListener.ProcessStreamAsync(ISubscriptionTransport transport, CancellationToken ct) in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\SalesforceListener.cs:line 178    at Wolverine.SalesforcePubSub.Internals.SalesforceListener.ProcessStreamAsync(ISubscriptionTransport transport, CancellationToken ct) in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\SalesforceListener.cs:line 178    at Wolverine.SalesforcePubSub.Internals.SalesforceListener.RunAsync(CancellationToken ct) in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\SalesforceListener.cs:line 161
+18:44:04 dbug: Wolverine.SalesforcePubSub.Internals.DefaultBackoffStrategy[0] Backing off for 00:00:15 for resource: CM_Test_Event_One
+18:44:19 dbug: Wolverine.SalesforcePubSub.Internals.DefaultBackoffStrategy[0] Completed backoff of 00:00:15 for resource: CM_Test_Event_One
+18:44:19 dbug: Wolverine.SalesforcePubSub.Internals.SalesforceListener[0] Reconnecting listener for CM_Test_Event_One; resuming from the server-side commit checkpoint (in-memory handled watermark 3503830 is not used for MES).
+18:44:19 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started OpenStream for CM_Test_Event_One
+18:44:19 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished OpenStream for CM_Test_Event_One
+18:44:19 dbug: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Sending ManagedFetchRequest for CM_Test_Event_One, FetchCount: 10
+18:44:19 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started WriteToStream for CM_Test_Event_One
+18:44:19 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished WriteToStream for CM_Test_Event_One
+18:44:19 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+18:45:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+18:45:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+18:46:19 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+18:46:19 info: Wolverine.SalesforcePubSub.Internals.SalesforceListener[0] Stream recovered for CM_Test_Event_One after 2 consecutive error(s); ~00:04:16.3164656 since last successful response.
+18:46:19 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+18:47:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+18:47:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+18:48:19 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+18:48:19 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+18:49:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+18:49:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+18:50:19 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+18:50:19 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+18:51:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+18:51:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+18:52:19 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+18:52:19 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+18:53:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+18:53:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+18:54:19 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+18:54:19 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+18:55:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+18:55:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+18:56:19 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+18:56:19 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+18:57:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+18:57:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+18:58:19 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+18:58:19 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+18:59:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+18:59:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+19:00:19 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+19:00:19 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+19:01:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+19:01:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+19:02:19 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+19:02:19 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+19:03:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+19:03:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+19:04:19 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+19:04:19 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+19:05:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+19:05:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+19:06:19 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+19:06:19 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+19:07:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+19:07:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+19:08:19 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+19:08:19 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+19:09:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+19:09:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+19:10:19 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+19:10:19 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+19:11:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+19:11:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+19:12:20 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+19:12:20 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+19:13:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+19:13:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+19:14:20 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+19:14:20 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+19:15:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+19:15:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+19:16:19 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started CompleteStream for CM_Test_Event_One
+19:16:19 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished CompleteStream for CM_Test_Event_One
+19:16:19 warn: Wolverine.SalesforcePubSub.Internals.SalesforceListener[0] RpcException in resource: CM_Test_Event_One, ConsecutiveErrors: 1, SinceLastSuccess: 00:01:59.8296340 Grpc.Core.RpcException: Status(StatusCode="DeadlineExceeded", Detail="No CommitReplayRequests sent in the last 1800 seconds. Closing managed subscription. rpcId: 85b676c7-914d-46bf-a212-743590bae44d")    at Grpc.Net.Client.Internal.HttpContentClientStreamReader`2.MoveNextCore(CancellationToken cancellationToken)    at Wolverine.SalesforcePubSub.Internals.ManagedEventSubscriptionTransport.ReadAsync(CancellationToken ct)+MoveNext() in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\ManagedEventSubscriptionTransport.cs:line 55    at Wolverine.SalesforcePubSub.Internals.ManagedEventSubscriptionTransport.ReadAsync(CancellationToken ct)+System.Threading.Tasks.Sources.IValueTaskSource<System.Boolean>.GetResult()    at System.Threading.Tasks.ValueTask`1.ValueTaskSourceAsTask.<>c.<.cctor>b__4_0(Object state) --- End of stack trace from previous location ---    at Wolverine.SalesforcePubSub.Internals.SalesforceListener.WithIdleTimeout(IAsyncEnumerable`1 source, TimeSpan idleTimeout, CancellationToken ct)+MoveNext() in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\SalesforceListener.cs:line 352    at Wolverine.SalesforcePubSub.Internals.SalesforceListener.WithIdleTimeout(IAsyncEnumerable`1 source, TimeSpan idleTimeout, CancellationToken ct)+MoveNext() in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\SalesforceListener.cs:line 369    at Wolverine.SalesforcePubSub.Internals.SalesforceListener.WithIdleTimeout(IAsyncEnumerable`1 source, TimeSpan idleTimeout, CancellationToken ct)+System.Threading.Tasks.Sources.IValueTaskSource<System.Boolean>.GetResult()    at Wolverine.SalesforcePubSub.Internals.SalesforceListener.ProcessStreamAsync(ISubscriptionTransport transport, CancellationToken ct) in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\SalesforceListener.cs:line 178    at Wolverine.SalesforcePubSub.Internals.SalesforceListener.ProcessStreamAsync(ISubscriptionTransport transport, CancellationToken ct) in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\SalesforceListener.cs:line 178    at Wolverine.SalesforcePubSub.Internals.SalesforceListener.RunAsync(CancellationToken ct) in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\SalesforceListener.cs:line 161
+19:16:19 dbug: Wolverine.SalesforcePubSub.Internals.SalesforceListener[0] Reconnecting listener for CM_Test_Event_One; resuming from the server-side commit checkpoint (in-memory handled watermark 3503830 is not used for MES).
+19:16:19 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started OpenStream for CM_Test_Event_One
+19:16:19 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished OpenStream for CM_Test_Event_One
+19:16:19 dbug: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Sending ManagedFetchRequest for CM_Test_Event_One, FetchCount: 10
+19:16:19 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started WriteToStream for CM_Test_Event_One
+19:16:19 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished WriteToStream for CM_Test_Event_One
+19:16:19 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+19:16:20 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started CompleteStream for CM_Test_Event_One
+19:16:20 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished CompleteStream for CM_Test_Event_One
+19:16:20 warn: Wolverine.SalesforcePubSub.Internals.SalesforceListener[0] RpcException in resource: CM_Test_Event_One, ConsecutiveErrors: 2, SinceLastSuccess: 00:02:00.0777910 Grpc.Core.RpcException: Status(StatusCode="AlreadyExists", Detail="An active managed subscription with the same ID already exists. If a previous subscription with the same ID was stopped, there can be a delay before it expires. Try subscribing again later. rpcId: 10b04201-e2b3-4d0d-ac71-05733f5def2b")    at Grpc.Net.Client.Internal.HttpContentClientStreamReader`2.MoveNextCore(CancellationToken cancellationToken)    at Wolverine.SalesforcePubSub.Internals.ManagedEventSubscriptionTransport.ReadAsync(CancellationToken ct)+MoveNext() in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\ManagedEventSubscriptionTransport.cs:line 55    at Wolverine.SalesforcePubSub.Internals.ManagedEventSubscriptionTransport.ReadAsync(CancellationToken ct)+System.Threading.Tasks.Sources.IValueTaskSource<System.Boolean>.GetResult()    at System.Threading.Tasks.ValueTask`1.ValueTaskSourceAsTask.<>c.<.cctor>b__4_0(Object state) --- End of stack trace from previous location ---    at Wolverine.SalesforcePubSub.Internals.SalesforceListener.WithIdleTimeout(IAsyncEnumerable`1 source, TimeSpan idleTimeout, CancellationToken ct)+MoveNext() in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\SalesforceListener.cs:line 352    at Wolverine.SalesforcePubSub.Internals.SalesforceListener.WithIdleTimeout(IAsyncEnumerable`1 source, TimeSpan idleTimeout, CancellationToken ct)+MoveNext() in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\SalesforceListener.cs:line 369    at Wolverine.SalesforcePubSub.Internals.SalesforceListener.WithIdleTimeout(IAsyncEnumerable`1 source, TimeSpan idleTimeout, CancellationToken ct)+System.Threading.Tasks.Sources.IValueTaskSource<System.Boolean>.GetResult()    at Wolverine.SalesforcePubSub.Internals.SalesforceListener.ProcessStreamAsync(ISubscriptionTransport transport, CancellationToken ct) in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\SalesforceListener.cs:line 178    at Wolverine.SalesforcePubSub.Internals.SalesforceListener.ProcessStreamAsync(ISubscriptionTransport transport, CancellationToken ct) in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\SalesforceListener.cs:line 178    at Wolverine.SalesforcePubSub.Internals.SalesforceListener.RunAsync(CancellationToken ct) in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\SalesforceListener.cs:line 161
+19:16:20 dbug: Wolverine.SalesforcePubSub.Internals.DefaultBackoffStrategy[0] Backing off for 00:00:15 for resource: CM_Test_Event_One
+19:16:35 dbug: Wolverine.SalesforcePubSub.Internals.DefaultBackoffStrategy[0] Completed backoff of 00:00:15 for resource: CM_Test_Event_One
+19:16:35 dbug: Wolverine.SalesforcePubSub.Internals.SalesforceListener[0] Reconnecting listener for CM_Test_Event_One; resuming from the server-side commit checkpoint (in-memory handled watermark 3503830 is not used for MES).
+19:16:35 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started OpenStream for CM_Test_Event_One
+19:16:35 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished OpenStream for CM_Test_Event_One
+19:16:35 dbug: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Sending ManagedFetchRequest for CM_Test_Event_One, FetchCount: 10
+19:16:35 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started WriteToStream for CM_Test_Event_One
+19:16:35 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished WriteToStream for CM_Test_Event_One
+19:16:35 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+19:17:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+19:17:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+19:18:35 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+19:18:35 info: Wolverine.SalesforcePubSub.Internals.SalesforceListener[0] Stream recovered for CM_Test_Event_One after 2 consecutive error(s); ~00:04:15.6702096 since last successful response.
+19:18:35 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+19:19:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+19:19:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+19:20:35 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+19:20:35 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+19:21:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+19:21:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+19:22:35 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+19:22:35 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+19:23:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+19:23:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+19:24:35 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+19:24:35 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+19:25:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+19:25:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+19:26:35 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+19:26:35 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+19:27:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+19:27:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+19:28:35 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+19:28:35 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+19:29:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+19:29:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+19:30:35 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+19:30:35 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+19:31:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+19:31:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+19:32:35 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+19:32:35 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+19:33:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+19:33:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+19:34:35 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+19:34:35 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+19:35:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+19:35:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+19:36:35 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+19:36:35 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+19:37:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+19:37:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+19:38:35 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+19:38:35 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+19:39:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+19:39:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+19:40:35 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+19:40:35 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+19:41:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+19:41:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+19:42:35 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+19:42:35 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+19:43:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+19:43:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+19:44:35 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+19:44:35 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+19:45:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+19:45:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+19:46:35 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+19:46:35 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+19:47:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+19:47:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+19:48:35 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started CompleteStream for CM_Test_Event_One
+19:48:35 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished CompleteStream for CM_Test_Event_One
+19:48:35 warn: Wolverine.SalesforcePubSub.Internals.SalesforceListener[0] RpcException in resource: CM_Test_Event_One, ConsecutiveErrors: 1, SinceLastSuccess: 00:01:59.9517415 Grpc.Core.RpcException: Status(StatusCode="DeadlineExceeded", Detail="No CommitReplayRequests sent in the last 1800 seconds. Closing managed subscription. rpcId: e0e11174-1181-4ea0-92f5-58cb00f255ef")    at Grpc.Net.Client.Internal.HttpContentClientStreamReader`2.MoveNextCore(CancellationToken cancellationToken)    at Wolverine.SalesforcePubSub.Internals.ManagedEventSubscriptionTransport.ReadAsync(CancellationToken ct)+MoveNext() in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\ManagedEventSubscriptionTransport.cs:line 55    at Wolverine.SalesforcePubSub.Internals.ManagedEventSubscriptionTransport.ReadAsync(CancellationToken ct)+System.Threading.Tasks.Sources.IValueTaskSource<System.Boolean>.GetResult()    at System.Threading.Tasks.ValueTask`1.ValueTaskSourceAsTask.<>c.<.cctor>b__4_0(Object state) --- End of stack trace from previous location ---    at Wolverine.SalesforcePubSub.Internals.SalesforceListener.WithIdleTimeout(IAsyncEnumerable`1 source, TimeSpan idleTimeout, CancellationToken ct)+MoveNext() in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\SalesforceListener.cs:line 352    at Wolverine.SalesforcePubSub.Internals.SalesforceListener.WithIdleTimeout(IAsyncEnumerable`1 source, TimeSpan idleTimeout, CancellationToken ct)+MoveNext() in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\SalesforceListener.cs:line 369    at Wolverine.SalesforcePubSub.Internals.SalesforceListener.WithIdleTimeout(IAsyncEnumerable`1 source, TimeSpan idleTimeout, CancellationToken ct)+System.Threading.Tasks.Sources.IValueTaskSource<System.Boolean>.GetResult()    at Wolverine.SalesforcePubSub.Internals.SalesforceListener.ProcessStreamAsync(ISubscriptionTransport transport, CancellationToken ct) in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\SalesforceListener.cs:line 178    at Wolverine.SalesforcePubSub.Internals.SalesforceListener.ProcessStreamAsync(ISubscriptionTransport transport, CancellationToken ct) in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\SalesforceListener.cs:line 178    at Wolverine.SalesforcePubSub.Internals.SalesforceListener.RunAsync(CancellationToken ct) in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\SalesforceListener.cs:line 161
+19:48:35 dbug: Wolverine.SalesforcePubSub.Internals.SalesforceListener[0] Reconnecting listener for CM_Test_Event_One; resuming from the server-side commit checkpoint (in-memory handled watermark 3503830 is not used for MES).
+19:48:35 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started OpenStream for CM_Test_Event_One
+19:48:35 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished OpenStream for CM_Test_Event_One
+19:48:35 dbug: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Sending ManagedFetchRequest for CM_Test_Event_One, FetchCount: 10
+19:48:35 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started WriteToStream for CM_Test_Event_One
+19:48:36 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished WriteToStream for CM_Test_Event_One
+19:48:36 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+19:48:36 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started CompleteStream for CM_Test_Event_One
+19:48:36 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished CompleteStream for CM_Test_Event_One
+19:48:36 warn: Wolverine.SalesforcePubSub.Internals.SalesforceListener[0] RpcException in resource: CM_Test_Event_One, ConsecutiveErrors: 2, SinceLastSuccess: 00:02:00.7194826 Grpc.Core.RpcException: Status(StatusCode="AlreadyExists", Detail="An active managed subscription with the same ID already exists. If a previous subscription with the same ID was stopped, there can be a delay before it expires. Try subscribing again later. rpcId: e06efe55-25cf-416a-99f6-4ba7d67a4c21")    at Grpc.Net.Client.Internal.HttpContentClientStreamReader`2.MoveNextCore(CancellationToken cancellationToken)    at Wolverine.SalesforcePubSub.Internals.ManagedEventSubscriptionTransport.ReadAsync(CancellationToken ct)+MoveNext() in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\ManagedEventSubscriptionTransport.cs:line 55    at Wolverine.SalesforcePubSub.Internals.ManagedEventSubscriptionTransport.ReadAsync(CancellationToken ct)+System.Threading.Tasks.Sources.IValueTaskSource<System.Boolean>.GetResult()    at System.Threading.Tasks.ValueTask`1.ValueTaskSourceAsTask.<>c.<.cctor>b__4_0(Object state) --- End of stack trace from previous location ---    at Wolverine.SalesforcePubSub.Internals.SalesforceListener.WithIdleTimeout(IAsyncEnumerable`1 source, TimeSpan idleTimeout, CancellationToken ct)+MoveNext() in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\SalesforceListener.cs:line 352    at Wolverine.SalesforcePubSub.Internals.SalesforceListener.WithIdleTimeout(IAsyncEnumerable`1 source, TimeSpan idleTimeout, CancellationToken ct)+MoveNext() in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\SalesforceListener.cs:line 369    at Wolverine.SalesforcePubSub.Internals.SalesforceListener.WithIdleTimeout(IAsyncEnumerable`1 source, TimeSpan idleTimeout, CancellationToken ct)+System.Threading.Tasks.Sources.IValueTaskSource<System.Boolean>.GetResult()    at Wolverine.SalesforcePubSub.Internals.SalesforceListener.ProcessStreamAsync(ISubscriptionTransport transport, CancellationToken ct) in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\SalesforceListener.cs:line 178    at Wolverine.SalesforcePubSub.Internals.SalesforceListener.ProcessStreamAsync(ISubscriptionTransport transport, CancellationToken ct) in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\SalesforceListener.cs:line 178    at Wolverine.SalesforcePubSub.Internals.SalesforceListener.RunAsync(CancellationToken ct) in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\SalesforceListener.cs:line 161
+19:48:36 dbug: Wolverine.SalesforcePubSub.Internals.DefaultBackoffStrategy[0] Backing off for 00:00:15 for resource: CM_Test_Event_One
+19:48:51 dbug: Wolverine.SalesforcePubSub.Internals.DefaultBackoffStrategy[0] Completed backoff of 00:00:15 for resource: CM_Test_Event_One
+19:48:51 dbug: Wolverine.SalesforcePubSub.Internals.SalesforceListener[0] Reconnecting listener for CM_Test_Event_One; resuming from the server-side commit checkpoint (in-memory handled watermark 3503830 is not used for MES).
+19:48:51 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started OpenStream for CM_Test_Event_One
+19:48:51 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished OpenStream for CM_Test_Event_One
+19:48:51 dbug: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Sending ManagedFetchRequest for CM_Test_Event_One, FetchCount: 10
+19:48:51 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started WriteToStream for CM_Test_Event_One
+19:48:51 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished WriteToStream for CM_Test_Event_One
+19:48:51 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+19:49:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+19:49:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+19:50:52 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+19:50:52 info: Wolverine.SalesforcePubSub.Internals.SalesforceListener[0] Stream recovered for CM_Test_Event_One after 2 consecutive error(s); ~00:04:16.3088234 since last successful response.
+19:50:52 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+19:51:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+19:51:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+19:52:52 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+19:52:52 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+19:53:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+19:53:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+19:54:52 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+19:54:52 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+19:55:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+19:55:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+19:56:52 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+19:56:52 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+19:57:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+19:57:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+19:58:52 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+19:58:52 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+19:59:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+19:59:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+20:00:52 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+20:00:52 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+20:01:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+20:01:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+20:02:52 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+20:02:52 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+20:03:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+20:03:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+20:04:52 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+20:04:52 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+20:05:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+20:05:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+20:06:52 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+20:06:52 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+20:07:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished MoveNext-ResponseReceived for /event/CM_Test_Event_Two__e
+20:07:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+20:08:17 info: Wolverine.Runtime.WolverineRuntime[0] Application stopping signal received
+20:08:17 info: Microsoft.Hosting.Lifetime[0] Application is shutting down...
+20:08:17 info: Wolverine.Transports.ListeningAgent[0] Stopped message listener at stub://replies/
+20:08:17 dbug: Wolverine.SalesforcePubSub.Internals.SalesforceListener[1] gRPC stream cancelled for /event/CM_Test_Event_Two__e Grpc.Core.RpcException: Status(StatusCode="Cancelled", Detail="Call canceled by the client.", DebugException="System.OperationCanceledException: The operation was canceled.")  ---> System.OperationCanceledException: The operation was canceled.    --- End of inner exception stack trace ---    at Grpc.Net.Client.Internal.HttpContentClientStreamReader`2.MoveNextCore(CancellationToken cancellationToken)    at Wolverine.SalesforcePubSub.Internals.TopicTransport.ReadAsync(CancellationToken ct)+MoveNext() in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\TopicTransport.cs:line 62
+20:08:17 dbug: Wolverine.SalesforcePubSub.Internals.SalesforceListener[1] gRPC stream cancelled for CM_Test_Event_One Grpc.Core.RpcException: Status(StatusCode="Cancelled", Detail="Call canceled by the client.", DebugException="System.OperationCanceledException: The operation was canceled.")  ---> System.OperationCanceledException: The operation was canceled.    --- End of inner exception stack trace ---    at Grpc.Net.Client.Internal.HttpContentClientStreamReader`2.MoveNextCore(CancellationToken cancellationToken)    at Wolverine.SalesforcePubSub.Internals.ManagedEventSubscriptionTransport.ReadAsync(CancellationToken ct)+MoveNext() in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\ManagedEventSubscriptionTransport.cs:line 55
+20:08:17 info: Wolverine.SalesforcePubSub.Internals.SalesforceListener[0] Salesforce listener stopped for resource: CM_Test_Event_One
+20:08:17 info: Wolverine.SalesforcePubSub.Internals.SalesforceListener[0] Salesforce listener stopped for resource: /event/CM_Test_Event_Two__e
+20:08:17 info: Wolverine.Transports.ListeningAgent[0] Stopped message listener at sfpubsub://topic/%2Fevent%2FCM_Test_Event_Two__e
+20:08:17 info: Wolverine.Transports.ListeningAgent[0] Stopped message listener at sfpubsub://mes/CM_Test_Event_One
+
+Process finished with exit code 0.
+

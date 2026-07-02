@@ -1,0 +1,200 @@
+08:51:06 info: Wolverine.Runtime.WolverineRuntime[0] Exporting Open Telemetry metrics from Wolverine with name Wolverine:WolverineFxContrib.SalesforcePubSub.TestHost, version 6.12.0.0
+08:51:06 info: Wolverine.Runtime.WolverineRuntime[0] Starting Wolverine messaging for application assembly WolverineFxContrib.SalesforcePubSub.TestHost, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null
+08:51:06 info: WolverineFxContrib.SalesforcePubSub.TestHost.PublisherWorker[0] Publisher disabled (or no events configured); host is listen-only.
+08:51:06 info: Wolverine.Runtime.WolverineRuntime[0] The Wolverine code generation mode is Dynamic. This is suitable for development, but you may want to opt into other options for production usage to reduce start up time and resource utilization.
+08:51:06 info: Wolverine.Runtime.WolverineRuntime[0] See https://wolverine.netlify.app/guide/codegen.html for more information
+08:51:06 info: Wolverine.Configuration.HandlerDiscovery[0] Searching assembly Wolverine.RuntimeCompilation, Version=6.12.0.0, Culture=neutral, PublicKeyToken=null for Wolverine message handlers
+08:51:06 info: Wolverine.Configuration.HandlerDiscovery[0] Searching assembly WolverineFxContrib.SalesforcePubSub.TestHost, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null for Wolverine message handlers
+08:51:06 info: Wolverine.Runtime.WolverineRuntime[0] Wolverine assigned node id for envelope persistence is 386231424
+08:51:06 info: Wolverine.Transports.ListeningAgent[0] Started message listening at stub://replies/
+08:51:07 info: WolverineFxContrib.SalesforcePubSub.TestHost.Replay.SqlReplayIdRepository[0] SQL replay store configured. Schema: dbo, Table: SalesforceSubscriberReplay, Application: wolverine-salesforcepubsub-testhost, Instance: wolverine-testhost
+08:51:07 info: Wolverine.Transports.ListeningAgent[0] Started message listening at sfpubsub://topic/%2Fevent%2FCM_Test_Event_Two__e
+08:51:07 info: Wolverine.SalesforcePubSub.Internals.SalesforceListener[0] Starting Salesforce listener for resource: /event/CM_Test_Event_Two__e
+08:51:07 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started OpenStream for /event/CM_Test_Event_Two__e
+08:51:07 info: Microsoft.Hosting.Lifetime[0] Application started. Press Ctrl+C to shut down.
+08:51:07 info: Microsoft.Hosting.Lifetime[0] Hosting environment: Development
+08:51:07 info: Microsoft.Hosting.Lifetime[0] Content root path: C:\src\wolverine-salesforce-pubsub\host\WolverineFxContrib.SalesforcePubSub.TestHost
+08:51:07 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished OpenStream for /event/CM_Test_Event_Two__e
+08:51:07 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started GetReplayId for /event/CM_Test_Event_Two__e
+08:51:09 info: WolverineFxContrib.SalesforcePubSub.TestHost.Replay.SqlReplayIdRepository[0] Cold-start read replay id 3503678 for Topic: /event/CM_Test_Event_Two__e from SQL
+08:51:09 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished GetReplayId for /event/CM_Test_Event_Two__e
+08:51:09 dbug: Wolverine.SalesforcePubSub.Internals.SalesforceListener[2] Sending FetchRequest for topic: /event/CM_Test_Event_Two__e, FetchCount: 10, ReplayId: 3503678
+08:51:09 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started WriteToStream for /event/CM_Test_Event_Two__e
+08:51:09 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished WriteToStream for /event/CM_Test_Event_Two__e
+08:51:09 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+08:51:39 dbug: Wolverine.SalesforcePubSub.Internals.SalesforceListener[1] gRPC stream cancelled for /event/CM_Test_Event_Two__e Grpc.Core.RpcException: Status(StatusCode="Cancelled", Detail="Call canceled by the client.", DebugException="System.OperationCanceledException: The operation was canceled.")  ---> System.OperationCanceledException: The operation was canceled.    --- End of inner exception stack trace ---    at Grpc.Net.Client.Internal.HttpContentClientStreamReader`2.MoveNextCore(CancellationToken cancellationToken)    at Wolverine.SalesforcePubSub.Internals.TopicTransport.ReadAsync(CancellationToken ct)+MoveNext() in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\TopicTransport.cs:line 53
+08:51:39 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started CompleteStream for /event/CM_Test_Event_Two__e
+08:51:39 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished CompleteStream for /event/CM_Test_Event_Two__e
+08:51:40 warn: Wolverine.SalesforcePubSub.Internals.SalesforceListener[0] TimeoutException in resource: /event/CM_Test_Event_Two__e, ConsecutiveErrors: 1, SinceLastSuccess: 00:00:32.8354870
+08:51:40 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started OpenStream for /event/CM_Test_Event_Two__e
+08:51:40 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished OpenStream for /event/CM_Test_Event_Two__e
+08:51:40 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started GetReplayId for /event/CM_Test_Event_Two__e
+08:51:40 dbug: WolverineFxContrib.SalesforcePubSub.TestHost.Replay.SqlReplayIdRepository[0] Resolved replay id 3503678 for Topic: /event/CM_Test_Event_Two__e from memory
+08:51:40 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished GetReplayId for /event/CM_Test_Event_Two__e
+08:51:40 dbug: Wolverine.SalesforcePubSub.Internals.SalesforceListener[2] Sending FetchRequest for topic: /event/CM_Test_Event_Two__e, FetchCount: 10, ReplayId: 3503678
+08:51:40 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started WriteToStream for /event/CM_Test_Event_Two__e
+08:51:40 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished WriteToStream for /event/CM_Test_Event_Two__e
+08:51:40 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+08:52:06 info: WolverineFxContrib.SalesforcePubSub.TestHost.HeartbeatService[0] [heartbeat] published: [none] | handled: [none]
+08:52:10 dbug: Wolverine.SalesforcePubSub.Internals.SalesforceListener[1] gRPC stream cancelled for /event/CM_Test_Event_Two__e Grpc.Core.RpcException: Status(StatusCode="Cancelled", Detail="Call canceled by the client.", DebugException="System.OperationCanceledException: The operation was canceled.")  ---> System.OperationCanceledException: The operation was canceled.    --- End of inner exception stack trace ---    at Grpc.Net.Client.Internal.HttpContentClientStreamReader`2.MoveNextCore(CancellationToken cancellationToken)    at Wolverine.SalesforcePubSub.Internals.TopicTransport.ReadAsync(CancellationToken ct)+MoveNext() in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\TopicTransport.cs:line 53
+08:52:10 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started CompleteStream for /event/CM_Test_Event_Two__e
+08:52:10 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished CompleteStream for /event/CM_Test_Event_Two__e
+08:52:10 warn: Wolverine.SalesforcePubSub.Internals.SalesforceListener[0] TimeoutException in resource: /event/CM_Test_Event_Two__e, ConsecutiveErrors: 2, SinceLastSuccess: 00:01:03.4146820
+08:52:10 dbug: Wolverine.SalesforcePubSub.Internals.DefaultBackoffStrategy[0] Backing off for 00:00:15 for resource: /event/CM_Test_Event_Two__e
+08:52:25 dbug: Wolverine.SalesforcePubSub.Internals.DefaultBackoffStrategy[0] Completed backoff of 00:00:15 for resource: /event/CM_Test_Event_Two__e
+08:52:25 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started OpenStream for /event/CM_Test_Event_Two__e
+08:52:25 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished OpenStream for /event/CM_Test_Event_Two__e
+08:52:25 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started GetReplayId for /event/CM_Test_Event_Two__e
+08:52:25 dbug: WolverineFxContrib.SalesforcePubSub.TestHost.Replay.SqlReplayIdRepository[0] Resolved replay id 3503678 for Topic: /event/CM_Test_Event_Two__e from memory
+08:52:25 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished GetReplayId for /event/CM_Test_Event_Two__e
+08:52:25 dbug: Wolverine.SalesforcePubSub.Internals.SalesforceListener[2] Sending FetchRequest for topic: /event/CM_Test_Event_Two__e, FetchCount: 10, ReplayId: 3503678
+08:52:25 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started WriteToStream for /event/CM_Test_Event_Two__e
+08:52:25 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished WriteToStream for /event/CM_Test_Event_Two__e
+08:52:25 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+08:52:55 dbug: Wolverine.SalesforcePubSub.Internals.SalesforceListener[1] gRPC stream cancelled for /event/CM_Test_Event_Two__e Grpc.Core.RpcException: Status(StatusCode="Cancelled", Detail="Call canceled by the client.", DebugException="System.OperationCanceledException: The operation was canceled.")  ---> System.OperationCanceledException: The operation was canceled.    --- End of inner exception stack trace ---    at Grpc.Net.Client.Internal.HttpContentClientStreamReader`2.MoveNextCore(CancellationToken cancellationToken)    at Wolverine.SalesforcePubSub.Internals.TopicTransport.ReadAsync(CancellationToken ct)+MoveNext() in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\TopicTransport.cs:line 53
+08:52:56 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started CompleteStream for /event/CM_Test_Event_Two__e
+08:52:56 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished CompleteStream for /event/CM_Test_Event_Two__e
+08:52:56 warn: Wolverine.SalesforcePubSub.Internals.SalesforceListener[0] TimeoutException in resource: /event/CM_Test_Event_Two__e, ConsecutiveErrors: 3, SinceLastSuccess: 00:01:48.9750040
+08:52:56 dbug: Wolverine.SalesforcePubSub.Internals.DefaultBackoffStrategy[0] Backing off for 00:00:30 for resource: /event/CM_Test_Event_Two__e
+08:53:06 info: WolverineFxContrib.SalesforcePubSub.TestHost.HeartbeatService[0] [heartbeat] published: [none] | handled: [none]
+08:53:26 dbug: Wolverine.SalesforcePubSub.Internals.DefaultBackoffStrategy[0] Completed backoff of 00:00:30 for resource: /event/CM_Test_Event_Two__e
+08:53:26 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started OpenStream for /event/CM_Test_Event_Two__e
+08:53:26 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished OpenStream for /event/CM_Test_Event_Two__e
+08:53:26 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started GetReplayId for /event/CM_Test_Event_Two__e
+08:53:26 dbug: WolverineFxContrib.SalesforcePubSub.TestHost.Replay.SqlReplayIdRepository[0] Resolved replay id 3503678 for Topic: /event/CM_Test_Event_Two__e from memory
+08:53:26 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished GetReplayId for /event/CM_Test_Event_Two__e
+08:53:26 dbug: Wolverine.SalesforcePubSub.Internals.SalesforceListener[2] Sending FetchRequest for topic: /event/CM_Test_Event_Two__e, FetchCount: 10, ReplayId: 3503678
+08:53:26 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started WriteToStream for /event/CM_Test_Event_Two__e
+08:53:26 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished WriteToStream for /event/CM_Test_Event_Two__e
+08:53:26 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+08:53:56 dbug: Wolverine.SalesforcePubSub.Internals.SalesforceListener[1] gRPC stream cancelled for /event/CM_Test_Event_Two__e Grpc.Core.RpcException: Status(StatusCode="Cancelled", Detail="Call canceled by the client.", DebugException="System.OperationCanceledException: The operation was canceled.")  ---> System.OperationCanceledException: The operation was canceled.    --- End of inner exception stack trace ---    at Grpc.Net.Client.Internal.HttpContentClientStreamReader`2.MoveNextCore(CancellationToken cancellationToken)    at Wolverine.SalesforcePubSub.Internals.TopicTransport.ReadAsync(CancellationToken ct)+MoveNext() in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\TopicTransport.cs:line 53
+08:53:56 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started CompleteStream for /event/CM_Test_Event_Two__e
+08:53:56 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished CompleteStream for /event/CM_Test_Event_Two__e
+08:53:56 warn: Wolverine.SalesforcePubSub.Internals.SalesforceListener[0] TimeoutException in resource: /event/CM_Test_Event_Two__e, ConsecutiveErrors: 4, SinceLastSuccess: 00:02:49.5380642
+08:53:56 dbug: Wolverine.SalesforcePubSub.Internals.DefaultBackoffStrategy[0] Backing off for 00:00:45 for resource: /event/CM_Test_Event_Two__e
+08:54:06 info: WolverineFxContrib.SalesforcePubSub.TestHost.HeartbeatService[0] [heartbeat] published: [none] | handled: [none]
+08:54:41 dbug: Wolverine.SalesforcePubSub.Internals.DefaultBackoffStrategy[0] Completed backoff of 00:00:45 for resource: /event/CM_Test_Event_Two__e
+08:54:41 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started OpenStream for /event/CM_Test_Event_Two__e
+08:54:41 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished OpenStream for /event/CM_Test_Event_Two__e
+08:54:41 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started GetReplayId for /event/CM_Test_Event_Two__e
+08:54:41 dbug: WolverineFxContrib.SalesforcePubSub.TestHost.Replay.SqlReplayIdRepository[0] Resolved replay id 3503678 for Topic: /event/CM_Test_Event_Two__e from memory
+08:54:41 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished GetReplayId for /event/CM_Test_Event_Two__e
+08:54:41 dbug: Wolverine.SalesforcePubSub.Internals.SalesforceListener[2] Sending FetchRequest for topic: /event/CM_Test_Event_Two__e, FetchCount: 10, ReplayId: 3503678
+08:54:41 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started WriteToStream for /event/CM_Test_Event_Two__e
+08:54:41 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished WriteToStream for /event/CM_Test_Event_Two__e
+08:54:41 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+08:55:06 info: WolverineFxContrib.SalesforcePubSub.TestHost.HeartbeatService[0] [heartbeat] published: [none] | handled: [none]
+08:55:11 dbug: Wolverine.SalesforcePubSub.Internals.SalesforceListener[1] gRPC stream cancelled for /event/CM_Test_Event_Two__e Grpc.Core.RpcException: Status(StatusCode="Cancelled", Detail="Call canceled by the client.", DebugException="System.OperationCanceledException: The operation was canceled.")  ---> System.OperationCanceledException: The operation was canceled.    --- End of inner exception stack trace ---    at Grpc.Net.Client.Internal.HttpContentClientStreamReader`2.MoveNextCore(CancellationToken cancellationToken)    at Wolverine.SalesforcePubSub.Internals.TopicTransport.ReadAsync(CancellationToken ct)+MoveNext() in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\TopicTransport.cs:line 53
+08:55:12 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started CompleteStream for /event/CM_Test_Event_Two__e
+08:55:12 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished CompleteStream for /event/CM_Test_Event_Two__e
+08:55:12 warn: Wolverine.SalesforcePubSub.Internals.SalesforceListener[0] TimeoutException in resource: /event/CM_Test_Event_Two__e, ConsecutiveErrors: 5, SinceLastSuccess: 00:04:05.1980597
+08:55:12 dbug: Wolverine.SalesforcePubSub.Internals.DefaultBackoffStrategy[0] Backing off for 00:01:00 for resource: /event/CM_Test_Event_Two__e
+08:56:06 info: WolverineFxContrib.SalesforcePubSub.TestHost.HeartbeatService[0] [heartbeat] published: [none] | handled: [none]
+08:56:12 dbug: Wolverine.SalesforcePubSub.Internals.DefaultBackoffStrategy[0] Completed backoff of 00:01:00 for resource: /event/CM_Test_Event_Two__e
+08:56:12 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started OpenStream for /event/CM_Test_Event_Two__e
+08:56:12 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished OpenStream for /event/CM_Test_Event_Two__e
+08:56:12 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started GetReplayId for /event/CM_Test_Event_Two__e
+08:56:12 dbug: WolverineFxContrib.SalesforcePubSub.TestHost.Replay.SqlReplayIdRepository[0] Resolved replay id 3503678 for Topic: /event/CM_Test_Event_Two__e from memory
+08:56:12 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished GetReplayId for /event/CM_Test_Event_Two__e
+08:56:12 dbug: Wolverine.SalesforcePubSub.Internals.SalesforceListener[2] Sending FetchRequest for topic: /event/CM_Test_Event_Two__e, FetchCount: 10, ReplayId: 3503678
+08:56:12 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started WriteToStream for /event/CM_Test_Event_Two__e
+08:56:12 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished WriteToStream for /event/CM_Test_Event_Two__e
+08:56:12 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+08:56:42 dbug: Wolverine.SalesforcePubSub.Internals.SalesforceListener[1] gRPC stream cancelled for /event/CM_Test_Event_Two__e Grpc.Core.RpcException: Status(StatusCode="Cancelled", Detail="Call canceled by the client.", DebugException="System.OperationCanceledException: The operation was canceled.")  ---> System.OperationCanceledException: The operation was canceled.    --- End of inner exception stack trace ---    at Grpc.Net.Client.Internal.HttpContentClientStreamReader`2.MoveNextCore(CancellationToken cancellationToken)    at Wolverine.SalesforcePubSub.Internals.TopicTransport.ReadAsync(CancellationToken ct)+MoveNext() in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\TopicTransport.cs:line 53
+08:56:42 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started CompleteStream for /event/CM_Test_Event_Two__e
+08:56:42 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished CompleteStream for /event/CM_Test_Event_Two__e
+08:56:43 warn: Wolverine.SalesforcePubSub.Internals.SalesforceListener[0] TimeoutException in resource: /event/CM_Test_Event_Two__e, ConsecutiveErrors: 6, SinceLastSuccess: 00:05:35.8609963
+08:56:43 dbug: Wolverine.SalesforcePubSub.Internals.DefaultBackoffStrategy[0] Backing off for 00:01:15 for resource: /event/CM_Test_Event_Two__e
+08:57:06 info: WolverineFxContrib.SalesforcePubSub.TestHost.HeartbeatService[0] [heartbeat] published: [none] | handled: [none]
+08:57:58 dbug: Wolverine.SalesforcePubSub.Internals.DefaultBackoffStrategy[0] Completed backoff of 00:01:15 for resource: /event/CM_Test_Event_Two__e
+08:57:58 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started OpenStream for /event/CM_Test_Event_Two__e
+08:57:58 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished OpenStream for /event/CM_Test_Event_Two__e
+08:57:58 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started GetReplayId for /event/CM_Test_Event_Two__e
+08:57:58 dbug: WolverineFxContrib.SalesforcePubSub.TestHost.Replay.SqlReplayIdRepository[0] Resolved replay id 3503678 for Topic: /event/CM_Test_Event_Two__e from memory
+08:57:58 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished GetReplayId for /event/CM_Test_Event_Two__e
+08:57:58 dbug: Wolverine.SalesforcePubSub.Internals.SalesforceListener[2] Sending FetchRequest for topic: /event/CM_Test_Event_Two__e, FetchCount: 10, ReplayId: 3503678
+08:57:58 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started WriteToStream for /event/CM_Test_Event_Two__e
+08:57:58 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished WriteToStream for /event/CM_Test_Event_Two__e
+08:57:58 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+08:58:06 info: WolverineFxContrib.SalesforcePubSub.TestHost.HeartbeatService[0] [heartbeat] published: [none] | handled: [none]
+08:58:28 dbug: Wolverine.SalesforcePubSub.Internals.SalesforceListener[1] gRPC stream cancelled for /event/CM_Test_Event_Two__e Grpc.Core.RpcException: Status(StatusCode="Cancelled", Detail="Call canceled by the client.", DebugException="System.OperationCanceledException: The operation was canceled.")  ---> System.OperationCanceledException: The operation was canceled.    --- End of inner exception stack trace ---    at Grpc.Net.Client.Internal.HttpContentClientStreamReader`2.MoveNextCore(CancellationToken cancellationToken)    at Wolverine.SalesforcePubSub.Internals.TopicTransport.ReadAsync(CancellationToken ct)+MoveNext() in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\TopicTransport.cs:line 53
+08:58:28 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started CompleteStream for /event/CM_Test_Event_Two__e
+08:58:28 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished CompleteStream for /event/CM_Test_Event_Two__e
+08:58:28 warn: Wolverine.SalesforcePubSub.Internals.SalesforceListener[0] TimeoutException in resource: /event/CM_Test_Event_Two__e, ConsecutiveErrors: 7, SinceLastSuccess: 00:07:21.4364952
+08:58:28 dbug: Wolverine.SalesforcePubSub.Internals.DefaultBackoffStrategy[0] Backing off for 00:01:30 for resource: /event/CM_Test_Event_Two__e
+08:59:06 info: WolverineFxContrib.SalesforcePubSub.TestHost.HeartbeatService[0] [heartbeat] published: [none] | handled: [none]
+08:59:58 dbug: Wolverine.SalesforcePubSub.Internals.DefaultBackoffStrategy[0] Completed backoff of 00:01:30 for resource: /event/CM_Test_Event_Two__e
+08:59:58 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started OpenStream for /event/CM_Test_Event_Two__e
+08:59:58 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished OpenStream for /event/CM_Test_Event_Two__e
+08:59:58 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started GetReplayId for /event/CM_Test_Event_Two__e
+08:59:58 dbug: WolverineFxContrib.SalesforcePubSub.TestHost.Replay.SqlReplayIdRepository[0] Resolved replay id 3503678 for Topic: /event/CM_Test_Event_Two__e from memory
+08:59:58 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished GetReplayId for /event/CM_Test_Event_Two__e
+08:59:58 dbug: Wolverine.SalesforcePubSub.Internals.SalesforceListener[2] Sending FetchRequest for topic: /event/CM_Test_Event_Two__e, FetchCount: 10, ReplayId: 3503678
+08:59:58 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started WriteToStream for /event/CM_Test_Event_Two__e
+08:59:58 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished WriteToStream for /event/CM_Test_Event_Two__e
+08:59:58 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+09:00:06 info: WolverineFxContrib.SalesforcePubSub.TestHost.HeartbeatService[0] [heartbeat] published: [none] | handled: [none]
+09:00:28 dbug: Wolverine.SalesforcePubSub.Internals.SalesforceListener[1] gRPC stream cancelled for /event/CM_Test_Event_Two__e Grpc.Core.RpcException: Status(StatusCode="Cancelled", Detail="Call canceled by the client.", DebugException="System.OperationCanceledException: The operation was canceled.")  ---> System.OperationCanceledException: The operation was canceled.    --- End of inner exception stack trace ---    at Grpc.Net.Client.Internal.HttpContentClientStreamReader`2.MoveNextCore(CancellationToken cancellationToken)    at Wolverine.SalesforcePubSub.Internals.TopicTransport.ReadAsync(CancellationToken ct)+MoveNext() in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\TopicTransport.cs:line 53
+09:00:29 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started CompleteStream for /event/CM_Test_Event_Two__e
+09:00:29 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished CompleteStream for /event/CM_Test_Event_Two__e
+09:00:29 warn: Wolverine.SalesforcePubSub.Internals.SalesforceListener[0] TimeoutException in resource: /event/CM_Test_Event_Two__e, ConsecutiveErrors: 8, SinceLastSuccess: 00:09:22.1005390
+09:00:29 dbug: Wolverine.SalesforcePubSub.Internals.DefaultBackoffStrategy[0] Backing off for 00:01:45 for resource: /event/CM_Test_Event_Two__e
+09:01:06 info: WolverineFxContrib.SalesforcePubSub.TestHost.HeartbeatService[0] [heartbeat] published: [none] | handled: [none]
+09:02:06 info: WolverineFxContrib.SalesforcePubSub.TestHost.HeartbeatService[0] [heartbeat] published: [none] | handled: [none]
+09:02:14 dbug: Wolverine.SalesforcePubSub.Internals.DefaultBackoffStrategy[0] Completed backoff of 00:01:45 for resource: /event/CM_Test_Event_Two__e
+09:02:14 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started OpenStream for /event/CM_Test_Event_Two__e
+09:02:14 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished OpenStream for /event/CM_Test_Event_Two__e
+09:02:14 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started GetReplayId for /event/CM_Test_Event_Two__e
+09:02:14 dbug: WolverineFxContrib.SalesforcePubSub.TestHost.Replay.SqlReplayIdRepository[0] Resolved replay id 3503678 for Topic: /event/CM_Test_Event_Two__e from memory
+09:02:14 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished GetReplayId for /event/CM_Test_Event_Two__e
+09:02:14 dbug: Wolverine.SalesforcePubSub.Internals.SalesforceListener[2] Sending FetchRequest for topic: /event/CM_Test_Event_Two__e, FetchCount: 10, ReplayId: 3503678
+09:02:14 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started WriteToStream for /event/CM_Test_Event_Two__e
+09:02:14 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished WriteToStream for /event/CM_Test_Event_Two__e
+09:02:14 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+09:02:44 dbug: Wolverine.SalesforcePubSub.Internals.SalesforceListener[1] gRPC stream cancelled for /event/CM_Test_Event_Two__e Grpc.Core.RpcException: Status(StatusCode="Cancelled", Detail="Call canceled by the client.", DebugException="System.OperationCanceledException: The operation was canceled.")  ---> System.OperationCanceledException: The operation was canceled.    --- End of inner exception stack trace ---    at Grpc.Net.Client.Internal.HttpContentClientStreamReader`2.MoveNextCore(CancellationToken cancellationToken)    at Wolverine.SalesforcePubSub.Internals.TopicTransport.ReadAsync(CancellationToken ct)+MoveNext() in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\TopicTransport.cs:line 53
+09:02:44 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started CompleteStream for /event/CM_Test_Event_Two__e
+09:02:44 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished CompleteStream for /event/CM_Test_Event_Two__e
+09:02:44 warn: Wolverine.SalesforcePubSub.Internals.SalesforceListener[0] TimeoutException in resource: /event/CM_Test_Event_Two__e, ConsecutiveErrors: 9, SinceLastSuccess: 00:11:37.5934927
+09:02:44 dbug: Wolverine.SalesforcePubSub.Internals.DefaultBackoffStrategy[0] Backing off for 00:02:00 for resource: /event/CM_Test_Event_Two__e
+09:03:06 info: WolverineFxContrib.SalesforcePubSub.TestHost.HeartbeatService[0] [heartbeat] published: [none] | handled: [none]
+09:04:06 info: WolverineFxContrib.SalesforcePubSub.TestHost.HeartbeatService[0] [heartbeat] published: [none] | handled: [none]
+09:04:44 dbug: Wolverine.SalesforcePubSub.Internals.DefaultBackoffStrategy[0] Completed backoff of 00:02:00 for resource: /event/CM_Test_Event_Two__e
+09:04:44 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started OpenStream for /event/CM_Test_Event_Two__e
+09:04:44 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished OpenStream for /event/CM_Test_Event_Two__e
+09:04:44 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started GetReplayId for /event/CM_Test_Event_Two__e
+09:04:44 dbug: WolverineFxContrib.SalesforcePubSub.TestHost.Replay.SqlReplayIdRepository[0] Resolved replay id 3503678 for Topic: /event/CM_Test_Event_Two__e from memory
+09:04:44 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished GetReplayId for /event/CM_Test_Event_Two__e
+09:04:44 dbug: Wolverine.SalesforcePubSub.Internals.SalesforceListener[2] Sending FetchRequest for topic: /event/CM_Test_Event_Two__e, FetchCount: 10, ReplayId: 3503678
+09:04:44 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started WriteToStream for /event/CM_Test_Event_Two__e
+09:04:44 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished WriteToStream for /event/CM_Test_Event_Two__e
+09:04:44 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+09:05:06 info: WolverineFxContrib.SalesforcePubSub.TestHost.HeartbeatService[0] [heartbeat] published: [none] | handled: [none]
+09:05:14 dbug: Wolverine.SalesforcePubSub.Internals.SalesforceListener[1] gRPC stream cancelled for /event/CM_Test_Event_Two__e Grpc.Core.RpcException: Status(StatusCode="Cancelled", Detail="Call canceled by the client.", DebugException="System.OperationCanceledException: The operation was canceled.")  ---> System.OperationCanceledException: The operation was canceled.    --- End of inner exception stack trace ---    at Grpc.Net.Client.Internal.HttpContentClientStreamReader`2.MoveNextCore(CancellationToken cancellationToken)    at Wolverine.SalesforcePubSub.Internals.TopicTransport.ReadAsync(CancellationToken ct)+MoveNext() in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\TopicTransport.cs:line 53
+09:05:15 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started CompleteStream for /event/CM_Test_Event_Two__e
+09:05:15 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished CompleteStream for /event/CM_Test_Event_Two__e
+09:05:15 warn: Wolverine.SalesforcePubSub.Internals.SalesforceListener[0] TimeoutException in resource: /event/CM_Test_Event_Two__e, ConsecutiveErrors: 10, SinceLastSuccess: 00:14:08.1310803
+09:05:15 dbug: Wolverine.SalesforcePubSub.Internals.DefaultBackoffStrategy[0] Backing off for 00:02:00 for resource: /event/CM_Test_Event_Two__e
+09:06:06 info: WolverineFxContrib.SalesforcePubSub.TestHost.HeartbeatService[0] [heartbeat] published: [none] | handled: [none]
+09:07:06 info: WolverineFxContrib.SalesforcePubSub.TestHost.HeartbeatService[0] [heartbeat] published: [none] | handled: [none]
+09:07:15 dbug: Wolverine.SalesforcePubSub.Internals.DefaultBackoffStrategy[0] Completed backoff of 00:02:00 for resource: /event/CM_Test_Event_Two__e
+09:07:15 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started OpenStream for /event/CM_Test_Event_Two__e
+09:07:15 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished OpenStream for /event/CM_Test_Event_Two__e
+09:07:15 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started GetReplayId for /event/CM_Test_Event_Two__e
+09:07:15 dbug: WolverineFxContrib.SalesforcePubSub.TestHost.Replay.SqlReplayIdRepository[0] Resolved replay id 3503678 for Topic: /event/CM_Test_Event_Two__e from memory
+09:07:15 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished GetReplayId for /event/CM_Test_Event_Two__e
+09:07:15 dbug: Wolverine.SalesforcePubSub.Internals.SalesforceListener[2] Sending FetchRequest for topic: /event/CM_Test_Event_Two__e, FetchCount: 10, ReplayId: 3503678
+09:07:15 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started WriteToStream for /event/CM_Test_Event_Two__e
+09:07:15 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished WriteToStream for /event/CM_Test_Event_Two__e
+09:07:15 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started MoveNext for /event/CM_Test_Event_Two__e
+09:07:45 dbug: Wolverine.SalesforcePubSub.Internals.SalesforceListener[1] gRPC stream cancelled for /event/CM_Test_Event_Two__e Grpc.Core.RpcException: Status(StatusCode="Cancelled", Detail="Call canceled by the client.", DebugException="System.OperationCanceledException: The operation was canceled.")  ---> System.OperationCanceledException: The operation was canceled.    --- End of inner exception stack trace ---    at Grpc.Net.Client.Internal.HttpContentClientStreamReader`2.MoveNextCore(CancellationToken cancellationToken)    at Wolverine.SalesforcePubSub.Internals.TopicTransport.ReadAsync(CancellationToken ct)+MoveNext() in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\TopicTransport.cs:line 53
+09:07:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Started CompleteStream for /event/CM_Test_Event_Two__e
+09:07:46 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Finished CompleteStream for /event/CM_Test_Event_Two__e
+09:07:46 warn: Wolverine.SalesforcePubSub.Internals.SalesforceListener[0] TimeoutException in resource: /event/CM_Test_Event_Two__e, ConsecutiveErrors: 11, SinceLastSuccess: 00:16:39.1846731
+09:07:46 dbug: Wolverine.SalesforcePubSub.Internals.DefaultBackoffStrategy[0] Backing off for 00:02:00 for resource: /event/CM_Test_Event_Two__e
+09:07:51 info: Wolverine.Runtime.WolverineRuntime[0] Application stopping signal received
+09:07:51 info: Microsoft.Hosting.Lifetime[0] Application is shutting down...
+09:07:51 info: Wolverine.Transports.ListeningAgent[0] Stopped message listener at stub://replies/
+09:07:51 info: Wolverine.SalesforcePubSub.Internals.SalesforceListener[0] Salesforce listener stopped for resource: /event/CM_Test_Event_Two__e
+09:07:52 info: Wolverine.Transports.ListeningAgent[0] Stopped message listener at sfpubsub://topic/%2Fevent%2FCM_Test_Event_Two__e
+09:07:52 info: WolverineFxContrib.SalesforcePubSub.TestHost.HeartbeatService[0] [heartbeat] published: [none] | handled: [none]
+

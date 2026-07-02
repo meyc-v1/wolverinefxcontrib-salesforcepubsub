@@ -1,0 +1,227 @@
+- Force Kill
+
+C:/src/wolverine-salesforce-pubsub/host/WolverineFxContrib.SalesforcePubSub.TestHost/bin/Debug/net10.0/WolverineFxContrib.SalesforcePubSub.TestHost.exe
+11:16:49 info: Wolverine.Runtime.WolverineRuntime[0] Exporting Open Telemetry metrics from Wolverine with name Wolverine:WolverineFxContrib.SalesforcePubSub.TestHost, version 6.12.0.0
+11:16:49 info: Wolverine.Runtime.WolverineRuntime[0] Starting Wolverine messaging for application assembly WolverineFxContrib.SalesforcePubSub.TestHost, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null
+11:16:49 info: WolverineFxContrib.SalesforcePubSub.TestHost.PublisherWorker[0] Publisher started: every 00:00:15, events [CM_Test_Event_One__e].
+11:16:49 info: Wolverine.Runtime.WolverineRuntime[0] The Wolverine code generation mode is Dynamic. This is suitable for development, but you may want to opt into other options for production usage to reduce start up time and resource utilization.
+11:16:49 info: Wolverine.Runtime.WolverineRuntime[0] See https://wolverine.netlify.app/guide/codegen.html for more information
+11:16:49 info: Wolverine.Configuration.HandlerDiscovery[0] Searching assembly Wolverine.RuntimeCompilation, Version=6.12.0.0, Culture=neutral, PublicKeyToken=null for Wolverine message handlers
+11:16:49 info: Wolverine.Configuration.HandlerDiscovery[0] Searching assembly WolverineFxContrib.SalesforcePubSub.TestHost, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null for Wolverine message handlers
+11:16:49 info: Wolverine.Runtime.WolverineRuntime[0] Wolverine assigned node id for envelope persistence is -1310669795
+11:16:49 info: Wolverine.Transports.ListeningAgent[0] Started message listening at stub://replies/
+11:16:49 info: Wolverine.Transports.ListeningAgent[0] Started message listening at sfpubsub://mes/CM_Test_Event_One
+11:16:49 info: Wolverine.SalesforcePubSub.Internals.SalesforceListener[0] Starting Salesforce listener for resource: CM_Test_Event_One
+11:16:49 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started OpenStream for CM_Test_Event_One
+11:16:49 info: Microsoft.Hosting.Lifetime[0] Application started. Press Ctrl+C to shut down.
+11:16:49 info: Microsoft.Hosting.Lifetime[0] Hosting environment: Development
+11:16:49 info: Microsoft.Hosting.Lifetime[0] Content root path: C:\src\wolverine-salesforce-pubsub\host\WolverineFxContrib.SalesforcePubSub.TestHost
+11:16:49 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished OpenStream for CM_Test_Event_One
+11:16:49 dbug: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Sending ManagedFetchRequest for CM_Test_Event_One, FetchCount: 10
+11:16:49 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started WriteToStream for CM_Test_Event_One
+11:16:50 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished WriteToStream for CM_Test_Event_One
+11:16:50 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+11:17:04 info: WolverineFxContrib.SalesforcePubSub.TestHost.PublisherWorker[0] Published CM_Test_Event_One__e: msg-1-e06ceec8438a4b078a8d5dc59bb22442
+11:17:04 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+11:17:05 dbug: Wolverine.Runtime.WolverineRuntime[101] (null): Received TestEventOne#e4ecdfee-4916-46d2-a3f8-da7db0b0527f at sfpubsub://mes/CM_Test_Event_One from 
+11:17:05 dbug: Wolverine.Runtime.Handlers.HandlerGraph[0] Starting to compile chain TestEventOne
+11:17:07 dbug: Wolverine.Runtime.Handlers.HandlerGraph[0] Finished building the chain TestEventOne
+11:17:07 dbug: WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventOne[102] (null): Started processing WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventOne#e4ecdfee-4916-46d2-a3f8-da7db0b0527f
+11:17:07 info: WolverineFxContrib.SalesforcePubSub.TestHost.Handlers.TestEventOneHandler[0] Handled TestEventOne (MES) - ReplayId 3503848, CreatedById 005400000035Bg5AAE, CreatedDate 1783005424505
+11:17:07 info: WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventOne[104] Successfully processed message WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventOne#e4ecdfee-4916-46d2-a3f8-da7db0b0527f from sfpubsub://mes/CM_Test_Event_One
+11:17:07 dbug: WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventOne[103] (null): Finished processing WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventOne#e4ecdfee-4916-46d2-a3f8-da7db0b0527f, executed in 17 ms
+11:17:07 dbug: Wolverine.Runtime.WorkerQueues.InlineReceiver[202] Received message from sfpubsub://mes/CM_Test_Event_One
+11:17:07 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+11:17:19 info: WolverineFxContrib.SalesforcePubSub.TestHost.PublisherWorker[0] Published CM_Test_Event_One__e: msg-2-f23acaa234ed4e1b8ade10cff9de0271
+11:17:19 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+11:17:19 dbug: Wolverine.Runtime.WolverineRuntime[101] (null): Received TestEventOne#f11409bb-0558-427e-bc57-60d85b541a3d at sfpubsub://mes/CM_Test_Event_One from 
+11:17:19 dbug: WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventOne[102] (null): Started processing WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventOne#f11409bb-0558-427e-bc57-60d85b541a3d
+11:17:19 info: WolverineFxContrib.SalesforcePubSub.TestHost.Handlers.TestEventOneHandler[0] Handled TestEventOne (MES) - ReplayId 3503849, CreatedById 005400000035Bg5AAE, CreatedDate 1783005439320
+11:17:19 info: WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventOne[104] Successfully processed message WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventOne#f11409bb-0558-427e-bc57-60d85b541a3d from sfpubsub://mes/CM_Test_Event_One
+11:17:19 dbug: WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventOne[103] (null): Finished processing WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventOne#f11409bb-0558-427e-bc57-60d85b541a3d, executed in 0 ms
+11:17:19 dbug: Wolverine.Runtime.WorkerQueues.InlineReceiver[202] Received message from sfpubsub://mes/CM_Test_Event_One
+11:17:19 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+11:17:34 info: WolverineFxContrib.SalesforcePubSub.TestHost.PublisherWorker[0] Published CM_Test_Event_One__e: msg-3-94daa5d4af0045afaeca2fc572424790
+11:17:34 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+11:17:34 dbug: Wolverine.Runtime.WolverineRuntime[101] (null): Received TestEventOne#7f4ca5a6-51c4-488f-8629-39cb2b4d4ebb at sfpubsub://mes/CM_Test_Event_One from 
+11:17:34 dbug: WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventOne[102] (null): Started processing WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventOne#7f4ca5a6-51c4-488f-8629-39cb2b4d4ebb
+11:17:34 info: WolverineFxContrib.SalesforcePubSub.TestHost.Handlers.TestEventOneHandler[0] Handled TestEventOne (MES) - ReplayId 3503850, CreatedById 005400000035Bg5AAE, CreatedDate 1783005454341
+11:17:34 info: WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventOne[104] Successfully processed message WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventOne#7f4ca5a6-51c4-488f-8629-39cb2b4d4ebb from sfpubsub://mes/CM_Test_Event_One
+11:17:34 dbug: WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventOne[103] (null): Finished processing WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventOne#7f4ca5a6-51c4-488f-8629-39cb2b4d4ebb, executed in 0 ms
+11:17:34 dbug: Wolverine.Runtime.WorkerQueues.InlineReceiver[202] Received message from sfpubsub://mes/CM_Test_Event_One
+11:17:34 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+11:17:49 info: WolverineFxContrib.SalesforcePubSub.TestHost.HeartbeatService[0] [heartbeat] published: [CM_Test_Event_One__e=3] | handled: [TestEventOne=3 (lastReplayId 3503850)]
+11:17:49 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+11:17:49 dbug: Wolverine.Runtime.WolverineRuntime[101] (null): Received TestEventOne#b4efa976-4d6e-47bb-ba4f-249da408af4b at sfpubsub://mes/CM_Test_Event_One from 
+11:17:49 dbug: WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventOne[102] (null): Started processing WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventOne#b4efa976-4d6e-47bb-ba4f-249da408af4b
+11:17:49 info: WolverineFxContrib.SalesforcePubSub.TestHost.Handlers.TestEventOneHandler[0] Handled TestEventOne (MES) - ReplayId 3503851, CreatedById 005400000035Bg5AAE, CreatedDate 1783005469294
+11:17:49 info: WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventOne[104] Successfully processed message WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventOne#b4efa976-4d6e-47bb-ba4f-249da408af4b from sfpubsub://mes/CM_Test_Event_One
+11:17:49 dbug: WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventOne[103] (null): Finished processing WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventOne#b4efa976-4d6e-47bb-ba4f-249da408af4b, executed in 0 ms
+11:17:49 dbug: Wolverine.Runtime.WorkerQueues.InlineReceiver[202] Received message from sfpubsub://mes/CM_Test_Event_One
+11:17:49 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+11:17:49 info: WolverineFxContrib.SalesforcePubSub.TestHost.PublisherWorker[0] Published CM_Test_Event_One__e: msg-4-ccac16b3788c498da6f39508ddd1fd9c
+11:18:04 info: WolverineFxContrib.SalesforcePubSub.TestHost.PublisherWorker[0] Published CM_Test_Event_One__e: msg-5-9e3c7d6db8284bac98d0b432254431c9
+11:18:04 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+11:18:04 dbug: Wolverine.Runtime.WolverineRuntime[101] (null): Received TestEventOne#a270fb6b-4c31-49f1-85b3-661c9a7856ed at sfpubsub://mes/CM_Test_Event_One from 
+11:18:04 dbug: WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventOne[102] (null): Started processing WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventOne#a270fb6b-4c31-49f1-85b3-661c9a7856ed
+11:18:04 info: WolverineFxContrib.SalesforcePubSub.TestHost.Handlers.TestEventOneHandler[0] Handled TestEventOne (MES) - ReplayId 3503852, CreatedById 005400000035Bg5AAE, CreatedDate 1783005484262
+11:18:04 info: WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventOne[104] Successfully processed message WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventOne#a270fb6b-4c31-49f1-85b3-661c9a7856ed from sfpubsub://mes/CM_Test_Event_One
+11:18:04 dbug: WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventOne[103] (null): Finished processing WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventOne#a270fb6b-4c31-49f1-85b3-661c9a7856ed, executed in 0 ms
+11:18:04 dbug: Wolverine.Runtime.WorkerQueues.InlineReceiver[202] Received message from sfpubsub://mes/CM_Test_Event_One
+11:18:04 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+11:18:19 info: WolverineFxContrib.SalesforcePubSub.TestHost.PublisherWorker[0] Published CM_Test_Event_One__e: msg-6-28bfc906902d462d80bf3e6ac8f0462b
+11:18:19 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+11:18:19 dbug: Wolverine.Runtime.WolverineRuntime[101] (null): Received TestEventOne#658afb46-f6d2-4b01-9654-840c2dce447e at sfpubsub://mes/CM_Test_Event_One from 
+11:18:19 dbug: WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventOne[102] (null): Started processing WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventOne#658afb46-f6d2-4b01-9654-840c2dce447e
+11:18:19 info: WolverineFxContrib.SalesforcePubSub.TestHost.Handlers.TestEventOneHandler[0] Handled TestEventOne (MES) - ReplayId 3503853, CreatedById 005400000035Bg5AAE, CreatedDate 1783005499322
+11:18:19 info: WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventOne[104] Successfully processed message WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventOne#658afb46-f6d2-4b01-9654-840c2dce447e from sfpubsub://mes/CM_Test_Event_One
+11:18:19 dbug: WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventOne[103] (null): Finished processing WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventOne#658afb46-f6d2-4b01-9654-840c2dce447e, executed in 0 ms
+11:18:19 dbug: Wolverine.Runtime.WorkerQueues.InlineReceiver[202] Received message from sfpubsub://mes/CM_Test_Event_One
+11:18:19 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+11:18:34 info: WolverineFxContrib.SalesforcePubSub.TestHost.PublisherWorker[0] Published CM_Test_Event_One__e: msg-7-73fdc2682be64525b350e300bbf40813
+11:18:34 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+11:18:34 dbug: Wolverine.Runtime.WolverineRuntime[101] (null): Received TestEventOne#620c55a1-c48a-42d4-bd93-55ead1da63aa at sfpubsub://mes/CM_Test_Event_One from 
+11:18:34 dbug: WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventOne[102] (null): Started processing WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventOne#620c55a1-c48a-42d4-bd93-55ead1da63aa
+11:18:34 info: WolverineFxContrib.SalesforcePubSub.TestHost.Handlers.TestEventOneHandler[0] Handled TestEventOne (MES) - ReplayId 3503854, CreatedById 005400000035Bg5AAE, CreatedDate 1783005514288
+11:18:34 info: WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventOne[104] Successfully processed message WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventOne#620c55a1-c48a-42d4-bd93-55ead1da63aa from sfpubsub://mes/CM_Test_Event_One
+11:18:34 dbug: WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventOne[103] (null): Finished processing WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventOne#620c55a1-c48a-42d4-bd93-55ead1da63aa, executed in 0 ms
+11:18:34 dbug: Wolverine.Runtime.WorkerQueues.InlineReceiver[202] Received message from sfpubsub://mes/CM_Test_Event_One
+11:18:34 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+11:18:49 info: WolverineFxContrib.SalesforcePubSub.TestHost.HeartbeatService[0] [heartbeat] published: [CM_Test_Event_One__e=7] | handled: [TestEventOne=7 (lastReplayId 3503854)]
+11:18:49 info: WolverineFxContrib.SalesforcePubSub.TestHost.PublisherWorker[0] Published CM_Test_Event_One__e: msg-8-8e77ea839a0c4c2abc5c87de673145b9
+11:18:49 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+11:18:49 dbug: Wolverine.Runtime.WolverineRuntime[101] (null): Received TestEventOne#4c1a76dc-699d-4a9f-be13-e26a39445f02 at sfpubsub://mes/CM_Test_Event_One from 
+11:18:49 dbug: WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventOne[102] (null): Started processing WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventOne#4c1a76dc-699d-4a9f-be13-e26a39445f02
+11:18:49 info: WolverineFxContrib.SalesforcePubSub.TestHost.Handlers.TestEventOneHandler[0] Handled TestEventOne (MES) - ReplayId 3503855, CreatedById 005400000035Bg5AAE, CreatedDate 1783005529269
+11:18:49 info: WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventOne[104] Successfully processed message WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventOne#4c1a76dc-699d-4a9f-be13-e26a39445f02 from sfpubsub://mes/CM_Test_Event_One
+11:18:49 dbug: WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventOne[103] (null): Finished processing WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventOne#4c1a76dc-699d-4a9f-be13-e26a39445f02, executed in 0 ms
+11:18:49 dbug: Wolverine.Runtime.WorkerQueues.InlineReceiver[202] Received message from sfpubsub://mes/CM_Test_Event_One
+11:18:49 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+11:19:04 info: WolverineFxContrib.SalesforcePubSub.TestHost.PublisherWorker[0] Published CM_Test_Event_One__e: msg-9-c4bd91bee487463d94723b0fa56ff03c
+11:19:04 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+11:19:04 dbug: Wolverine.Runtime.WolverineRuntime[101] (null): Received TestEventOne#8a28a5bb-00aa-4a2d-b0b8-9d18e81bf492 at sfpubsub://mes/CM_Test_Event_One from 
+11:19:04 dbug: WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventOne[102] (null): Started processing WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventOne#8a28a5bb-00aa-4a2d-b0b8-9d18e81bf492
+11:19:04 info: WolverineFxContrib.SalesforcePubSub.TestHost.Handlers.TestEventOneHandler[0] Handled TestEventOne (MES) - ReplayId 3503856, CreatedById 005400000035Bg5AAE, CreatedDate 1783005544415
+11:19:04 info: WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventOne[104] Successfully processed message WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventOne#8a28a5bb-00aa-4a2d-b0b8-9d18e81bf492 from sfpubsub://mes/CM_Test_Event_One
+11:19:04 dbug: WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventOne[103] (null): Finished processing WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventOne#8a28a5bb-00aa-4a2d-b0b8-9d18e81bf492, executed in 0 ms
+11:19:04 dbug: Wolverine.Runtime.WorkerQueues.InlineReceiver[202] Received message from sfpubsub://mes/CM_Test_Event_One
+11:19:04 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+11:19:19 info: WolverineFxContrib.SalesforcePubSub.TestHost.PublisherWorker[0] Published CM_Test_Event_One__e: msg-10-43d6f4dbed144745bd1a9f841cc7a01f
+11:19:19 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+11:19:19 dbug: Wolverine.Runtime.WolverineRuntime[101] (null): Received TestEventOne#13538e7a-3f57-44bd-aaf0-cfff0f159e69 at sfpubsub://mes/CM_Test_Event_One from 
+11:19:19 dbug: WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventOne[102] (null): Started processing WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventOne#13538e7a-3f57-44bd-aaf0-cfff0f159e69
+11:19:19 info: WolverineFxContrib.SalesforcePubSub.TestHost.Handlers.TestEventOneHandler[0] Handled TestEventOne (MES) - ReplayId 3503857, CreatedById 005400000035Bg5AAE, CreatedDate 1783005559583
+11:19:19 info: WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventOne[104] Successfully processed message WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventOne#13538e7a-3f57-44bd-aaf0-cfff0f159e69 from sfpubsub://mes/CM_Test_Event_One
+11:19:19 dbug: WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventOne[103] (null): Finished processing WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventOne#13538e7a-3f57-44bd-aaf0-cfff0f159e69, executed in 0 ms
+11:19:19 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Committing ReplayId: 3503857 for CM_Test_Event_One
+11:19:19 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started CommitReplayId for CM_Test_Event_One
+11:19:19 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished CommitReplayId for CM_Test_Event_One
+11:19:19 dbug: Wolverine.SalesforcePubSub.Internals.SalesforceListener[0] Committed replay position 3503857 for CM_Test_Event_One (keepAlive: False).
+11:19:19 dbug: Wolverine.Runtime.WorkerQueues.InlineReceiver[202] Received message from sfpubsub://mes/CM_Test_Event_One
+11:19:19 dbug: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Sending ManagedFetchRequest for CM_Test_Event_One, FetchCount: 10
+11:19:19 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started WriteToStream for CM_Test_Event_One
+11:19:19 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished WriteToStream for CM_Test_Event_One
+11:19:19 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+11:19:19 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+11:19:19 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[2] Commit acknowledged for CM_Test_Event_One, ReplayId: 3503857
+11:19:19 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+11:19:34 info: WolverineFxContrib.SalesforcePubSub.TestHost.PublisherWorker[0] Published CM_Test_Event_One__e: msg-11-daa723a2084e42439b6c91893b27b574
+11:19:34 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+11:19:34 dbug: Wolverine.Runtime.WolverineRuntime[101] (null): Received TestEventOne#3738e830-6daf-4a5c-92b1-a3b595bbb682 at sfpubsub://mes/CM_Test_Event_One from 
+11:19:34 dbug: WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventOne[102] (null): Started processing WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventOne#3738e830-6daf-4a5c-92b1-a3b595bbb682
+11:19:34 info: WolverineFxContrib.SalesforcePubSub.TestHost.Handlers.TestEventOneHandler[0] Handled TestEventOne (MES) - ReplayId 3503858, CreatedById 005400000035Bg5AAE, CreatedDate 1783005574280
+11:19:34 info: WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventOne[104] Successfully processed message WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventOne#3738e830-6daf-4a5c-92b1-a3b595bbb682 from sfpubsub://mes/CM_Test_Event_One
+11:19:34 dbug: WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventOne[103] (null): Finished processing WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventOne#3738e830-6daf-4a5c-92b1-a3b595bbb682, executed in 0 ms
+11:19:34 dbug: Wolverine.Runtime.WorkerQueues.InlineReceiver[202] Received message from sfpubsub://mes/CM_Test_Event_One
+11:19:34 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+
+Process finished with exit code -1.
+
+
+
+
+
+- Restart
+
+C:/src/wolverine-salesforce-pubsub/host/WolverineFxContrib.SalesforcePubSub.TestHost/bin/Debug/net10.0/WolverineFxContrib.SalesforcePubSub.TestHost.exe
+11:19:49 info: Wolverine.Runtime.WolverineRuntime[0] Exporting Open Telemetry metrics from Wolverine with name Wolverine:WolverineFxContrib.SalesforcePubSub.TestHost, version 6.12.0.0
+11:19:49 info: Wolverine.Runtime.WolverineRuntime[0] Starting Wolverine messaging for application assembly WolverineFxContrib.SalesforcePubSub.TestHost, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null
+11:19:49 info: WolverineFxContrib.SalesforcePubSub.TestHost.PublisherWorker[0] Publisher started: every 00:00:15, events [CM_Test_Event_One__e].
+11:19:49 info: Wolverine.Runtime.WolverineRuntime[0] The Wolverine code generation mode is Dynamic. This is suitable for development, but you may want to opt into other options for production usage to reduce start up time and resource utilization.
+11:19:49 info: Wolverine.Runtime.WolverineRuntime[0] See https://wolverine.netlify.app/guide/codegen.html for more information
+11:19:49 info: Wolverine.Configuration.HandlerDiscovery[0] Searching assembly Wolverine.RuntimeCompilation, Version=6.12.0.0, Culture=neutral, PublicKeyToken=null for Wolverine message handlers
+11:19:49 info: Wolverine.Configuration.HandlerDiscovery[0] Searching assembly WolverineFxContrib.SalesforcePubSub.TestHost, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null for Wolverine message handlers
+11:19:49 info: Wolverine.Runtime.WolverineRuntime[0] Wolverine assigned node id for envelope persistence is -1548882525
+11:19:49 info: Wolverine.Transports.ListeningAgent[0] Started message listening at stub://replies/
+11:19:49 info: Wolverine.Transports.ListeningAgent[0] Started message listening at sfpubsub://mes/CM_Test_Event_One
+11:19:49 info: Wolverine.SalesforcePubSub.Internals.SalesforceListener[0] Starting Salesforce listener for resource: CM_Test_Event_One
+11:19:49 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started OpenStream for CM_Test_Event_One
+11:19:49 info: Microsoft.Hosting.Lifetime[0] Application started. Press Ctrl+C to shut down.
+11:19:49 info: Microsoft.Hosting.Lifetime[0] Hosting environment: Development
+11:19:49 info: Microsoft.Hosting.Lifetime[0] Content root path: C:\src\wolverine-salesforce-pubsub\host\WolverineFxContrib.SalesforcePubSub.TestHost
+11:19:50 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished OpenStream for CM_Test_Event_One
+11:19:50 dbug: Wolverine.SalesforcePubSub.Internals.SalesforceListener[4] Sending ManagedFetchRequest for CM_Test_Event_One, FetchCount: 10
+11:19:50 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started WriteToStream for CM_Test_Event_One
+11:19:50 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished WriteToStream for CM_Test_Event_One
+11:19:50 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+11:19:51 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+11:19:52 dbug: Wolverine.Runtime.WolverineRuntime[101] (null): Received TestEventOne#3738e830-6daf-4a5c-92b1-a3b595bbb682 at sfpubsub://mes/CM_Test_Event_One from 
+11:19:52 dbug: Wolverine.Runtime.Handlers.HandlerGraph[0] Starting to compile chain TestEventOne
+11:19:54 dbug: Wolverine.Runtime.Handlers.HandlerGraph[0] Finished building the chain TestEventOne
+11:19:54 dbug: WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventOne[102] (null): Started processing WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventOne#3738e830-6daf-4a5c-92b1-a3b595bbb682
+11:19:54 info: WolverineFxContrib.SalesforcePubSub.TestHost.Handlers.TestEventOneHandler[0] Handled TestEventOne (MES) - ReplayId 3503858, CreatedById 005400000035Bg5AAE, CreatedDate 1783005574280
+11:19:54 info: WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventOne[104] Successfully processed message WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventOne#3738e830-6daf-4a5c-92b1-a3b595bbb682 from sfpubsub://mes/CM_Test_Event_One
+11:19:54 dbug: WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventOne[103] (null): Finished processing WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventOne#3738e830-6daf-4a5c-92b1-a3b595bbb682, executed in 18 ms
+11:19:54 dbug: Wolverine.Runtime.WorkerQueues.InlineReceiver[202] Received message from sfpubsub://mes/CM_Test_Event_One
+11:19:54 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+11:20:05 info: WolverineFxContrib.SalesforcePubSub.TestHost.PublisherWorker[0] Published CM_Test_Event_One__e: msg-1-21aad51284e74df29797aaf0b8e75e88
+11:20:05 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+11:20:05 dbug: Wolverine.Runtime.WolverineRuntime[101] (null): Received TestEventOne#8b9c3778-1fea-4eec-99cd-7342d7522de9 at sfpubsub://mes/CM_Test_Event_One from 
+11:20:05 dbug: WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventOne[102] (null): Started processing WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventOne#8b9c3778-1fea-4eec-99cd-7342d7522de9
+11:20:05 info: WolverineFxContrib.SalesforcePubSub.TestHost.Handlers.TestEventOneHandler[0] Handled TestEventOne (MES) - ReplayId 3503859, CreatedById 005400000035Bg5AAE, CreatedDate 1783005605245
+11:20:05 info: WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventOne[104] Successfully processed message WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventOne#8b9c3778-1fea-4eec-99cd-7342d7522de9 from sfpubsub://mes/CM_Test_Event_One
+11:20:05 dbug: WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventOne[103] (null): Finished processing WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventOne#8b9c3778-1fea-4eec-99cd-7342d7522de9, executed in 1 ms
+11:20:05 dbug: Wolverine.Runtime.WorkerQueues.InlineReceiver[202] Received message from sfpubsub://mes/CM_Test_Event_One
+11:20:05 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+11:20:19 info: WolverineFxContrib.SalesforcePubSub.TestHost.PublisherWorker[0] Published CM_Test_Event_One__e: msg-2-9ba847887b8548cc8f16b5d3c722af40
+11:20:20 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+11:20:20 dbug: Wolverine.Runtime.WolverineRuntime[101] (null): Received TestEventOne#af0a7cf9-076e-40d4-b9e5-f0dfdd57c776 at sfpubsub://mes/CM_Test_Event_One from 
+11:20:20 dbug: WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventOne[102] (null): Started processing WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventOne#af0a7cf9-076e-40d4-b9e5-f0dfdd57c776
+11:20:20 info: WolverineFxContrib.SalesforcePubSub.TestHost.Handlers.TestEventOneHandler[0] Handled TestEventOne (MES) - ReplayId 3503860, CreatedById 005400000035Bg5AAE, CreatedDate 1783005619909
+11:20:20 info: WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventOne[104] Successfully processed message WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventOne#af0a7cf9-076e-40d4-b9e5-f0dfdd57c776 from sfpubsub://mes/CM_Test_Event_One
+11:20:20 dbug: WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventOne[103] (null): Finished processing WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventOne#af0a7cf9-076e-40d4-b9e5-f0dfdd57c776, executed in 0 ms
+11:20:20 dbug: Wolverine.Runtime.WorkerQueues.InlineReceiver[202] Received message from sfpubsub://mes/CM_Test_Event_One
+11:20:20 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+11:20:34 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+11:20:35 dbug: Wolverine.Runtime.WolverineRuntime[101] (null): Received TestEventOne#046ad98a-3661-4556-95f2-a1452d8e4909 at sfpubsub://mes/CM_Test_Event_One from 
+11:20:35 dbug: WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventOne[102] (null): Started processing WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventOne#046ad98a-3661-4556-95f2-a1452d8e4909
+11:20:35 info: WolverineFxContrib.SalesforcePubSub.TestHost.Handlers.TestEventOneHandler[0] Handled TestEventOne (MES) - ReplayId 3503861, CreatedById 005400000035Bg5AAE, CreatedDate 1783005634943
+11:20:35 info: WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventOne[104] Successfully processed message WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventOne#046ad98a-3661-4556-95f2-a1452d8e4909 from sfpubsub://mes/CM_Test_Event_One
+11:20:35 dbug: WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventOne[103] (null): Finished processing WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventOne#046ad98a-3661-4556-95f2-a1452d8e4909, executed in 0 ms
+11:20:35 dbug: Wolverine.Runtime.WorkerQueues.InlineReceiver[202] Received message from sfpubsub://mes/CM_Test_Event_One
+11:20:35 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+11:20:35 info: WolverineFxContrib.SalesforcePubSub.TestHost.PublisherWorker[0] Published CM_Test_Event_One__e: msg-3-cd488a823f8e464db8f2dca92fb63098
+11:20:49 info: WolverineFxContrib.SalesforcePubSub.TestHost.HeartbeatService[0] [heartbeat] published: [CM_Test_Event_One__e=3] | handled: [TestEventOne=4 (lastReplayId 3503861)]
+11:20:49 info: WolverineFxContrib.SalesforcePubSub.TestHost.PublisherWorker[0] Published CM_Test_Event_One__e: msg-4-a6e01764161a4c6fac752bddbcd4d0d3
+11:20:49 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished MoveNext-ResponseReceived for CM_Test_Event_One
+11:20:49 dbug: Wolverine.Runtime.WolverineRuntime[101] (null): Received TestEventOne#014d97d4-431f-4ee0-bcbd-565f487de1ba at sfpubsub://mes/CM_Test_Event_One from 
+11:20:49 dbug: WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventOne[102] (null): Started processing WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventOne#014d97d4-431f-4ee0-bcbd-565f487de1ba
+11:20:49 info: WolverineFxContrib.SalesforcePubSub.TestHost.Handlers.TestEventOneHandler[0] Handled TestEventOne (MES) - ReplayId 3503862, CreatedById 005400000035Bg5AAE, CreatedDate 1783005649913
+11:20:49 info: WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventOne[104] Successfully processed message WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventOne#014d97d4-431f-4ee0-bcbd-565f487de1ba from sfpubsub://mes/CM_Test_Event_One
+11:20:49 dbug: WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventOne[103] (null): Finished processing WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventOne#014d97d4-431f-4ee0-bcbd-565f487de1ba, executed in 0 ms
+11:20:49 dbug: Wolverine.Runtime.WorkerQueues.InlineReceiver[202] Received message from sfpubsub://mes/CM_Test_Event_One
+11:20:49 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started MoveNext for CM_Test_Event_One
+11:21:01 info: Wolverine.Runtime.WolverineRuntime[0] Application stopping signal received
+11:21:01 info: Microsoft.Hosting.Lifetime[0] Application is shutting down...
+11:21:01 info: Wolverine.Transports.ListeningAgent[0] Stopped message listener at stub://replies/
+11:21:01 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[3] Committing ReplayId: 3503862 for CM_Test_Event_One
+11:21:01 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[5] Started CommitReplayId for CM_Test_Event_One
+11:21:01 trce: Wolverine.SalesforcePubSub.Internals.SalesforceListener[6] Finished CommitReplayId for CM_Test_Event_One
+11:21:01 dbug: Wolverine.SalesforcePubSub.Internals.SalesforceListener[0] Committed replay position 3503862 for CM_Test_Event_One (keepAlive: False).
+11:21:01 dbug: Wolverine.SalesforcePubSub.Internals.SalesforceListener[1] gRPC stream cancelled for CM_Test_Event_One Grpc.Core.RpcException: Status(StatusCode="Cancelled", Detail="Call canceled by the client.", DebugException="System.OperationCanceledException: The operation was canceled.")  ---> System.OperationCanceledException: The operation was canceled.    --- End of inner exception stack trace ---    at Grpc.Net.Client.Internal.HttpContentClientStreamReader`2.MoveNextCore(CancellationToken cancellationToken)    at Wolverine.SalesforcePubSub.Internals.ManagedEventSubscriptionTransport.ReadAsync(CancellationToken ct)+MoveNext() in C:\src\wolverine-salesforce-pubsub\src\WolverineFxContrib.SalesforcePubSub\Internals\ManagedEventSubscriptionTransport.cs:line 55
+11:21:01 info: Wolverine.SalesforcePubSub.Internals.SalesforceListener[0] Salesforce listener stopped for resource: CM_Test_Event_One
+11:21:01 info: Wolverine.Transports.ListeningAgent[0] Stopped message listener at sfpubsub://mes/CM_Test_Event_One
+11:21:01 info: WolverineFxContrib.SalesforcePubSub.TestHost.HeartbeatService[0] [heartbeat] published: [CM_Test_Event_One__e=4] | handled: [TestEventOne=5 (lastReplayId 3503862)]
+
+Process finished with exit code 0.
+
