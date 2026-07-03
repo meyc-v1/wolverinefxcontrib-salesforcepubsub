@@ -7,6 +7,7 @@ using Wolverine.Configuration;
 using Wolverine.SalesforcePubSub;
 using Wolverine.SqlServer;
 using Wolverine.Transports.SharedMemory;
+using WolverineFxContrib.SalesforcePubSub.External.Salesforce;
 using WolverineFxContrib.SalesforcePubSub.TestHost;
 using WolverineFxContrib.SalesforcePubSub.TestHost.Events;
 using WolverineFxContrib.SalesforcePubSub.TestHost.Replay;
@@ -19,9 +20,16 @@ var builder = Host.CreateApplicationBuilder(args);
 builder.Configuration.AddJsonFile("appsettings.otel.json", optional: true, reloadOnChange: true);
 builder.Configuration.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
 
-var sf = builder.Configuration.GetSection("salesforceSettings").Get<SalesforceSettings>() ?? new SalesforceSettings();
-// Apply the same defaults the options pipeline does, so the bootstrap read below matches IOptions consumers.
-new SalesforceSettingsConfigurer().PostConfigure(Microsoft.Extensions.Options.Options.DefaultName, sf);
+var sf = builder.Configuration.GetSection("salesforceSettings").Get<SalesforcePubSubSettings>() ?? new SalesforcePubSubSettings();
+// Apply the same defaults the options pipeline does, then validate eagerly — nothing resolves
+// IOptions<SalesforcePubSubSettings> (this bootstrap read drives the wiring), so this is where
+// subscription config errors surface. Previously they hid until the publisher resolved the shared
+// settings class.
+var sfConfigurer = new SalesforcePubSubSettingsConfigurer();
+sfConfigurer.PostConfigure(Microsoft.Extensions.Options.Options.DefaultName, sf);
+var sfValidation = sfConfigurer.Validate(Microsoft.Extensions.Options.Options.DefaultName, sf);
+if (sfValidation.Failed)
+    throw new InvalidOperationException($"salesforceSettings validation failed: {sfValidation.FailureMessage}");
 
 // Logging + OpenTelemetry, mirroring the internal host. Console formatter/log levels come from
 // appsettings.otel.json; traces (HTTP token calls + the Pub/Sub gRPC stream) and logs export via OTLP.
@@ -47,7 +55,8 @@ builder.Services.ConfigureOpenTelemetryTracerProvider(providerBuilder =>
 // See https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/src/OpenTelemetry.Exporter.OpenTelemetryProtocol/README.md for env var info.
 builder.Services.AddOpenTelemetry().UseOtlpExporter();
 
-// Salesforce auth + REST client, mirroring the internal client (own token client; no deprecated package).
+// Salesforce auth + REST client from the External.Salesforce support lib (publisher side; the
+// transport authenticates separately via SalesforceAuthenticationTokenHandler below).
 builder.Services.AddSalesforceAuthentication(s => builder.Configuration.GetSection("salesforceAuthenticationSettings").Bind(s));
 builder.Services.AddSalesforce(s => builder.Configuration.GetSection("salesforceSettings").Bind(s));
 

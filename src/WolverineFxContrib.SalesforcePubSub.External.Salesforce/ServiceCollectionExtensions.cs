@@ -1,15 +1,16 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using WolverineFxContrib.SalesforcePubSub.TestHost.Settings;
+using WolverineFxContrib.SalesforcePubSub.External.Salesforce.Infrastructure;
+using WolverineFxContrib.SalesforcePubSub.External.Salesforce.Settings;
 
-namespace WolverineFxContrib.SalesforcePubSub.TestHost.Salesforce;
+namespace WolverineFxContrib.SalesforcePubSub.External.Salesforce;
 
 /// <summary>
 /// Registration mirroring the internal Salesforce client lib: a token client (auth) plus a bearer-authed
-/// REST client. Settings defaults + FluentValidation run via the *Configurer options bindings; Polly
-/// retry is omitted for the test host.
+/// REST client for publishing platform events. Settings defaults + FluentValidation run via the
+/// *Configurer options bindings; Polly retry is omitted.
 /// </summary>
-public static class SalesforceServiceCollectionExtensions
+public static class ServiceCollectionExtensions
 {
     /// <summary>Registers the client-credentials token client (cached) from <see cref="SalesforceAuthenticationSettings"/>.</summary>
     public static IServiceCollection AddSalesforceAuthentication(this IServiceCollection services, Action<SalesforceAuthenticationSettings> configure)

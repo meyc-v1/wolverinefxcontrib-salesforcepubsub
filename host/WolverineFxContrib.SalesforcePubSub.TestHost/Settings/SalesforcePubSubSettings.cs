@@ -5,34 +5,32 @@ using Wolverine.SalesforcePubSub;
 namespace WolverineFxContrib.SalesforcePubSub.TestHost.Settings;
 
 /// <summary>
-/// General Salesforce + pub/sub configuration, bound from the "salesforceSettings" section.
-/// (Auth — ClientId/ClientSecret/LoginUri — lives separately under "salesforceAuthenticationSettings".)
+/// Pub/sub subscription configuration, bound from the "salesforceSettings" section. (The REST
+/// publisher's BaseUri binds from the same section into the External.Salesforce lib's settings;
+/// auth — ClientId/ClientSecret/LoginUri — lives separately under "salesforceAuthenticationSettings".)
 /// </summary>
-public sealed class SalesforceSettings
+public sealed class SalesforcePubSubSettings
 {
-    /// <summary>REST data API base, e.g. https://your-org.my.salesforce.com/services/data/v64.0/ (trailing slash required).</summary>
-    public Uri BaseUri { get; set; } = null!;
-
-    /// <summary>Salesforce Pub/Sub gRPC endpoint. Defaults to the public Salesforce endpoint (see <see cref="SalesforceSettingsConfigurer"/>).</summary>
+    /// <summary>Salesforce Pub/Sub gRPC endpoint. Defaults to the public Salesforce endpoint (see <see cref="SalesforcePubSubSettingsConfigurer"/>).</summary>
     public Uri PubSubUri { get; set; } = null!;
 
     /// <summary>The subscriptions to wire as Wolverine listening endpoints.</summary>
     public List<SalesforceSubscriptionOptions> Subscriptions { get; set; } = [];
 }
 
-/// <summary>Applies defaults (PostConfigure) and validates <see cref="SalesforceSettings"/>.</summary>
-internal sealed class SalesforceSettingsConfigurer
-    : IPostConfigureOptions<SalesforceSettings>, IValidateOptions<SalesforceSettings>
+/// <summary>Applies defaults (PostConfigure) and validates <see cref="SalesforcePubSubSettings"/>.</summary>
+internal sealed class SalesforcePubSubSettingsConfigurer
+    : IPostConfigureOptions<SalesforcePubSubSettings>, IValidateOptions<SalesforcePubSubSettings>
 {
     /// <summary>The public Salesforce Pub/Sub gRPC endpoint, used when none is configured.</summary>
     public static readonly Uri DefaultPubSubUri = new("https://api.pubsub.salesforce.com:7443");
 
-    public void PostConfigure(string? name, SalesforceSettings options)
+    public void PostConfigure(string? name, SalesforcePubSubSettings options)
         => options.PubSubUri ??= DefaultPubSubUri;
 
-    public ValidateOptionsResult Validate(string? name, SalesforceSettings options)
+    public ValidateOptionsResult Validate(string? name, SalesforcePubSubSettings options)
     {
-        var res = new SalesforceSettingsValidator().Validate(options);
+        var res = new SalesforcePubSubSettingsValidator().Validate(options);
 
         return res.IsValid
             ? ValidateOptionsResult.Success
@@ -40,11 +38,10 @@ internal sealed class SalesforceSettingsConfigurer
     }
 }
 
-internal sealed class SalesforceSettingsValidator : AbstractValidator<SalesforceSettings>
+internal sealed class SalesforcePubSubSettingsValidator : AbstractValidator<SalesforcePubSubSettings>
 {
-    public SalesforceSettingsValidator()
+    public SalesforcePubSubSettingsValidator()
     {
-        RuleFor(x => x.BaseUri).NotNull();
         RuleFor(x => x.PubSubUri).NotNull();
 
         RuleForEach(x => x.Subscriptions).ChildRules(sub =>

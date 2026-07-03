@@ -27,6 +27,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\WolverineFxContrib.SalesforcePubSub\WolverineFxContrib.SalesforcePubSub.csproj" />
+    <ProjectReference Include="..\..\src\WolverineFxContrib.SalesforcePubSub.External.Salesforce\WolverineFxContrib.SalesforcePubSub.External.Salesforce.csproj" />
   </ItemGroup>
 
   <ItemGroup>

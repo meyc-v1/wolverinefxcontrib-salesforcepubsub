@@ -2,7 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using WolverineFxContrib.SalesforcePubSub.TestHost.Salesforce;
+using WolverineFxContrib.SalesforcePubSub.External.Salesforce;
 using WolverineFxContrib.SalesforcePubSub.TestHost.Settings;
 
 namespace WolverineFxContrib.SalesforcePubSub.TestHost;

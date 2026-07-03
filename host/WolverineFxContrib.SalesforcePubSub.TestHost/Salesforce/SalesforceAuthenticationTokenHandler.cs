@@ -1,4 +1,5 @@
 using Wolverine.SalesforcePubSub;
+using WolverineFxContrib.SalesforcePubSub.External.Salesforce;
 
 namespace WolverineFxContrib.SalesforcePubSub.TestHost.Salesforce;
 

@@ -1,18 +1,14 @@
 using System.Text.Json;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
-using WolverineFxContrib.SalesforcePubSub.TestHost.Settings;
+using WolverineFxContrib.SalesforcePubSub.External.Salesforce.Models;
+using WolverineFxContrib.SalesforcePubSub.External.Salesforce.Settings;
 
-namespace WolverineFxContrib.SalesforcePubSub.TestHost.Salesforce;
-
-public interface ISalesforceTokenClient
-{
-    Task<SalesforceTokenResponse> GetTokenResponseAsync(bool refresh = false);
-}
+namespace WolverineFxContrib.SalesforcePubSub.External.Salesforce.Infrastructure;
 
 /// <summary>
 /// Client-credentials token client with in-memory caching. Lifted from the internal client
-/// (Polly retry omitted for the test host).
+/// (Polly retry omitted).
 /// </summary>
 internal sealed class SalesforceTokenClient : ISalesforceTokenClient
 {

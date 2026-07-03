@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <!-- Repo-internal support lib (TestHost + IntegrationTests); not part of the published transport package. -->
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FluentValidation" Version="12.1.1" />
+    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="10.0.8" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.0" />
+  </ItemGroup>
+
+</Project>

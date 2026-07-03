@@ -7,6 +7,7 @@
   </Folder>
   <Folder Name="/src/">
     <Project Path="src/WolverineFxContrib.SalesforcePubSub/WolverineFxContrib.SalesforcePubSub.csproj" />
+    <Project Path="src/WolverineFxContrib.SalesforcePubSub.External.Salesforce/WolverineFxContrib.SalesforcePubSub.External.Salesforce.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/WolverineFxContrib.SalesforcePubSub.IntegrationTests/WolverineFxContrib.SalesforcePubSub.IntegrationTests.csproj" />

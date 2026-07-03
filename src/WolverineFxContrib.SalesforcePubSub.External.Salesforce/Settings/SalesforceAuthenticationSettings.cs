@@ -1,11 +1,11 @@
 using FluentValidation;
 using Microsoft.Extensions.Options;
 
-namespace WolverineFxContrib.SalesforcePubSub.TestHost.Settings;
+namespace WolverineFxContrib.SalesforcePubSub.External.Salesforce.Settings;
 
 /// <summary>
-/// Salesforce client-credentials auth, bound from the "salesforceAuthenticationSettings" section
-/// (in user-secrets). Mirrors the internal client's settings.
+/// Salesforce client-credentials auth for the REST publisher (typically bound from a
+/// "salesforceAuthenticationSettings" section in user-secrets). Mirrors the internal client's settings.
 /// </summary>
 public sealed class SalesforceAuthenticationSettings
 {
