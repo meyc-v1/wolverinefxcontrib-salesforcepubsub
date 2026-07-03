@@ -6,7 +6,9 @@ using Wolverine;
 using Wolverine.Configuration;
 using Wolverine.SalesforcePubSub;
 using Wolverine.SqlServer;
+using Wolverine.Transports.SharedMemory;
 using WolverineFxContrib.SalesforcePubSub.TestHost;
+using WolverineFxContrib.SalesforcePubSub.TestHost.Events;
 using WolverineFxContrib.SalesforcePubSub.TestHost.Replay;
 using WolverineFxContrib.SalesforcePubSub.TestHost.Salesforce;
 using WolverineFxContrib.SalesforcePubSub.TestHost.Settings;
@@ -90,22 +92,11 @@ builder.UseWolverine(opts =>
         if (!sub.Enabled)
             continue;
 
-        // Single-type (messageType, seals the map) vs map-style (events list) registration.
-        var singleType = string.IsNullOrWhiteSpace(sub.MessageType)
-            ? null
-            : ResolveEventType(sub.MessageType!)
-              ?? throw new InvalidOperationException($"Could not resolve message type '{sub.MessageType}' for channel '{sub.Channel}'.");
-
-        var listener = sub.Type switch
-        {
-            SalesforceSubscriptionType.ManagedSubscription => singleType is null
-                ? opts.ListenToManagedSubscription(sub.Channel)
-                : opts.ListenToManagedSubscription(sub.Channel, singleType),
-            SalesforceSubscriptionType.Channel => opts.ListenToSalesforceChannel(sub.Channel),
-            _ => singleType is null
-                ? opts.ListenToSalesforceTopic(sub.Channel)
-                : opts.ListenToSalesforceTopic(sub.Channel, singleType)
-        };
+        // Two kinds, split on who manages replay (DECISIONS #19); "Channel" is accepted as a config
+        // alias for Topic (a custom channel is a topic to the Pub/Sub API).
+        var listener = sub.Type == SalesforceSubscriptionType.ManagedSubscription
+            ? opts.ListenToManagedSubscription(sub.Channel)
+            : opts.ListenToSalesforceTopic(sub.Channel);
 
         foreach (var evt in sub.Events)
         {
@@ -133,9 +124,9 @@ builder.UseWolverine(opts =>
         if (sub.StartFromEarliest is { } earliest)
             listener.StartFromEarliest(earliest);
         if (sub.HeartbeatInterval is { } heartbeat)
-            listener.HeartbeatInterval(heartbeat);
-        if (sub.StaleStreamThreshold is { } staleThreshold)
-            listener.StaleStreamThreshold(staleThreshold);
+            listener.Heartbeat.Interval(heartbeat);
+        if (sub.WatchdogThreshold is { } watchdogThreshold)
+            listener.Watchdog.Threshold(watchdogThreshold);
     }
 });
 
@@ -154,3 +145,62 @@ host.Run();
 static Type? ResolveEventType(string name)
     => Type.GetType(name)
        ?? Assembly.GetExecutingAssembly().GetTypes().FirstOrDefault(t => t.Name == name || t.FullName == name);
+
+static void ScratchTestConfig(IHostBuilder bulder)
+{
+    bulder.UseWolverine(options =>
+    {
+        options.UseSalesforcePubSub()
+            .UseAuthenticationHandler<SalesforceAuthenticationTokenHandler>();
+            //probably should have a .UseBackoff, to register a custom backoff impl
+            //probably should have a .UseReplay for being specific about the ReplayRepository impl, in the existing setup it is registered singleton against the service provider
+            //I think it is better to think about replay from the scope of the regsitration of the transport
+            //Can we do the Heartbeat like an intermediate so .Heartbeat.Disable(), or .Heartbeat.SetInterval()
+            //Same for Watchdog, .Watchdog.Disable(), or .WatchDog.SetInterval() and .WatchDog.SetThreshold?  Cleans you the amount of "stuff" you see an groups properties better
+
+
+            //Is the "SalesforcePubSubConfiguration" that is returned by UseSalesforcePubSub standard to Woverine?  I want to make sure this isn't like the endpoint.  There's a type that 
+            //it implements(from Wolverine) that it extends and returns.  I want to make sure it shouldn't be the same for the registration of the Transport
+            var test1 = options.UseSalesforcePubSub();
+
+            //MES registration things we need
+            //mes subscription name
+            //api platform event name if using MapEvent
+
+            var testEventOneApiName = "CM_Test_Event_One__e";
+            var testEventTwoApiName = "CM_Test_Event_Two__e";
+            
+            //single event MES registration.  The two below should be about equivalent
+            var singleEventMesName = "CM_Test_Event_One";  //I should have named this different so its name didn't correspond so closely to the Event.  That is coincidental
+            var multiEventMesName = "CM_Test_Channel_Sub";
+            var singleEventChannelName = "/event/CM_Test_Event_Two__e";
+            var multiEventChannelName = "/event/CM_Test_Channel__chn";
+
+            //use this as the way to register MES, be explicit about what its name is and what PEs it contains, is consistent for 1:1 MES:Event or 1:N MES:Events
+            
+            //MES
+            options.ListenToManagedSubscription(singleEventMesName)
+                .MapEvent<TestEventOne>(testEventOneApiName);
+
+            options.ListenToManagedSubscription(multiEventMesName)
+                .MapEvent<TestEventOne>(testEventOneApiName)
+                .MapEvent<TestEventTwo>(testEventTwoApiName);
+            
+            //Channel or Topic?
+            options.ListenToSalesforceTopic(singleEventChannelName)
+                .MapEvent<TestEventTwo>(testEventTwoApiName);
+
+            options.ListenToSalesforceTopic(multiEventChannelName)
+                .MapEvent<TestEventOne>(testEventOneApiName)
+                .MapEvent<TestEventTwo>(testEventTwoApiName);
+
+            //I think the same .Heartbeat, and .Watchdog guidance applies here if possible
+
+
+
+
+
+
+
+    });
+}

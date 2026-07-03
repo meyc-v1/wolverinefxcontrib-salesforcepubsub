@@ -13,7 +13,8 @@ builder.UseWolverine(opts =>
     opts.UseSalesforcePubSub()
         .UseAuthenticationHandler<MyTokenHandler>();
 
-    opts.ListenToSalesforceTopic<OrderShipped>("/event/Order_Shipped__e");
+    opts.ListenToSalesforceTopic("/event/Order_Shipped__e")
+        .MapEvent<OrderShipped>("Order_Shipped__e");
 });
 ```
 
@@ -38,11 +39,11 @@ Requires **.NET 10** and **WolverineFx 6.12+**. Design decisions and their ratio
 
 Three small interfaces connect the transport to your infrastructure:
 
-| Interface | Purpose | Default |
+| Interface | Registered via | Default |
 |---|---|---|
-| `IAuthenticationTokenHandler` | Fetches a Salesforce access token (`AccessToken`, `InstanceUri`, `TenantId`) | **required** — none |
-| `IReplayIdRepository` | Durable store for topic replay ids (per-resource watermark) | in-memory (fine for dev; use a durable store in prod) |
-| `IBackoffStrategy` | Delay between reconnect attempts | linear: +15s per consecutive error, capped at 2 min |
+| `IAuthenticationTokenHandler` — fetches a Salesforce access token (`AccessToken`, `InstanceUri`, `TenantId`) | `UseAuthenticationHandler<T>()` | **required** — none |
+| `IReplayIdRepository` — durable store for topic replay ids (per-resource watermark) | `UseReplayIdRepository<T>()` | in-memory (fine for dev; use a durable store in prod) |
+| `IBackoffStrategy` — delay between reconnect attempts | `UseBackoffStrategy<T>()` | linear: +15s per consecutive error, capped at 2 min |
 
 **Your token handler must fetch a fresh token every call and must not cache.** The transport owns
 caching (default 60 min, `TokenCacheDuration(...)`) and — critically — owns *invalidation*: when
@@ -55,22 +56,21 @@ over a table keyed by (application, instance, topic).
 
 ## Subscription kinds
 
-### Topic — the recommended default
+There are exactly two, split by **who manages the replay position** — and every subscription declares
+each event it carries with `MapEvent<T>("Api_Name__e")`, keyed by the **event API name** (the Avro
+record name of the event's schema). A single-event subscription is simply the one-entry case.
 
-A plain platform-event topic (`/event/X__e`) carries exactly one event type, tracked with
-**client-side replay** (your `IReplayIdRepository`):
+### Topic — client-managed replay (the recommended default)
 
-```csharp
-opts.ListenToSalesforceTopic<OrderShipped>("/event/Order_Shipped__e");
-```
-
-### Custom channel — multiple event types on one stream
-
-A custom channel (`/event/X__chn`) delivers several platform-event types. Declare each one with
-`MapEvent`, keyed by the **event API name** (which is the Avro record name of each event's schema):
+The path may be a plain platform-event topic (`/event/X__e`, exactly one event type) or a custom channel
+(`/event/X__chn`, one or more) — both are topics to the Pub/Sub API. Replay is tracked client-side via
+your `IReplayIdRepository`:
 
 ```csharp
-opts.ListenToSalesforceChannel("/event/Order_Events__chn")
+opts.ListenToSalesforceTopic("/event/Order_Shipped__e")
+    .MapEvent<OrderShipped>("Order_Shipped__e");
+
+opts.ListenToSalesforceTopic("/event/Order_Events__chn")
     .MapEvent<OrderShipped>("Order_Shipped__e")
     .MapEvent<OrderCancelled>("Order_Cancelled__e");
 ```
@@ -79,25 +79,22 @@ The listener resolves each event's type from its schema and Wolverine routes it 
 handler. An event arriving with **no mapping** is logged once (warning) and handed to Wolverine's
 missing-handler policy — dead-lettered by default — and the replay position still advances. Putting
 `[MessageIdentity("Some_Event__e")]` on a handled type is a zero-config way to pick up an unmapped
-event.
-
-Registration is map-only and fail-fast at startup: the generic `ListenTo…<T>` forms are sugar for a
-*sealed* single-entry map (adding `MapEvent` to one throws), a plain topic accepts exactly one entry, a
-channel requires every entry named, and `ListenToSalesforceTopic`/`ListenToSalesforceChannel` reject
-each other's suffix.
+event. A `__e` topic validates at startup that its mapped name matches the path (a mismatch would
+dead-letter everything). Because every entry is named, every endpoint eagerly pre-warms its schemas at
+startup.
 
 The same event type may be mapped on several endpoints (topic + channel + MES); handlers are routed by
 type, and `Envelope.TopicName` identifies which subscription delivered a given message.
 
-### Managed event subscription (MES) — server-side replay
+### Managed event subscription (MES) — Salesforce-managed replay
 
 Salesforce tracks the replay position for you (`CommitReplayIdRequest` on the stream); no
-`IReplayIdRepository` involved:
+`IReplayIdRepository` involved. The MES's server-side channel may carry one event type or several:
 
 ```csharp
-opts.ListenToManagedSubscription<InvoicePaid>("My_Managed_Sub");
+opts.ListenToManagedSubscription("My_Managed_Sub")
+    .MapEvent<InvoicePaid>("Invoice_Paid__e");
 
-// a MES may target a custom channel server-side — declare its types the same way:
 opts.ListenToManagedSubscription("My_Channel_Sub")
     .MapEvent<OrderShipped>("Order_Shipped__e")
     .MapEvent<OrderCancelled>("Order_Cancelled__e");
@@ -133,8 +130,9 @@ Add a message store (e.g. `WolverineFx.SqlServer` — and note `Microsoft.Data.S
 
 ```csharp
 opts.PersistMessagesWithSqlServer(connectionString);
-opts.ListenToSalesforceChannel("/event/Order_Events__chn")
+opts.ListenToSalesforceTopic("/event/Order_Events__chn")
     .MapEvent<OrderShipped>("Order_Shipped__e")
+    .MapEvent<OrderCancelled>("Order_Cancelled__e")
     .UseDurableInbox();
 ```
 
@@ -188,15 +186,17 @@ periodic signals per listener:
 
 ## Configuration reference
 
-Transport-level (on `UseSalesforcePubSub(...)`): `UseAuthenticationHandler<T>()`,
-`TokenCacheDuration(ts)`, `HeartbeatInterval(ts, LogLevel?)`, `StaleStreamThreshold(ts, LogLevel?)`,
-`DisableHeartbeat()`, `DisableStaleStreamWatchdog()`. The gRPC endpoint defaults to
+Transport-level, on the `SalesforcePubSubTransportExpression` returned by `UseSalesforcePubSub(...)`:
+`UseAuthenticationHandler<T>()`, `UseReplayIdRepository<T>()` (replace the in-memory default with your
+durable store), `UseBackoffStrategy<T>()`, `TokenCacheDuration(ts)`, and the grouped observability
+knobs — `Heartbeat.Interval(ts)` / `.Level(lvl)` / `.Disable()` and `Watchdog.Threshold(ts)` /
+`.PollingInterval(ts)` / `.Level(lvl)` / `.Disable()`. The gRPC endpoint defaults to
 `https://api.pubsub.salesforce.com:7443` (override via the `pubSubUri` argument).
 
-Per-endpoint (on the listener configuration, overriding the transport defaults): `MapEvent<T>(name?)`,
-`FetchCount(n)` (default 10), `FetchTimeout(ts)` (idle reconnect ceiling, default 270s),
-`StartFromEarliest()` (topics, cold start only), `HeartbeatInterval(...)`, `StaleStreamThreshold(...)`,
-the `Disable…()` pair, plus everything Wolverine's standard listener surface provides
+Per-endpoint (on the listener configuration, overriding the transport defaults):
+`MapEvent<T>("Api_Name__e")`, `FetchCount(n)` (default 10), `FetchTimeout(ts)` (idle reconnect ceiling,
+default 270s), `StartFromEarliest()` (client-replay subscriptions, cold start only), the same grouped
+`Heartbeat.…` / `Watchdog.…` overrides, plus everything Wolverine's standard listener surface provides
 (`ProcessInline`, `BufferedInMemory`, `UseDurableInbox`, `Sequential`, `MaximumParallelMessages`, …).
 
 ## Limitations

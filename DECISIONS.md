@@ -27,6 +27,49 @@ aren't conformance issues go under "Cleanups / tech-debt".
 
 ---
 
+## 19. Multi-type-first: a transport carries multiple message types; single-type is the N=1 case, not a different kind
+- **Date:** 2026-07-03 · **Status:** Accepted (supersedes the registration surface of #16 and its addenda)
+- **Context:** the maintainer's review of the channels work identified that multi-type support had been bolted
+  onto the original one-message-per-transport model rather than replacing it: two decode paths (named map
+  vs "decode everything as T"), map sealing, cardinality rules policing the border, and three entry
+  points (`ListenToSalesforceTopic`/`ListenToSalesforceChannel`/`ListenToManagedSubscription`) implying a
+  false third kind. The real taxonomy has two axes: **who manages replay** (MES vs client-managed — the
+  only true kind split) and **how many event types the stream carries** (just the map's cardinality).
+  The "decode everything as T" sugar was additionally rejected on explicitness grounds: it cannot
+  pre-warm schemas (nothing to look up), and it silently force-decodes a drifted stream instead of the
+  consumer declaring "this is the event."
+- **Decision:** Two entry points split on the replay axis — `ListenToSalesforceTopic(path)` (accepts
+  `/event/X__e` and `/event/X__chn`; **"Topic" over "Channel"** because the Pub/Sub API's own
+  `topic_name` field and `GetTopic` RPC treat both as topics; a channel is the narrower SF term) and
+  `ListenToManagedSubscription(name)`. Every event is declared `MapEvent<T>("Api_Name__e")` with the
+  **API name required**; every event resolves per-schema at receive time; unknown names ride the
+  missing-handler path. A single-event topic (`__e`) validates at startup that its one mapped name equals
+  the path's last segment (a mismatch would dead-letter everything at runtime). Because every entry is
+  named, **every endpoint pre-warms its schemas at startup — including MES** (previously impossible for
+  the single-type MES form). Deleted: `ListenToSalesforceChannel`, the generic `ListenTo…<T>` and
+  `(string, Type)` overloads, the unconditional decode path, sealing, the cross-suffix guards (redundant
+  with map validation). Identical duplicate `MapEvent` registration stays idempotent; a conflicting type
+  for a name throws.
+- **Also in this rework (the maintainer's fluent redesign):** `SalesforcePubSubConfiguration` →
+  `SalesforcePubSubTransportExpression` (Wolverine's `KafkaTransportExpression` naming; cannot derive
+  `BrokerExpression` — it is paired with `BrokerTransport` and a sender side we don't have);
+  `UseReplayIdRepository<T>()` / `UseBackoffStrategy<T>()` register consumer implementations through the
+  expression (`Services.Replace` over the in-memory/linear defaults) instead of bare container
+  registrations; observability knobs grouped under `Heartbeat`/`Watchdog` sub-expressions
+  (`.Heartbeat.Interval(…)`, `.Watchdog.Threshold(…)`, `.Level(…)`, `.Disable()`; watchdog
+  `PollingInterval` now settable at transport level) at both transport and per-listener levels, replacing
+  the flat setters; internal `StaleStream*` settings renamed `Watchdog*` to match; the listener gained an
+  explicit `Start()` called by `BuildListenerAsync` (the SPI has no start method — built == listening —
+  so the constructor no longer does work and the lifecycle line is visible at the wiring site, mirroring
+  Kafka main's `BackgroundReceiveLoop.Start()`).
+- **Why:** One model covers all scenarios including N=1; the deletions remove every border-policing rule
+  and the trust-based decode; the consumer always states "this is the event." Breaking changes accepted
+  (org-internal, pre-consumer).
+- **Consequences:** Public surface: `UseSalesforcePubSub` → expression; two `ListenTo…` methods;
+  `MapEvent<T>(name)`/`MapEvent(Type, name)`; grouped observability. TestHost config is events[]-only
+  (`messageType` field removed; `Channel` type value retained as a Topic alias). Unit tests 99 → 93 (the
+  sealing/sugar/guard tests deleted with their subjects).
+
 ## 18. Envelope identity: one Salesforce event = one message identity; per-endpoint processing is Wolverine's native `MessageIdentity.IdAndDestination`
 - **Date:** 2026-07-03 · **Status:** Accepted
 - **Context:** The code review found `ResolveEnvelopeId`'s three derivation paths implemented *different*

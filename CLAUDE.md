@@ -7,12 +7,15 @@ endpoints. Package id `WolverineFxContrib.SalesforcePubSub`; root namespace `Wol
 ## Structure
 - `src/WolverineFxContrib.SalesforcePubSub` — the transport library (net10.0).
   - **Public surface:** the three consumer-implemented interfaces `IReplayIdRepository`,
-    `IBackoffStrategy`, `IAuthenticationTokenHandler`; event base types `PubSubEvent` / `PlatformEvent`
-    (in the `Wolverine.SalesforcePubSub.Events` namespace — consumers add a `using` for it); and the
-    Wolverine config surface — `UseSalesforcePubSub`, `ListenToSalesforceTopic[<T>]`,
-    `ListenToSalesforceChannel` (custom `__chn` channels, multi-type), `ListenToManagedSubscription[<T>]`
-    (generic sugar seals the type map; non-generic overloads + `MapEvent<T>("Api_Name__e")` declare it —
-    DECISIONS #16), `SalesforcePubSubTransport`, `SalesforceEndpoint`.
+    `IBackoffStrategy`, `IAuthenticationTokenHandler` (registered via `UseReplayIdRepository<T>` /
+    `UseBackoffStrategy<T>` / `UseAuthenticationHandler<T>` on the transport expression); event base
+    types `PubSubEvent` / `PlatformEvent` (in the `Wolverine.SalesforcePubSub.Events` namespace); and
+    the Wolverine config surface — `UseSalesforcePubSub` → `SalesforcePubSubTransportExpression` (with
+    grouped `Heartbeat`/`Watchdog` sub-expressions), `ListenToSalesforceTopic(path)` (a `/event/X__e`
+    topic or `/event/X__chn` channel — both are topics to the Pub/Sub API) and
+    `ListenToManagedSubscription(name)`, each declaring every event via `MapEvent<T>("Api_Name__e")`
+    (multi-type-first, DECISIONS #19), `SalesforcePubSubTransport`, `SalesforceEndpoint`,
+    `SalesforceListenerConfiguration`.
   - **Namespaces are folder-based:** root files → `Wolverine.SalesforcePubSub`, `Events/` →
     `Wolverine.SalesforcePubSub.Events`, `Internals/` and its subfolders →
     `Wolverine.SalesforcePubSub.Internals[.Authentication|.Backoff|.Replay|.Schema|.Transports]`.
@@ -57,8 +60,8 @@ endpoints. Package id `WolverineFxContrib.SalesforcePubSub`; root namespace `Wol
   - `salesforceAuthenticationSettings` (user-secrets, id `wolverine.salesforcepubsub`): `ClientId`,
     `ClientSecret`, `LoginUri`.
   - `salesforceSettings` (appsettings; `baseUri` lives in user secrets): `pubSubUri` (gRPC) and
-    `subscriptions[]` — each `{ type: Topic|ManagedSubscription|Channel, channel, messageType | events[]
-    {messageType, eventApiName}, mode: Inline|BufferedInMemory|Durable, enabled, … }`.
+    `subscriptions[]` — each `{ type: Topic|ManagedSubscription (Channel = Topic alias), channel,
+    events[] {messageType, eventApiName} (required), mode: Inline|BufferedInMemory|Durable, enabled, … }`.
   - `durabilitySettings:connectionString` (user secrets) opts into the Wolverine SQL Server message store
     for Durable-mode endpoints.
 - Wired against **the sandbox org**: Test Event One → MES `CM_Test_Event_One`; Test Event Two → topic

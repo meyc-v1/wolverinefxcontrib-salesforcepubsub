@@ -29,14 +29,12 @@ public sealed class SalesforceEndpoint : Endpoint
     internal SalesforceResourceKind Kind { get; }
     internal string Resource { get; }
 
-    // Map-only type binding: named entries key on the event API name (the Avro record name, e.g.
-    // "CM_Test_Event_One__e"); the unconditional entry stamps every event (single-type topic/MES — the
-    // degenerate case). The <T> sugar seals the map so it can't be mixed with MapEvent.
+    // Multi-type-first binding (DECISIONS #19): every entry keys on the event API name (the Avro record
+    // name, e.g. "CM_Test_Event_One__e"). A single-type subscription is just the one-entry case.
     internal Dictionary<string, Type> EventTypeMap { get; } = new(StringComparer.Ordinal);
-    internal Type? UnconditionalEventType { get; private set; }
-    internal bool EventMapSealed { get; private set; }
 
-    internal bool IsChannel => Resource.EndsWith("__chn", StringComparison.Ordinal);
+    internal bool IsSingleEventTopic =>
+        Kind == SalesforceResourceKind.Topic && Resource.EndsWith("__e", StringComparison.Ordinal);
 
     // Per-endpoint overrides (null = inherit the transport-level default). Set via the fluent
     // SalesforceListenerConfiguration and merged into the effective settings in BuildListenerAsync.
@@ -45,8 +43,8 @@ public sealed class SalesforceEndpoint : Endpoint
     internal bool? StartFromEarliest { get; set; }
     internal TimeSpan? HeartbeatInterval { get; set; }
     internal LogLevel? HeartbeatLogLevel { get; set; }
-    internal TimeSpan? StaleStreamThreshold { get; set; }
-    internal LogLevel? StaleStreamLogLevel { get; set; }
+    internal TimeSpan? WatchdogThreshold { get; set; }
+    internal LogLevel? WatchdogLogLevel { get; set; }
 
     internal SalesforceEndpoint(SalesforcePubSubTransport parent, SalesforceResourceKind kind, string resource, EndpointRole role)
         : base(BuildUri(kind, resource), role)
@@ -65,71 +63,52 @@ public sealed class SalesforceEndpoint : Endpoint
     }
 
     /// <summary>
-    /// Adds an event-type mapping. A null <paramref name="eventApiName"/> is the unconditional entry
-    /// (every event on the stream decodes as this type); named entries resolve per event by the Avro
-    /// record name. <paramref name="seal"/> marks the map complete (the single-type sugar) so a later
-    /// MapEvent fails fast instead of silently changing semantics.
+    /// Adds an event-type mapping, keyed by the event API name (the Avro record name each event's schema
+    /// carries). Re-registering an identical mapping is a no-op — Wolverine's own transports treat
+    /// repeated endpoint configuration as idempotent; a conflicting type for the same name throws.
     /// </summary>
-    internal void AddEventMapping(Type messageType, string? eventApiName, bool seal = false)
+    internal void AddEventMapping(Type messageType, string eventApiName)
     {
         if (!typeof(PubSubEvent).IsAssignableFrom(messageType))
             throw new ArgumentException($"Message type '{messageType}' must derive from {nameof(PubSubEvent)}.", nameof(messageType));
 
-        // Re-registering an identical mapping is a no-op — Wolverine's own transports treat repeated
-        // endpoint configuration as idempotent, and config code touching the same topic twice is common.
-        if (eventApiName is null && UnconditionalEventType == messageType)
+        if (EventTypeMap.TryGetValue(eventApiName, out var existing))
         {
-            EventMapSealed |= seal;
-            return;
+            if (existing == messageType)
+                return;
+            throw new InvalidOperationException(
+                $"Salesforce endpoint '{Resource}' already maps event '{eventApiName}' to {existing.Name}; it cannot also map to {messageType.Name}.");
         }
 
-        if (eventApiName is not null && EventTypeMap.TryGetValue(eventApiName, out var existing) && existing == messageType)
-            return;
+        EventTypeMap.Add(eventApiName, messageType);
 
-        if (EventMapSealed)
-            throw new InvalidOperationException(eventApiName is null && seal
-                ? $"Salesforce endpoint '{Resource}' is already registered with the single event type {UnconditionalEventType!.Name}; it cannot be re-registered with the conflicting type {messageType.Name}."
-                : $"The event map for Salesforce endpoint '{Resource}' was configured with a single-type ListenTo…<T> registration and cannot be extended with MapEvent. Use the non-generic ListenToSalesforceTopic/ListenToSalesforceChannel/ListenToManagedSubscription overload with MapEvent<T>(…) to declare the event types explicitly.");
-
-        if (eventApiName is null)
-        {
-            if (UnconditionalEventType is not null)
-                throw new InvalidOperationException(
-                    $"Salesforce endpoint '{Resource}' already has an unconditional event type ({UnconditionalEventType.Name}). Only one unnamed MapEvent entry is allowed; give each entry an event API name to map multiple types.");
-            UnconditionalEventType = messageType;
-            MessageType = messageType; // diagnostics parity with the single-type model
-        }
-        else
-        {
-            if (!EventTypeMap.TryAdd(eventApiName, messageType))
-                throw new InvalidOperationException(
-                    $"Salesforce endpoint '{Resource}' already maps event '{eventApiName}' to {EventTypeMap[eventApiName].Name}; it cannot also map to {messageType.Name}.");
-        }
-
-        if (seal)
-            EventMapSealed = true;
+        // Diagnostics parity: surface the type on the base Endpoint while the map is single-entry.
+        MessageType = EventTypeMap.Count == 1 ? messageType : null;
     }
 
-    /// <summary>Fail-fast cardinality/shape validation for the event map (see DECISIONS #16).</summary>
+    /// <summary>Fail-fast shape validation for the event map (DECISIONS #19).</summary>
     internal void ValidateEventMap()
     {
-        var total = EventTypeMap.Count + (UnconditionalEventType is null ? 0 : 1);
-
-        if (total == 0)
+        if (EventTypeMap.Count == 0)
             throw new InvalidOperationException(
-                $"No event types configured for Salesforce endpoint '{Resource}'. Use ListenToSalesforceTopic<T> / ListenToManagedSubscription<T>, or the non-generic overloads with MapEvent<T>(…).");
+                $"No event types configured for Salesforce endpoint '{Resource}'. Declare each event with MapEvent<T>(\"Api_Name__e\").");
 
-        if (UnconditionalEventType is not null && EventTypeMap.Count > 0)
-            throw new InvalidOperationException(
-                $"Salesforce endpoint '{Resource}' mixes an unnamed MapEvent entry with named entries. An unnamed (unconditional) entry must be the only one; name every entry to map multiple types.");
+        if (IsSingleEventTopic)
+        {
+            // A plain platform-event topic delivers exactly one event type, and its API name is the
+            // path's last segment — a mismatch would dead-letter every event at runtime, so fail fast.
+            // (Non-__e paths, e.g. standard platform events, skip the name check until their record-name
+            // convention is live-verified; __chn channels and MES are inherently 1..N.)
+            if (EventTypeMap.Count > 1)
+                throw new InvalidOperationException(
+                    $"Salesforce topic '{Resource}' maps {EventTypeMap.Count} event types, but a plain platform-event topic delivers exactly one. Subscribe to a custom channel (…__chn) for multi-type streams.");
 
-        if (Kind == SalesforceResourceKind.Topic && !IsChannel && total > 1)
-            throw new InvalidOperationException(
-                $"Salesforce topic '{Resource}' maps {total} event types, but a plain platform-event topic delivers exactly one. Map a single type, or subscribe to a custom channel (…__chn) via ListenToSalesforceChannel for multi-type streams.");
-
-        if (IsChannel && UnconditionalEventType is not null)
-            throw new InvalidOperationException(
-                $"Salesforce channel '{Resource}' has an unnamed MapEvent entry, but a custom channel delivers multiple event types — every entry must specify its event API name (e.g. MapEvent<MyEvent>(\"My_Event__e\")).");
+            var expected = Resource[(Resource.LastIndexOf('/') + 1)..];
+            var actual = EventTypeMap.Keys.First();
+            if (!string.Equals(expected, actual, StringComparison.Ordinal))
+                throw new InvalidOperationException(
+                    $"Salesforce topic '{Resource}' delivers '{expected}', but the endpoint maps '{actual}' — every event would dead-letter at runtime. Fix the MapEvent name (or the topic path).");
+        }
     }
 
     protected override bool supportsMode(EndpointMode mode)
@@ -175,28 +154,26 @@ public sealed class SalesforceEndpoint : Endpoint
         // checkpoint. The flag only governs reconnect-log accuracy — the MES factory already discards resumeFrom.
         var resumesFromWatermark = Kind == SalesforceResourceKind.Topic;
 
-        var eventTypes = new EventTypeResolver(UnconditionalEventType, EventTypeMap, schemaRepository);
+        var eventTypes = new EventTypeResolver(EventTypeMap, schemaRepository);
 
         // DI fills the listener's service params (schema repository, backoff, token provider, logger); we
-        // supply the runtime-contextual ones, including the per-endpoint effective settings.
+        // supply the runtime-contextual ones, including the per-endpoint effective settings. Construction
+        // wires everything; Start() below is the explicit "begin consuming" — the SPI has no start method
+        // (built == listening), so the lifecycle line lives here where the wiring reads top to bottom.
         var listener = ActivatorUtilities.CreateInstance<SalesforceListener>(
             services, Uri, Resource, resumesFromWatermark, factory, receiver, eventTypes, BuildPrewarmTopics(), effective, runtime.Cancellation);
+        listener.Start();
 
         return ValueTask.FromResult((IListener)listener);
     }
 
     /// <summary>
-    /// The topics whose schemas the listener eagerly pre-warms at startup: named MapEvent entries each have
-    /// their own /event/&lt;ApiName&gt; topic; an unconditional topic endpoint warms its own resource. An
-    /// unconditional MES has no topic to query (its channel is server-side config) and stays lazy.
+    /// The topics whose schemas the listener eagerly pre-warms at startup: every MapEvent entry names an
+    /// event, and every event has its own /event/&lt;ApiName&gt; topic — so all endpoints pre-warm,
+    /// including MES (whose own resource is a developer name we could not query).
     /// </summary>
     internal IReadOnlyList<string> BuildPrewarmTopics()
-    {
-        if (UnconditionalEventType is not null)
-            return Kind == SalesforceResourceKind.Topic ? [Resource] : [];
-
-        return EventTypeMap.Keys.Select(name => $"/event/{name}").ToArray();
-    }
+        => EventTypeMap.Keys.Select(name => $"/event/{name}").ToArray();
 
     /// <summary>Merge this endpoint's per-endpoint overrides over the transport-level defaults.</summary>
     internal SubscriberComponentsSettings ResolveEffectiveSettings(SubscriberComponentsSettings defaults) => new()
@@ -208,8 +185,8 @@ public sealed class SalesforceEndpoint : Endpoint
         StartFromEarliest = StartFromEarliest ?? defaults.StartFromEarliest,
         HeartbeatInterval = HeartbeatInterval ?? defaults.HeartbeatInterval,
         HeartbeatLogLevel = HeartbeatLogLevel ?? defaults.HeartbeatLogLevel,
-        StaleStreamThreshold = StaleStreamThreshold ?? defaults.StaleStreamThreshold,
-        StaleStreamLogLevel = StaleStreamLogLevel ?? defaults.StaleStreamLogLevel,
+        WatchdogThreshold = WatchdogThreshold ?? defaults.WatchdogThreshold,
+        WatchdogLogLevel = WatchdogLogLevel ?? defaults.WatchdogLogLevel,
         WatchdogPollingPeriod = defaults.WatchdogPollingPeriod,
         ProcessNewEventsIfReplayIdValidationFails = defaults.ProcessNewEventsIfReplayIdValidationFails,
         ReplayIdValidationFailedErrorCode = defaults.ReplayIdValidationFailedErrorCode

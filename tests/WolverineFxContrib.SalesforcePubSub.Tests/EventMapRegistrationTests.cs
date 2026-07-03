@@ -6,9 +6,9 @@ using Wolverine.SalesforcePubSub.Events;
 namespace WolverineFxContrib.SalesforcePubSub.Tests;
 
 /// <summary>
-/// The map-only registration model (DECISIONS #16): single-type sugar seals the map, MapEvent declares
-/// per-event mappings, cardinality is enforced per endpoint kind (topic = one, channel = named 1..N,
-/// MES = 1..N), and the __chn/__e entry points guard each other.
+/// The multi-type-first registration model (DECISIONS #19): two entry points split on the replay axis,
+/// every event declared by API name via MapEvent, a single-event topic's name validated against its
+/// path, and idempotent duplicate registration.
 /// </summary>
 public class EventMapRegistrationTests
 {
@@ -22,80 +22,57 @@ public class EventMapRegistrationTests
         => ((IDelayedEndpointConfiguration)config).Apply();
 
     [Fact]
-    public void Single_type_sugar_creates_a_sealed_unconditional_entry()
+    public void Entry_points_create_the_right_kinds()
     {
         var options = new WolverineOptions();
-        options.ListenToSalesforceTopic<EventA>("/event/A__e");
+        options.ListenToSalesforceTopic("/event/A__e").MapEvent<EventA>("A__e");
+        options.ListenToManagedSubscription("My_Sub").MapEvent<EventA>("A__e");
 
-        var endpoint = EndpointOf(options, SalesforceResourceKind.Topic, "/event/A__e");
-        Assert.Equal(typeof(EventA), endpoint.UnconditionalEventType);
-        Assert.Equal(typeof(EventA), endpoint.MessageType); // diagnostics parity
-        Assert.True(endpoint.EventMapSealed);
-        endpoint.ValidateEventMap(); // exactly-one topic entry: valid
+        Assert.Equal(SalesforceResourceKind.Topic, EndpointOf(options, SalesforceResourceKind.Topic, "/event/A__e").Kind);
+        Assert.Equal(SalesforceResourceKind.ManagedSubscription, EndpointOf(options, SalesforceResourceKind.ManagedSubscription, "My_Sub").Kind);
     }
 
     [Fact]
-    public void Re_registering_the_same_single_type_is_idempotent()
+    public void MapEvent_requires_the_event_api_name()
     {
-        // Wolverine's own transports treat repeated endpoint configuration as idempotent; two composition
-        // modules touching the same topic with the same type must not crash startup.
         var options = new WolverineOptions();
-        options.ListenToSalesforceTopic<EventA>("/event/A__e");
-        options.ListenToSalesforceTopic<EventA>("/event/A__e");
+        var config = options.ListenToSalesforceTopic("/event/A__e");
+
+        Assert.ThrowsAny<ArgumentException>(() => config.MapEvent<EventA>(null!));
+        Assert.ThrowsAny<ArgumentException>(() => config.MapEvent<EventA>(""));
+        Assert.ThrowsAny<ArgumentException>(() => config.MapEvent<EventA>("   "));
+        Assert.Throws<ArgumentNullException>(() => config.MapEvent(null!, "A__e"));
+    }
+
+    [Fact]
+    public void Single_event_topic_with_the_matching_name_is_valid()
+    {
+        var options = new WolverineOptions();
+        Apply(options.ListenToSalesforceTopic("/event/A__e").MapEvent<EventA>("A__e"));
 
         var endpoint = EndpointOf(options, SalesforceResourceKind.Topic, "/event/A__e");
-        Assert.Equal(typeof(EventA), endpoint.UnconditionalEventType);
-        Assert.True(endpoint.EventMapSealed);
         endpoint.ValidateEventMap();
-    }
-
-    [Fact]
-    public void Re_registering_a_conflicting_single_type_throws()
-    {
-        var options = new WolverineOptions();
-        options.ListenToSalesforceTopic<EventA>("/event/A__e");
-
-        var ex = Assert.Throws<InvalidOperationException>(() => options.ListenToSalesforceTopic<EventB>("/event/A__e"));
-        Assert.Contains("conflicting", ex.Message);
-    }
-
-    [Fact]
-    public void Duplicate_map_entry_with_the_same_type_is_idempotent()
-    {
-        var options = new WolverineOptions();
-        var config = options.ListenToSalesforceChannel("/event/C__chn").MapEvent<EventA>("A__e").MapEvent<EventA>("A__e");
-        Apply(config);
-
-        var endpoint = EndpointOf(options, SalesforceResourceKind.Topic, "/event/C__chn");
-        Assert.Single(endpoint.EventTypeMap);
         Assert.Equal(typeof(EventA), endpoint.EventTypeMap["A__e"]);
+        Assert.Equal(typeof(EventA), endpoint.MessageType); // single-entry diagnostics parity
     }
 
     [Fact]
-    public void Null_message_type_is_rejected_at_registration()
+    public void Single_event_topic_name_must_match_the_path()
     {
+        // "/event/A__e" delivers A__e; mapping B__e would dead-letter every event at runtime — fail fast.
         var options = new WolverineOptions();
-        Assert.Throws<ArgumentNullException>(() => options.ListenToSalesforceTopic("/event/A__e", null!));
-        Assert.Throws<ArgumentNullException>(() => options.ListenToManagedSubscription("My_Sub", null!));
-        Assert.Throws<ArgumentNullException>(() => options.ListenToSalesforceChannel("/event/C__chn").MapEvent(null!, "A__e"));
+        Apply(options.ListenToSalesforceTopic("/event/A__e").MapEvent<EventB>("B__e"));
+
+        var endpoint = EndpointOf(options, SalesforceResourceKind.Topic, "/event/A__e");
+        var ex = Assert.Throws<InvalidOperationException>(endpoint.ValidateEventMap);
+        Assert.Contains("dead-letter", ex.Message);
     }
 
     [Fact]
-    public void MapEvent_after_the_sugar_throws_at_apply_time()
+    public void Single_event_topic_rejects_multiple_mappings()
     {
         var options = new WolverineOptions();
-        var config = options.ListenToSalesforceTopic<EventA>("/event/A__e").MapEvent<EventB>("B__e");
-
-        var ex = Assert.Throws<InvalidOperationException>(() => Apply(config));
-        Assert.Contains("MapEvent", ex.Message);
-    }
-
-    [Fact]
-    public void Topic_with_two_mapped_events_fails_validation()
-    {
-        var options = new WolverineOptions();
-        var config = options.ListenToSalesforceTopic("/event/A__e").MapEvent<EventA>("A__e").MapEvent<EventB>("B__e");
-        Apply(config);
+        Apply(options.ListenToSalesforceTopic("/event/A__e").MapEvent<EventA>("A__e").MapEvent<EventB>("B__e"));
 
         var endpoint = EndpointOf(options, SalesforceResourceKind.Topic, "/event/A__e");
         var ex = Assert.Throws<InvalidOperationException>(endpoint.ValidateEventMap);
@@ -106,37 +83,20 @@ public class EventMapRegistrationTests
     public void Channel_maps_multiple_named_events()
     {
         var options = new WolverineOptions();
-        var config = options.ListenToSalesforceChannel("/event/C__chn")
-            .MapEvent<EventA>("A__e")
-            .MapEvent<EventB>("B__e");
-        Apply(config);
+        Apply(options.ListenToSalesforceTopic("/event/C__chn").MapEvent<EventA>("A__e").MapEvent<EventB>("B__e"));
 
         var endpoint = EndpointOf(options, SalesforceResourceKind.Topic, "/event/C__chn");
         endpoint.ValidateEventMap();
         Assert.Equal(typeof(EventA), endpoint.EventTypeMap["A__e"]);
         Assert.Equal(typeof(EventB), endpoint.EventTypeMap["B__e"]);
-        Assert.Null(endpoint.UnconditionalEventType);
+        Assert.Null(endpoint.MessageType); // multi-entry: no single diagnostic type
     }
 
     [Fact]
-    public void Channel_rejects_an_unnamed_entry()
+    public void Mes_allows_one_or_many_events()
     {
         var options = new WolverineOptions();
-        var config = options.ListenToSalesforceChannel("/event/C__chn").MapEvent<EventA>();
-        Apply(config);
-
-        var endpoint = EndpointOf(options, SalesforceResourceKind.Topic, "/event/C__chn");
-        var ex = Assert.Throws<InvalidOperationException>(endpoint.ValidateEventMap);
-        Assert.Contains("event API name", ex.Message);
-    }
-
-    [Fact]
-    public void Mes_allows_multiple_named_events()
-    {
-        // A MES may target a custom channel server-side, so the map-style MES form allows 1..N.
-        var options = new WolverineOptions();
-        var config = options.ListenToManagedSubscription("My_Sub").MapEvent<EventA>("A__e").MapEvent<EventB>("B__e");
-        Apply(config);
+        Apply(options.ListenToManagedSubscription("My_Sub").MapEvent<EventA>("A__e").MapEvent<EventB>("B__e"));
 
         var endpoint = EndpointOf(options, SalesforceResourceKind.ManagedSubscription, "My_Sub");
         endpoint.ValidateEventMap();
@@ -144,42 +104,33 @@ public class EventMapRegistrationTests
     }
 
     [Fact]
-    public void Unnamed_entry_mixed_with_named_entries_fails_validation()
+    public void Duplicate_identical_mapping_is_idempotent()
     {
+        // Two composition modules touching the same subscription with the same mapping must not crash.
         var options = new WolverineOptions();
-        var config = options.ListenToManagedSubscription("My_Sub").MapEvent<EventA>().MapEvent<EventB>("B__e");
-        Apply(config);
+        Apply(options.ListenToSalesforceTopic("/event/A__e").MapEvent<EventA>("A__e"));
+        Apply(options.ListenToSalesforceTopic("/event/A__e").MapEvent<EventA>("A__e"));
 
-        var endpoint = EndpointOf(options, SalesforceResourceKind.ManagedSubscription, "My_Sub");
-        var ex = Assert.Throws<InvalidOperationException>(endpoint.ValidateEventMap);
-        Assert.Contains("unnamed", ex.Message);
+        var endpoint = EndpointOf(options, SalesforceResourceKind.Topic, "/event/A__e");
+        Assert.Single(endpoint.EventTypeMap);
+        endpoint.ValidateEventMap();
     }
 
     [Fact]
-    public void Duplicate_event_api_name_throws()
+    public void Conflicting_type_for_the_same_name_throws()
     {
         var options = new WolverineOptions();
-        var config = options.ListenToSalesforceChannel("/event/C__chn").MapEvent<EventA>("X__e").MapEvent<EventB>("X__e");
+        var config = options.ListenToSalesforceTopic("/event/C__chn").MapEvent<EventA>("X__e").MapEvent<EventB>("X__e");
 
         var ex = Assert.Throws<InvalidOperationException>(() => Apply(config));
         Assert.Contains("already maps", ex.Message);
     }
 
     [Fact]
-    public void Second_unnamed_entry_throws()
-    {
-        var options = new WolverineOptions();
-        var config = options.ListenToManagedSubscription("My_Sub").MapEvent<EventA>().MapEvent<EventB>();
-
-        var ex = Assert.Throws<InvalidOperationException>(() => Apply(config));
-        Assert.Contains("unconditional", ex.Message);
-    }
-
-    [Fact]
     public void Empty_map_fails_validation()
     {
         var options = new WolverineOptions();
-        options.ListenToSalesforceChannel("/event/C__chn"); // no MapEvent
+        options.ListenToSalesforceTopic("/event/C__chn"); // no MapEvent
 
         var endpoint = EndpointOf(options, SalesforceResourceKind.Topic, "/event/C__chn");
         var ex = Assert.Throws<InvalidOperationException>(endpoint.ValidateEventMap);
@@ -187,29 +138,10 @@ public class EventMapRegistrationTests
     }
 
     [Fact]
-    public void ListenToSalesforceTopic_rejects_a_channel_resource()
-    {
-        var options = new WolverineOptions();
-        var ex = Assert.Throws<ArgumentException>(() => options.ListenToSalesforceTopic("/event/C__chn"));
-        Assert.Contains("ListenToSalesforceChannel", ex.Message);
-
-        ex = Assert.Throws<ArgumentException>(() => options.ListenToSalesforceTopic<EventA>("/event/C__chn"));
-        Assert.Contains("ListenToSalesforceChannel", ex.Message);
-    }
-
-    [Fact]
-    public void ListenToSalesforceChannel_rejects_a_topic_resource()
-    {
-        var options = new WolverineOptions();
-        var ex = Assert.Throws<ArgumentException>(() => options.ListenToSalesforceChannel("/event/A__e"));
-        Assert.Contains("ListenToSalesforceTopic", ex.Message);
-    }
-
-    [Fact]
     public void Non_pubsub_event_type_is_rejected()
     {
         var options = new WolverineOptions();
-        var config = options.ListenToSalesforceChannel("/event/C__chn").MapEvent(typeof(string), "X__e");
+        var config = options.ListenToSalesforceTopic("/event/C__chn").MapEvent(typeof(string), "X__e");
 
         Assert.Throws<ArgumentException>(() => Apply(config));
     }
@@ -218,29 +150,24 @@ public class EventMapRegistrationTests
     public void Durable_mode_is_supported()
     {
         var options = new WolverineOptions();
-        options.ListenToSalesforceChannel("/event/C__chn").MapEvent<EventA>("A__e");
+        options.ListenToSalesforceTopic("/event/C__chn").MapEvent<EventA>("A__e");
 
         var endpoint = EndpointOf(options, SalesforceResourceKind.Topic, "/event/C__chn");
-        endpoint.Mode = EndpointMode.Durable; // previously rejected by supportsMode
+        endpoint.Mode = EndpointMode.Durable;
         Assert.Equal(EndpointMode.Durable, endpoint.Mode);
     }
 
     [Fact]
-    public void Prewarm_topics_come_from_the_map_or_the_topic_itself()
+    public void Every_endpoint_prewarms_from_its_map_including_mes()
     {
         var options = new WolverineOptions();
 
-        var channelConfig = options.ListenToSalesforceChannel("/event/C__chn").MapEvent<EventA>("A__e").MapEvent<EventB>("B__e");
-        Apply(channelConfig);
-        var channel = EndpointOf(options, SalesforceResourceKind.Topic, "/event/C__chn");
-        Assert.Equal(["/event/A__e", "/event/B__e"], channel.BuildPrewarmTopics().Order());
+        Apply(options.ListenToSalesforceTopic("/event/C__chn").MapEvent<EventA>("A__e").MapEvent<EventB>("B__e"));
+        Assert.Equal(["/event/A__e", "/event/B__e"],
+            EndpointOf(options, SalesforceResourceKind.Topic, "/event/C__chn").BuildPrewarmTopics().Order());
 
-        options.ListenToSalesforceTopic<EventA>("/event/A__e");
-        var topic = EndpointOf(options, SalesforceResourceKind.Topic, "/event/A__e");
-        Assert.Equal(["/event/A__e"], topic.BuildPrewarmTopics());
-
-        options.ListenToManagedSubscription<EventA>("My_Sub");
-        var mes = EndpointOf(options, SalesforceResourceKind.ManagedSubscription, "My_Sub");
-        Assert.Empty(mes.BuildPrewarmTopics()); // an unconditional MES has no topic to query
+        Apply(options.ListenToManagedSubscription("My_Sub").MapEvent<EventA>("A__e"));
+        Assert.Equal(["/event/A__e"],
+            EndpointOf(options, SalesforceResourceKind.ManagedSubscription, "My_Sub").BuildPrewarmTopics());
     }
 }

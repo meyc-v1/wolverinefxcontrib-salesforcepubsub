@@ -16,7 +16,7 @@ internal sealed class SubscriberComponentsSettings
     internal static readonly TimeSpan DefaultTokenCacheDuration = TimeSpan.FromMinutes(60);
     internal static readonly Uri DefaultPubSubUri = new("https://api.pubsub.salesforce.com:7443");
     internal static readonly TimeSpan DefaultHeartbeatInterval = TimeSpan.FromMinutes(15);
-    internal static readonly TimeSpan DefaultStaleStreamThreshold = TimeSpan.FromMinutes(15);
+    internal static readonly TimeSpan DefaultWatchdogThreshold = TimeSpan.FromMinutes(15);
     internal static readonly TimeSpan DefaultWatchdogPollingPeriod = TimeSpan.FromMinutes(1);
 
     public static readonly string DefaultReplayIdValidationFailedErrorCode =
@@ -54,20 +54,20 @@ internal sealed class SubscriberComponentsSettings
 
     /// <summary>
     /// How long a listener may go without any successful response (event batch or keep-alive) before the
-    /// stream is considered silently cold: the watchdog starts logging at <see cref="StaleStreamLogLevel"/>
+    /// stream is considered silently cold: the watchdog starts logging at <see cref="WatchdogLogLevel"/>
     /// each poll, and reconnect-failure logs escalate from Warning to that same level. Keep-alives arrive
     /// roughly every 2 minutes on a healthy idle stream, so this only trips on a genuinely cold one.
     /// Defaults to 15 minutes; <see cref="TimeSpan.Zero"/> disables both the watchdog and the escalation.
     /// </summary>
-    public TimeSpan StaleStreamThreshold { get; set; } = DefaultStaleStreamThreshold;
+    public TimeSpan WatchdogThreshold { get; set; } = DefaultWatchdogThreshold;
 
     /// <summary>
-    /// Log level used once <see cref="StaleStreamThreshold"/> is exceeded — by the watchdog's
+    /// Log level used once <see cref="WatchdogThreshold"/> is exceeded — by the watchdog's
     /// "has not received a response" line and by escalated reconnect-failure logs. Defaults to
     /// <see cref="LogLevel.Error"/> (the alertable severity).
     /// </summary>
-    public LogLevel StaleStreamLogLevel { get; set; } = LogLevel.Error;
+    public LogLevel WatchdogLogLevel { get; set; } = LogLevel.Error;
 
-    /// <summary>How often the stale-stream watchdog polls. Defaults to 1 minute; not exposed fluently.</summary>
+    /// <summary>How often the watchdog polls for a cold stream. Defaults to 1 minute.</summary>
     public TimeSpan WatchdogPollingPeriod { get; set; } = DefaultWatchdogPollingPeriod;
 }

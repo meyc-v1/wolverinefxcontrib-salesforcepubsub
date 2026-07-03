@@ -42,8 +42,8 @@ internal sealed class SalesforceListener : IListener
     private readonly ListenerDiagnostics _diagnostics = new(DateTimeOffset.UtcNow);
     private readonly ILogger _logger;
     private readonly CancellationTokenSource _cts;
-    private readonly Task _runner;
 
+    private Task? _runner;
     private ISubscriptionTransport? _currentTransport;
 
     public SalesforceListener(
@@ -78,6 +78,18 @@ internal sealed class SalesforceListener : IListener
         _commits = new ReplayCommitTracker(CommitToCurrentTransportAsync, settings.FetchCount,
             commitKeepAliveWhenIdle: !resumesFromWatermark);
         _cts = CancellationTokenSource.CreateLinkedTokenSource(runtimeCancellation);
+    }
+
+    /// <summary>
+    /// Begins consuming. Wolverine's SPI has no start method — a built listener is a listening listener —
+    /// so <see cref="SalesforceEndpoint.BuildListenerAsync"/> calls this explicitly right after
+    /// construction, keeping the constructor free of work and the lifecycle visible at the wiring site.
+    /// </summary>
+    public void Start()
+    {
+        if (_runner is not null)
+            return;
+
         _runner = Task.Run(() => RunAsync(_cts.Token));
     }
 
@@ -124,6 +136,9 @@ internal sealed class SalesforceListener : IListener
         if (!_cts.IsCancellationRequested)
             _cts.Cancel();
 
+        if (_runner is null)
+            return; // built but never started
+
         try
         {
             await _runner.ConfigureAwait(false);
@@ -155,7 +170,7 @@ internal sealed class SalesforceListener : IListener
         var heartbeat = _settings.HeartbeatInterval > TimeSpan.Zero
             ? HeartbeatLoopAsync(sidecarCts.Token)
             : Task.CompletedTask;
-        var watchdog = _settings.StaleStreamThreshold > TimeSpan.Zero
+        var watchdog = _settings.WatchdogThreshold > TimeSpan.Zero
             ? WatchdogLoopAsync(sidecarCts.Token)
             : Task.CompletedTask;
 
@@ -386,9 +401,9 @@ internal sealed class SalesforceListener : IListener
                 if (!await timer.WaitForNextTickAsync(ct).ConfigureAwait(false))
                     return;
 
-                if (_diagnostics.CheckStale(_settings.StaleStreamThreshold, DateTimeOffset.UtcNow, out var sinceLastSuccess))
+                if (_diagnostics.CheckStale(_settings.WatchdogThreshold, DateTimeOffset.UtcNow, out var sinceLastSuccess))
                 {
-                    _logger.Log(_settings.StaleStreamLogLevel,
+                    _logger.Log(_settings.WatchdogLogLevel,
                         "{Resource}: Has not received a response in {Duration}",
                         _resource, sinceLastSuccess);
                 }
@@ -470,8 +485,8 @@ internal sealed class SalesforceListener : IListener
 
         // Past the stale threshold this is no longer a routine reconnect — escalate to the alertable level
         // so the actual exception rides along with the watchdog's duration-only line.
-        var level = _settings.StaleStreamThreshold > TimeSpan.Zero && sinceLastSuccess >= _settings.StaleStreamThreshold
-            ? _settings.StaleStreamLogLevel
+        var level = _settings.WatchdogThreshold > TimeSpan.Zero && sinceLastSuccess >= _settings.WatchdogThreshold
+            ? _settings.WatchdogLogLevel
             : LogLevel.Warning;
 
         _logger.Log(level, ex is TimeoutException ? null : ex,

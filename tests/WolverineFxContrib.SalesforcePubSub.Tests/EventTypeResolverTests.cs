@@ -29,28 +29,15 @@ public class EventTypeResolverTests
     }
 
     private static (EventTypeResolver Resolver, CachingSchemaRepository Schemas, MemoryCache Cache) Create(
-        Type? unconditional = null, Dictionary<string, Type>? map = null)
+        Dictionary<string, Type>? map = null)
     {
         var cache = new MemoryCache(new MemoryCacheOptions());
         var schemas = new CachingSchemaRepository(new StubSchemaRepository(), cache);
-        return (new EventTypeResolver(unconditional, map ?? [], schemas), schemas, cache);
+        return (new EventTypeResolver(map ?? [], schemas), schemas, cache);
     }
 
     private static void SeedSchema(MemoryCache cache, string schemaId, string recordName)
         => cache.Set(schemaId, new SchemaInfo { SchemaId = schemaId, SchemaJson = SchemaJsonFor(recordName) });
-
-    [Fact]
-    public void Unconditional_type_short_circuits_without_reading_the_schema()
-    {
-        var (resolver, _, _) = Create(unconditional: typeof(EventOne));
-
-        // "missing" schema id — the unconditional path must not need it.
-        var (typeName, mapped, _) = resolver.Resolve("never-cached");
-
-        Assert.True(mapped);
-        Assert.Equal(typeof(EventOne).ToMessageTypeName(), typeName);
-        Assert.True(resolver.IsUnconditional);
-    }
 
     [Fact]
     public void Mapped_record_name_resolves_to_the_registered_type()

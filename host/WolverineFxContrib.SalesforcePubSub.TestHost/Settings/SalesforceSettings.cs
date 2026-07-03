@@ -51,20 +51,14 @@ internal sealed class SalesforceSettingsValidator : AbstractValidator<Salesforce
         {
             sub.RuleFor(x => x.Channel).NotEmpty();
             sub.RuleFor(x => x.Type).IsInEnum();
-
-            // Single-type (messageType) XOR map-style (events) — the single-type registration seals the map.
-            sub.RuleFor(x => x)
-                .Must(x => !string.IsNullOrWhiteSpace(x.MessageType) ^ x.Events.Count > 0)
-                .WithMessage("A subscription needs either a messageType or an events list (not both).");
-
             sub.RuleFor(x => x.Events)
                 .Must(events => events.Count > 0)
-                .When(x => x.Type == SalesforceSubscriptionType.Channel)
-                .WithMessage("A Channel subscription requires an events list (one entry per event type).");
+                .WithMessage("Every subscription requires an events list (one entry per event type it carries).");
 
             sub.RuleForEach(x => x.Events).ChildRules(evt =>
             {
                 evt.RuleFor(x => x.MessageType).NotEmpty();
+                evt.RuleFor(x => x.EventApiName).NotEmpty();
             });
         });
     }
@@ -84,8 +78,8 @@ public sealed class SalesforceSubscriptionEventOptions
     /// <summary>Simple or full name of the <c>PubSubEvent</c>-derived type to deserialize into.</summary>
     public string MessageType { get; set; } = "";
 
-    /// <summary>The event API name (Avro record name), e.g. <c>CM_Test_Event_One__e</c>. Optional only on a single-entry topic/MES.</summary>
-    public string? EventApiName { get; set; }
+    /// <summary>The event API name (Avro record name), e.g. <c>CM_Test_Event_One__e</c>. Required.</summary>
+    public string EventApiName { get; set; } = "";
 }
 
 /// <summary>One Salesforce subscription: its kind, the channel/MES name, and the .NET event type(s) it maps to.</summary>
@@ -101,13 +95,7 @@ public sealed class SalesforceSubscriptionOptions
     /// </summary>
     public string Channel { get; set; } = "";
 
-    /// <summary>
-    /// Single-type form: the <c>PubSubEvent</c>-derived type to deserialize every event into. Mutually
-    /// exclusive with <see cref="Events"/> (the single-type registration seals the event map).
-    /// </summary>
-    public string? MessageType { get; set; }
-
-    /// <summary>Map-style form: one entry per event type (required for Channel subscriptions).</summary>
+    /// <summary>The events this subscription carries: one entry per event type (DECISIONS #19 — always map-style).</summary>
     public List<SalesforceSubscriptionEventOptions> Events { get; set; } = [];
 
     /// <summary>Wire this subscription as a listener. Set false to run isolated topic-only / MES-only passes.</summary>
@@ -128,6 +116,6 @@ public sealed class SalesforceSubscriptionOptions
     /// <summary>Override the listener heartbeat cadence (default 15m; 00:00:00 disables). Set ~2m to observe it live.</summary>
     public TimeSpan? HeartbeatInterval { get; set; }
 
-    /// <summary>Override the stale-stream watchdog threshold (default 15m; 00:00:00 disables). Set short + kill the network to observe a trip.</summary>
-    public TimeSpan? StaleStreamThreshold { get; set; }
+    /// <summary>Override the watchdog cold-stream threshold (default 15m; 00:00:00 disables). Set short + kill the network to observe a trip.</summary>
+    public TimeSpan? WatchdogThreshold { get; set; }
 }
