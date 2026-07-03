@@ -1,0 +1,26 @@
+meta {
+  name: 09 - Verify channel and members
+  type: http
+  seq: 9
+}
+
+get {
+  url: {{_endpoint}}/services/data/v{{version}}/tooling/query?q=SELECT DeveloperName, EventChannel, SelectedEntity FROM PlatformEventChannelMember WHERE DeveloperName IN ('WIT_Channel_chn_WIT_Event_A_e', 'WIT_Channel_chn_WIT_Event_B_e')
+  body: none
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{accessToken}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.size: eq 2
+}
+
+docs {
+  Both WIT events should be members of WIT_Channel__chn (size = 2). Note: the EventChannel and
+  SelectedEntity columns return record Ids, not names (verified live) - which is why this filters
+  by DeveloperName. Run any time to check the org's state - safe read-only query.
+}

@@ -1,0 +1,25 @@
+meta {
+  name: 03 - Verify Message__c on both events
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{_endpoint}}/services/data/v{{version}}/tooling/query?q=SELECT EntityDefinition.QualifiedApiName, QualifiedApiName FROM FieldDefinition WHERE EntityDefinition.QualifiedApiName IN ('WIT_Event_A__e', 'WIT_Event_B__e') AND QualifiedApiName = 'Message__c'
+  body: none
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{accessToken}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.size: eq 2
+}
+
+docs {
+  Verifies both events carry the Message__c Text(255) custom field. size must be 2 (one row per
+  event); if it is 0 or 1, add the missing field per org-setup/README.md step 1.
+}

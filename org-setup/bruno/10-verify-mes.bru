@@ -1,0 +1,25 @@
+meta {
+  name: 10 - Verify managed event subscriptions
+  type: http
+  seq: 10
+}
+
+get {
+  url: {{_endpoint}}/services/data/v{{version}}/tooling/query?q=SELECT DeveloperName, MasterLabel FROM ManagedEventSubscription WHERE DeveloperName IN ('WIT_Event_A_Sub', 'WIT_Channel_Sub')
+  body: none
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{accessToken}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.size: eq 2
+}
+
+docs {
+  Both managed event subscriptions should exist (size = 2). Remember the ~5 minute provisioning
+  delay after creation before the first subscribe attempt. Safe read-only query.
+}

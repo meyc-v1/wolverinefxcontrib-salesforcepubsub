@@ -1,0 +1,36 @@
+meta {
+  name: 04 - Create WIT_Channel__chn
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{_endpoint}}/services/data/v{{version}}/tooling/sobjects/PlatformEventChannel
+  body: json
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{accessToken}}
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "FullName": "WIT_Channel__chn",
+    "Metadata": {
+      "channelType": "event",
+      "label": "WIT Channel"
+    }
+  }
+}
+
+assert {
+  res.status: eq 201
+}
+
+docs {
+  Creates the custom channel that aggregates both WIT events. channelType "event" = platform
+  events (as opposed to "data" = Change Data Capture). Re-running against an org where the
+  channel already exists returns a duplicate-value error - expected and harmless.
+}

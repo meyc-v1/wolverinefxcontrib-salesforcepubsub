@@ -1,0 +1,35 @@
+meta {
+  name: 06 - Add WIT_Event_B__e to the channel
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{_endpoint}}/services/data/v{{version}}/tooling/sobjects/PlatformEventChannelMember
+  body: json
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{accessToken}}
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "FullName": "WIT_Channel_chn_WIT_Event_B_e",
+    "Metadata": {
+      "eventChannel": "WIT_Channel__chn",
+      "selectedEntity": "WIT_Event_B__e"
+    }
+  }
+}
+
+assert {
+  res.status: eq 201
+}
+
+docs {
+  Second channel member - makes WIT_Channel__chn genuinely multi-type, which the channel-decode
+  and unmapped-event integration tests depend on. Requires 04 (the channel) to exist.
+}

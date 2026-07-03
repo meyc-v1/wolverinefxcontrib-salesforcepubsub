@@ -1,0 +1,39 @@
+meta {
+  name: 07 - Create MES WIT_Event_A_Sub (over the event)
+  type: http
+  seq: 7
+}
+
+post {
+  url: {{_endpoint}}/services/data/v{{version}}/tooling/sobjects/ManagedEventSubscription
+  body: json
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{accessToken}}
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "FullName": "WIT_Event_A_Sub",
+    "Metadata": {
+      "label": "WIT Event A Sub",
+      "topicName": "/event/WIT_Event_A__e",
+      "state": "RUN",
+      "defaultReplay": "LATEST",
+      "errorRecoveryReplay": "LATEST"
+    }
+  }
+}
+
+assert {
+  res.status: eq 201
+}
+
+docs {
+  Managed event subscription directly over WIT_Event_A__e (Salesforce-managed replay). Note:
+  MES provisioning takes a few minutes after creation - wait ~5 minutes before the first
+  subscribe. The slot is exclusive per client; only one process can hold it at a time.
+}

@@ -1,0 +1,25 @@
+meta {
+  name: 02 - Verify WIT_Event_B__e exists
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{_endpoint}}/services/data/v{{version}}/tooling/query?q=SELECT DeveloperName FROM CustomObject WHERE DeveloperName = 'WIT_Event_B'
+  body: none
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{accessToken}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.size: eq 1
+}
+
+docs {
+  Verifies the manually-created platform event WIT_Event_B__e exists (see org-setup/README.md
+  step 1). size = 0 means the event is missing or the Object Name is off.
+}

@@ -1,0 +1,38 @@
+meta {
+  name: 08 - Create MES WIT_Channel_Sub (over the channel)
+  type: http
+  seq: 8
+}
+
+post {
+  url: {{_endpoint}}/services/data/v{{version}}/tooling/sobjects/ManagedEventSubscription
+  body: json
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{accessToken}}
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "FullName": "WIT_Channel_Sub",
+    "Metadata": {
+      "label": "WIT Channel Sub",
+      "topicName": "/event/WIT_Channel__chn",
+      "state": "RUN",
+      "defaultReplay": "LATEST",
+      "errorRecoveryReplay": "LATEST"
+    }
+  }
+}
+
+assert {
+  res.status: eq 201
+}
+
+docs {
+  Managed event subscription over the multi-type channel (the MES-over-channel test scenario).
+  Requires 04-06 (channel + members). Same provisioning-delay and exclusive-slot notes as 07.
+}

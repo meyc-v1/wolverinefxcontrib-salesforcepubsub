@@ -1,0 +1,36 @@
+meta {
+  name: 05 - Add WIT_Event_A__e to the channel
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{_endpoint}}/services/data/v{{version}}/tooling/sobjects/PlatformEventChannelMember
+  body: json
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{accessToken}}
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "FullName": "WIT_Channel_chn_WIT_Event_A_e",
+    "Metadata": {
+      "eventChannel": "WIT_Channel__chn",
+      "selectedEntity": "WIT_Event_A__e"
+    }
+  }
+}
+
+assert {
+  res.status: eq 201
+}
+
+docs {
+  FullName follows Salesforce's member convention: channel + entity with double underscores
+  collapsed to single (WIT_Channel__chn + WIT_Event_A__e -> WIT_Channel_chn_WIT_Event_A_e).
+  Requires 04 (the channel) to exist.
+}
