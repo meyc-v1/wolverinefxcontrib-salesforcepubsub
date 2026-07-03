@@ -95,13 +95,13 @@ builder.UseWolverine(opts =>
         // Two kinds, split on who manages replay (DECISIONS #19); "Channel" is accepted as a config
         // alias for Topic (a custom channel is a topic to the Pub/Sub API).
         var listener = sub.Type == SalesforceSubscriptionType.ManagedSubscription
-            ? opts.ListenToManagedSubscription(sub.Channel)
-            : opts.ListenToSalesforceTopic(sub.Channel);
+            ? opts.ListenToManagedSubscription(sub.Resource)
+            : opts.ListenToSalesforceTopic(sub.Resource);
 
         foreach (var evt in sub.Events)
         {
             var eventType = ResolveEventType(evt.MessageType)
-                ?? throw new InvalidOperationException($"Could not resolve message type '{evt.MessageType}' for channel '{sub.Channel}'.");
+                ?? throw new InvalidOperationException($"Could not resolve message type '{evt.MessageType}' for resource '{sub.Resource}'.");
 
             // Name from config when given; otherwise the type's [SalesforcePlatformEvent] attribute.
             if (string.IsNullOrWhiteSpace(evt.EventApiName))
@@ -115,7 +115,7 @@ builder.UseWolverine(opts =>
             case EndpointMode.Durable:
                 if (string.IsNullOrWhiteSpace(durabilityConnectionString))
                     throw new InvalidOperationException(
-                        $"Subscription '{sub.Channel}' is configured with mode Durable, but no message store is wired — set the 'durabilitySettings:connectionString' user secret (or change the mode). Without a store, Durable would silently run without persistence.");
+                        $"Subscription '{sub.Resource}' is configured with mode Durable, but no message store is wired — set the 'durabilitySettings:connectionString' user secret (or change the mode). Without a store, Durable would silently run without persistence.");
                 listener.UseDurableInbox();
                 break;
             case EndpointMode.BufferedInMemory:

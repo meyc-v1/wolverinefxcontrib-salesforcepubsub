@@ -60,8 +60,9 @@ endpoints. Package id `WolverineFxContrib.SalesforcePubSub`; root namespace `Wol
   - `salesforceAuthenticationSettings` (user-secrets, id `wolverine.salesforcepubsub`): `ClientId`,
     `ClientSecret`, `LoginUri`.
   - `salesforceSettings` (appsettings; `baseUri` lives in user secrets): `pubSubUri` (gRPC) and
-    `subscriptions[]` — each `{ type: Topic|ManagedSubscription (Channel = Topic alias), channel,
-    events[] {messageType, eventApiName} (required), mode: Inline|BufferedInMemory|Durable, enabled, … }`.
+    `subscriptions[]` — each `{ type: Topic|ManagedSubscription (Channel = Topic alias), resource
+    (topic path or MES developer name), events[] {messageType, eventApiName? (attribute fallback)},
+    mode: Inline|BufferedInMemory|Durable, enabled, … }`.
   - `durabilitySettings:connectionString` (user secrets) opts into the Wolverine SQL Server message store
     for Durable-mode endpoints.
 - Wired against **the sandbox org**: Test Event One → MES `CM_Test_Event_One`; Test Event Two → topic

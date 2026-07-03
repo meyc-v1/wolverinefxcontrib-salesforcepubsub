@@ -49,7 +49,7 @@ internal sealed class SalesforceSettingsValidator : AbstractValidator<Salesforce
 
         RuleForEach(x => x.Subscriptions).ChildRules(sub =>
         {
-            sub.RuleFor(x => x.Channel).NotEmpty();
+            sub.RuleFor(x => x.Resource).NotEmpty();
             sub.RuleFor(x => x.Type).IsInEnum();
             sub.RuleFor(x => x.Events)
                 .Must(events => events.Count > 0)
@@ -92,11 +92,11 @@ public sealed class SalesforceSubscriptionOptions
     public SalesforceSubscriptionType Type { get; set; }
 
     /// <summary>
-    /// For a topic, the channel path (e.g. <c>/event/CM_Test_Event_Two__e</c>); for a custom channel the
-    /// __chn path (e.g. <c>/event/CM_Test_Channel__chn</c>). For MES, the ManagedEventSubscription
-    /// DeveloperName (e.g. <c>CM_Test_Event_One</c>).
+    /// The subscribed resource — matches <c>SalesforceEndpoint.Resource</c>. For a topic, the path
+    /// (<c>/event/CM_Test_Event_Two__e</c> or <c>/event/CM_Test_Channel__chn</c>); for MES, the
+    /// ManagedEventSubscription DeveloperName (e.g. <c>CM_Test_Event_One</c>).
     /// </summary>
-    public string Channel { get; set; } = "";
+    public string Resource { get; set; } = "";
 
     /// <summary>The events this subscription carries: one entry per event type (DECISIONS #19 — always map-style).</summary>
     public List<SalesforceSubscriptionEventOptions> Events { get; set; } = [];
