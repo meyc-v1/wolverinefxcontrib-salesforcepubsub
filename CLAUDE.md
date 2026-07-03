@@ -66,9 +66,11 @@ endpoints. Package id `WolverineFxContrib.SalesforcePubSub`; root namespace `Wol
   - `durabilitySettings:connectionString` (user secrets) opts into the Wolverine SQL Server message store
     for Durable-mode endpoints.
 - Wired against **the sandbox org**: Test Event One → MES `CM_Test_Event_One`; Test Event Two → topic
-  `/event/CM_Test_Event_Two__e`; custom channel `CM_Test_Channel__chn` carries both (created via the sf
-  CLI Tooling API). Timed `PublisherWorker` (opt-in `publisherSettings`) POSTs the test PEs; handler seams:
-  `Message__c` = "poison" (throws) / "slow" (30s delay) drive the Durable DLQ / restart-recovery tests.
+  `/event/CM_Test_Event_Two__e`; custom channel `CM_Test_Channel__chn` carries both, and MES
+  `CM_Test_Channel_Sub` sits over that channel (all created via the sf CLI Tooling API). Timed
+  `PublisherWorker` (opt-in `publisherSettings`) POSTs the test PEs; handler seams: `Message__c` =
+  "poison" (throws) / "slow" (30s delay) drive the DLQ / restart-recovery / kill-window tests
+  (delivery-guarantee evidence lives in `test-results/`).
 
 ## Conventions
 - **Do it the Wolverine way.** This is a community Wolverine transport and should look/behave like a
