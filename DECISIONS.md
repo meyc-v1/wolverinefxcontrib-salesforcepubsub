@@ -27,6 +27,30 @@ aren't conformance issues go under "Cleanups / tech-debt".
 
 ---
 
+## 20. Buffered mode characterized: at-most-once has BOTH a loss window and a duplicate window across restarts — documented, not "fixed"
+- **Date:** 2026-07-03 · **Status:** Accepted (documentation decision; no code change)
+- **Context:** The last un-verified delivery mode. `BufferedInMemory` acks at receipt (Wolverine's
+  `BufferedReceiver` completes before the handler runs — DECISIONS #2), and our replay commit is
+  *throttled* (`commitEvery`/keep-alive/flush). Those two facts predict two opposite failure windows
+  around a force-kill, neither previously observed. Both were staged live on the channel endpoint
+  (evidence: `test-results/buffered-run{1,2,3}.txt`):
+  - **Duplicate window:** events 3504109/3504110 were handled, the process was killed within seconds —
+    before any durable commit — and the restart resumed behind and **re-handled both**. "At-most-once"
+    Buffered produces duplicates across restarts whenever the kill beats the throttled commit.
+  - **Loss window:** two slow-handler events were received (ack-at-receipt advanced the watermark),
+    nine fast events pushed the throttle so the durable commit (3504118) landed **past** the
+    still-running slows; the kill caught 3504114 mid-handler → the restart resumed after the commit and
+    **3504114 was never delivered again**. Received-committed-unhandled = lost.
+- **Decision:** Document, don't engineer around. Both windows are inherent to ack-at-receipt combined
+  with any batched/throttled durable commit; "fixing" either means moving the ack after handling — which
+  is exactly what Inline and Durable already are. Guidance (README matrix): use Buffered only where loss
+  *and* duplication are both acceptable; otherwise Inline (at-least-once) or Durable (at-least-once with
+  parallelism + DLQ).
+- **Consequences:** The delivery-guarantee matrix in the README now states observed behavior per mode
+  with evidence cited, and doubles as the spec for future integration tests. This closes the original
+  "Layer B" testing item — Inline was covered by the resiliency campaign, Durable by its live pass and
+  the night-1 overnight, and Buffered by this characterization (steady-state overnight to follow).
+
 ## 19. Multi-type-first: a transport carries multiple message types; single-type is the N=1 case, not a different kind
 - **Date:** 2026-07-03 · **Status:** Accepted (supersedes the registration surface of #16 and its addenda)
 - **Context:** the maintainer's review of the channels work identified that multi-type support had been bolted

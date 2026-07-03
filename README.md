@@ -122,11 +122,14 @@ Salesforce-managed checkpointing is specifically wanted. (DECISIONS #13.)
 
 Per endpoint, via the standard Wolverine listener configuration:
 
-| Mode | Guarantee | Notes |
-|---|---|---|
-| `ProcessInline()` *(default)* | at-least-once | replay commits only after the handler resolves |
-| `BufferedInMemory()` | at-most-once | acked at receipt, before handling |
-| `UseDurableInbox()` | at-least-once **with parallelism** + a real DLQ | requires a Wolverine message store |
+| Mode | Guarantee | Crash / force-kill + restart (observed) | Poison message (observed) |
+|---|---|---|---|
+| `ProcessInline()` *(default)* | at-least-once | resumes from the durable replay position; the handled-but-uncommitted tail redelivers (duplicates bounded by the commit throttle; no loss) | retried per your error policies, then discarded with no store / a DLQ row with one |
+| `BufferedInMemory()` | at-most-once — **and not cleanly so across restarts** | acked at receipt, before handling. Two windows, depending on where the kill lands relative to the throttled replay commit: events *received-committed-but-unhandled* are **lost**, and events *handled-but-uncommitted* **redeliver as duplicates**. Use it only where both loss *and* duplication are acceptable | the loss window applies; a handler failure otherwise behaves like Inline |
+| `UseDurableInbox()` | at-least-once **with parallelism** + a real DLQ | persisted before processing; a crash mid-handle is recovered from the inbox on restart with full fidelity | preserved in the store's dead-letter table, replayable |
+
+Every cell above is live-verified against a sandbox org (resiliency campaign + kill-window tests; evidence
+logs in `test-results/`).
 
 Replay tracking is a per-envelope **watermark**: events are tracked on receive, and the committed
 position advances only through fully-resolved envelopes — never past one still in flight. Handler

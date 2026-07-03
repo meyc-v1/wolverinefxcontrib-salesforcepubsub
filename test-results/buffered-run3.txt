@@ -1,0 +1,37 @@
+Using launch settings from C:\src\wolverine-salesforce-pubsub\host\WolverineFxContrib.SalesforcePubSub.TestHost\Properties\launchSettings.json...
+Building...
+14:32:04 info: Wolverine.Runtime.WolverineRuntime[0] Exporting Open Telemetry metrics from Wolverine with name Wolverine:WolverineFxContrib.SalesforcePubSub.TestHost, version 6.12.0.0
+14:32:04 info: Wolverine.Runtime.WolverineRuntime[0] Starting Wolverine messaging for application assembly WolverineFxContrib.SalesforcePubSub.TestHost, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null
+14:32:04 info: WolverineFxContrib.SalesforcePubSub.TestHost.PublisherWorker[0] Publisher disabled (or no events configured); host is listen-only.
+14:32:04 info: Wolverine.Runtime.WolverineRuntime[0] The Wolverine code generation mode is Dynamic. This is suitable for development, but you may want to opt into other options for production usage to reduce start up time and resource utilization.
+14:32:04 info: Wolverine.Runtime.WolverineRuntime[0] See https://wolverine.netlify.app/guide/codegen.html for more information
+14:32:04 info: Wolverine.Configuration.HandlerDiscovery[0] Searching assembly Wolverine.RuntimeCompilation, Version=6.12.0.0, Culture=neutral, PublicKeyToken=null for Wolverine message handlers
+14:32:04 info: Wolverine.Configuration.HandlerDiscovery[0] Searching assembly WolverineFxContrib.SalesforcePubSub.TestHost, Version=0.1.0.0, Culture=neutral, PublicKeyToken=null for Wolverine message handlers
+14:32:06 info: Wolverine.Runtime.WolverineRuntime[0] Wolverine assigned node id for envelope persistence is 1692844471
+14:32:06 info: Wolverine.Transports.ListeningAgent[0] Started message listening at stub://replies/
+14:32:06 info: WolverineFxContrib.SalesforcePubSub.TestHost.Replay.SqlReplayIdRepository[0] SQL replay store configured. Schema: dbo, Table: SalesforceSubscriberReplay, Application: wolverine-salesforcepubsub-testhost, Instance: wolverine-testhost
+14:32:06 info: Wolverine.Transports.ListeningAgent[0] Started message listening at sfpubsub://topic/%2Fevent%2FCM_Test_Channel__chn
+14:32:06 info: Wolverine.Transports.ListeningAgent[0] Started message listening at dbcontrol://1492d2b6-4a39-426b-9b3c-e81befc63156/
+14:32:06 info: Wolverine.SalesforcePubSub.Internals.SalesforceListener[0] /event/CM_Test_Channel__chn: Starting Salesforce listener.
+14:32:06 info: Wolverine.Runtime.Agents.NodeAgentController[0] Starting agents for Node 1492d2b6-4a39-426b-9b3c-e81befc63156 with assigned node id 19 and Control Uri dbcontrol://1492d2b6-4a39-426b-9b3c-e81befc63156/
+14:32:06 info: Microsoft.Hosting.Lifetime[0] Application started. Press Ctrl+C to shut down.
+14:32:06 info: Microsoft.Hosting.Lifetime[0] Hosting environment: Development
+14:32:06 info: Microsoft.Hosting.Lifetime[0] Content root path: C:\src\wolverine-salesforce-pubsub\host\WolverineFxContrib.SalesforcePubSub.TestHost
+14:32:07 dbug: Wolverine.SalesforcePubSub.Internals.SalesforceListener[0] /event/CM_Test_Channel__chn: Pre-warmed schema X8s0tlGFdrbznTk20pDWsQ for /event/CM_Test_Event_One__e.
+14:32:08 dbug: Wolverine.SalesforcePubSub.Internals.SalesforceListener[0] /event/CM_Test_Channel__chn: Pre-warmed schema K98aAtiNFBjA-PJlcvaQ2g for /event/CM_Test_Event_Two__e.
+14:32:08 info: WolverineFxContrib.SalesforcePubSub.TestHost.Replay.SqlReplayIdRepository[0] Cold-start read replay id 3504118 for Topic: /event/CM_Test_Channel__chn from SQL
+14:32:08 dbug: Wolverine.SalesforcePubSub.Internals.SalesforceListener[2] /event/CM_Test_Channel__chn: Sending FetchRequest, FetchCount: 10, ReplayId: 3504118
+14:32:10 info: WolverineFxContrib.SalesforcePubSub.TestHost.Handlers.TestEventTwoHandler[0] Handled TestEventTwo from /event/CM_Test_Channel__chn — ReplayId 3504119, CreatedById 005400000035Bg5AAE, CreatedDate 1783103458795
+14:32:10 info: WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventTwo[104] Successfully processed message WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventTwo#b2fcaa52-1d0e-4002-a852-39592f6c6e72 from sfpubsub://topic/%2Fevent%2FCM_Test_Channel__chn
+14:32:10 info: WolverineFxContrib.SalesforcePubSub.TestHost.Handlers.TestEventTwoHandler[0] Handled TestEventTwo from /event/CM_Test_Channel__chn — ReplayId 3504120, CreatedById 005400000035Bg5AAE, CreatedDate 1783103460944
+14:32:10 info: WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventTwo[104] Successfully processed message WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventTwo#9bffbe90-5330-4e83-8bca-afb28fe798a9 from sfpubsub://topic/%2Fevent%2FCM_Test_Channel__chn
+14:32:10 info: WolverineFxContrib.SalesforcePubSub.TestHost.Handlers.TestEventTwoHandler[0] Handled TestEventTwo from /event/CM_Test_Channel__chn — ReplayId 3504121, CreatedById 005400000035Bg5AAE, CreatedDate 1783103463078
+14:32:10 info: WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventTwo[104] Successfully processed message WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventTwo#8d8adaad-ab4c-4de6-940f-c70481b78fe3 from sfpubsub://topic/%2Fevent%2FCM_Test_Channel__chn
+14:32:10 info: WolverineFxContrib.SalesforcePubSub.TestHost.Handlers.TestEventTwoHandler[0] Handled TestEventTwo from /event/CM_Test_Channel__chn — ReplayId 3504122, CreatedById 005400000035Bg5AAE, CreatedDate 1783103465062
+14:32:10 info: WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventTwo[104] Successfully processed message WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventTwo#8a5ae74f-0719-4e88-9f46-83a63951c0c5 from sfpubsub://topic/%2Fevent%2FCM_Test_Channel__chn
+14:32:10 info: WolverineFxContrib.SalesforcePubSub.TestHost.Handlers.TestEventTwoHandler[0] Handled TestEventTwo from /event/CM_Test_Channel__chn — ReplayId 3504123, CreatedById 005400000035Bg5AAE, CreatedDate 1783103467256
+14:32:10 info: WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventTwo[104] Successfully processed message WolverineFxContrib.SalesforcePubSub.TestHost.Events.TestEventTwo#e16f98f3-b3dc-4861-870b-12ed61e6fee9 from sfpubsub://topic/%2Fevent%2FCM_Test_Channel__chn
+14:32:19 info: Wolverine.Runtime.Agents.NodeAgentController[0] Node 1492d2b6-4a39-426b-9b3c-e81befc63156 successfully assumed leadership
+14:32:19 info: Wolverine.Runtime.Agents.NodeAgentController[0] Successfully started agent wolverinedb://sqlserver/your-sql-server.database.windows.net/CM_SalesforceReplayIdTest/dbo on Node 19
+14:32:20 info: Wolverine.Runtime.WolverineRuntime[0] Successfully started agent wolverinedb://sqlserver/your-sql-server.database.windows.net/CM_SalesforceReplayIdTest/dbo on node 19
+14:33:04 info: WolverineFxContrib.SalesforcePubSub.TestHost.HeartbeatService[0] [heartbeat] published: [none] | handled: [TestEventTwo=5 (lastReplayId 3504123)]
