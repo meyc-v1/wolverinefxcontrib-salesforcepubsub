@@ -60,6 +60,17 @@ There are exactly two, split by **who manages the replay position** — and ever
 each event it carries with `MapEvent<T>("Api_Name__e")`, keyed by the **event API name** (the Avro
 record name of the event's schema). A single-event subscription is simply the one-entry case.
 
+The name can also live on the type itself — it rarely changes, so tuck it away once:
+
+```csharp
+[SalesforcePlatformEvent("Order_Shipped__e")]
+public class OrderShipped : PlatformEvent { … }
+
+opts.ListenToSalesforceTopic("/event/Order_Shipped__e").MapEvent<OrderShipped>();
+```
+
+An explicit name at the registration site always wins over the attribute.
+
 ### Topic — client-managed replay (the recommended default)
 
 The path may be a plain platform-event topic (`/event/X__e`, exactly one event type) or a custom channel

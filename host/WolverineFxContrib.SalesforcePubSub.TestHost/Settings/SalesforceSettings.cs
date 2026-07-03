@@ -57,8 +57,8 @@ internal sealed class SalesforceSettingsValidator : AbstractValidator<Salesforce
 
             sub.RuleForEach(x => x.Events).ChildRules(evt =>
             {
+                // EventApiName may be omitted when the .NET type carries [SalesforcePlatformEvent].
                 evt.RuleFor(x => x.MessageType).NotEmpty();
-                evt.RuleFor(x => x.EventApiName).NotEmpty();
             });
         });
     }
@@ -78,8 +78,11 @@ public sealed class SalesforceSubscriptionEventOptions
     /// <summary>Simple or full name of the <c>PubSubEvent</c>-derived type to deserialize into.</summary>
     public string MessageType { get; set; } = "";
 
-    /// <summary>The event API name (Avro record name), e.g. <c>CM_Test_Event_One__e</c>. Required.</summary>
-    public string EventApiName { get; set; } = "";
+    /// <summary>
+    /// The event API name (Avro record name), e.g. <c>CM_Test_Event_One__e</c>. Optional when the .NET
+    /// type carries a <c>[SalesforcePlatformEvent]</c> attribute.
+    /// </summary>
+    public string? EventApiName { get; set; }
 }
 
 /// <summary>One Salesforce subscription: its kind, the channel/MES name, and the .NET event type(s) it maps to.</summary>

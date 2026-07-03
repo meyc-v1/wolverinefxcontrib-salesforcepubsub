@@ -15,6 +15,9 @@ public class EventMapRegistrationTests
     public sealed class EventA : PlatformEvent;
     public sealed class EventB : PlatformEvent;
 
+    [SalesforcePlatformEvent("Attributed__e")]
+    public sealed class AttributedEvent : PlatformEvent;
+
     private static SalesforceEndpoint EndpointOf(WolverineOptions options, SalesforceResourceKind kind, string resource)
         => options.Transports.GetOrCreate<SalesforcePubSubTransport>().EndpointForResource(kind, resource);
 
@@ -135,6 +138,38 @@ public class EventMapRegistrationTests
         var endpoint = EndpointOf(options, SalesforceResourceKind.Topic, "/event/C__chn");
         var ex = Assert.Throws<InvalidOperationException>(endpoint.ValidateEventMap);
         Assert.Contains("No event types", ex.Message);
+    }
+
+    [Fact]
+    public void Attribute_supplies_the_event_api_name()
+    {
+        var options = new WolverineOptions();
+        Apply(options.ListenToSalesforceTopic("/event/Attributed__e").MapEvent<AttributedEvent>());
+
+        var endpoint = EndpointOf(options, SalesforceResourceKind.Topic, "/event/Attributed__e");
+        endpoint.ValidateEventMap();
+        Assert.Equal(typeof(AttributedEvent), endpoint.EventTypeMap["Attributed__e"]);
+    }
+
+    [Fact]
+    public void Attribute_less_type_with_no_explicit_name_throws()
+    {
+        var options = new WolverineOptions();
+        var config = options.ListenToSalesforceTopic("/event/A__e");
+
+        var ex = Assert.Throws<InvalidOperationException>(() => config.MapEvent<EventA>());
+        Assert.Contains(nameof(SalesforcePlatformEventAttribute), ex.Message);
+    }
+
+    [Fact]
+    public void Explicit_name_wins_over_the_attribute()
+    {
+        var options = new WolverineOptions();
+        Apply(options.ListenToSalesforceTopic("/event/C__chn").MapEvent<AttributedEvent>("Override__e"));
+
+        var endpoint = EndpointOf(options, SalesforceResourceKind.Topic, "/event/C__chn");
+        Assert.Equal(typeof(AttributedEvent), endpoint.EventTypeMap["Override__e"]);
+        Assert.False(endpoint.EventTypeMap.ContainsKey("Attributed__e"));
     }
 
     [Fact]

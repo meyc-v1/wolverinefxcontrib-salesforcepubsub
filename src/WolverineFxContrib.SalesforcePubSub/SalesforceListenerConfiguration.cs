@@ -41,6 +41,26 @@ public class SalesforceListenerConfiguration
         return this;
     }
 
+    /// <summary>
+    /// Declares an event whose API name is carried on the type via
+    /// <see cref="SalesforcePlatformEventAttribute"/> — the declaration lives with the type instead of
+    /// being repeated at each registration. An explicit name overload always wins over the attribute.
+    /// </summary>
+    public SalesforceListenerConfiguration MapEvent<T>() where T : PubSubEvent
+        => MapEvent(typeof(T));
+
+    /// <summary>Runtime-typed overload of the attribute-based <see cref="MapEvent{T}()"/>.</summary>
+    public SalesforceListenerConfiguration MapEvent(Type messageType)
+    {
+        ArgumentNullException.ThrowIfNull(messageType);
+
+        var attribute = (SalesforcePlatformEventAttribute?)Attribute.GetCustomAttribute(messageType, typeof(SalesforcePlatformEventAttribute))
+            ?? throw new InvalidOperationException(
+                $"'{messageType.Name}' has no [{nameof(SalesforcePlatformEventAttribute)}] declaring its event API name. Decorate the type ([SalesforcePlatformEvent(\"My_Event__e\")]) or pass the name explicitly: MapEvent<{messageType.Name}>(\"My_Event__e\").");
+
+        return MapEvent(messageType, attribute.EventApiName);
+    }
+
     /// <summary>Override the fetch batch size for this listener (default 10).</summary>
     public SalesforceListenerConfiguration FetchCount(int count)
     {

@@ -102,7 +102,12 @@ builder.UseWolverine(opts =>
         {
             var eventType = ResolveEventType(evt.MessageType)
                 ?? throw new InvalidOperationException($"Could not resolve message type '{evt.MessageType}' for channel '{sub.Channel}'.");
-            listener.MapEvent(eventType, evt.EventApiName);
+
+            // Name from config when given; otherwise the type's [SalesforcePlatformEvent] attribute.
+            if (string.IsNullOrWhiteSpace(evt.EventApiName))
+                listener.MapEvent(eventType);
+            else
+                listener.MapEvent(eventType, evt.EventApiName);
         }
 
         switch (sub.Mode)

@@ -66,7 +66,10 @@ aren't conformance issues go under "Cleanups / tech-debt".
   and the trust-based decode; the consumer always states "this is the event." Breaking changes accepted
   (org-internal, pre-consumer).
 - **Consequences:** Public surface: `UseSalesforcePubSub` → expression; two `ListenTo…` methods;
-  `MapEvent<T>(name)`/`MapEvent(Type, name)`; grouped observability. TestHost config is events[]-only
+  `MapEvent<T>(name)`/`MapEvent(Type, name)`; grouped observability. **Addendum (same day):**
+  `[SalesforcePlatformEvent("Api_Name__e")]` on the event type lets `MapEvent<T>()` omit the name at the
+  registration site — the declaration moves to the type (names rarely change); an explicit name always
+  wins over the attribute, and a type with neither fails fast. TestHost config is events[]-only
   (`messageType` field removed; `Channel` type value retained as a Topic alias). Unit tests 99 → 93 (the
   sealing/sugar/guard tests deleted with their subjects).
 
