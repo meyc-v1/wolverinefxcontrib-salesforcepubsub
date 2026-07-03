@@ -5,10 +5,10 @@ using Wolverine.SalesforcePubSub.Events;
 namespace WolverineFxContrib.SalesforcePubSub.TestHost.Events;
 
 /// <summary>
-/// Maps to the "CM Test Event One" platform event. Inherits the standard CreatedById/CreatedDate. Add
+/// Maps to the "WIT Event A" platform event. Inherits the standard CreatedById/CreatedDate. Add
 /// custom (__c) fields here with names matching the platform event schema.
 /// </summary>
-[SalesforcePlatformEvent("CM_Test_Event_One__e")]
+[SalesforcePlatformEvent("WIT_Event_A__e")]
 public sealed class TestEventOne : PlatformEvent
 {
     public string Message__c { get; set; } = null!;
