@@ -117,6 +117,9 @@ builder.UseWolverine(opts =>
         switch (sub.Mode)
         {
             case EndpointMode.Durable:
+                if (string.IsNullOrWhiteSpace(durabilityConnectionString))
+                    throw new InvalidOperationException(
+                        $"Subscription '{sub.Channel}' is configured with mode Durable, but no message store is wired — set the 'durabilitySettings:connectionString' user secret (or change the mode). Without a store, Durable would silently run without persistence.");
                 listener.UseDurableInbox();
                 break;
             case EndpointMode.BufferedInMemory:
@@ -137,6 +140,15 @@ builder.UseWolverine(opts =>
 });
 
 var host = builder.Build();
+
+// The replay-repository fallback chain is silent by design in the transport; in the harness, make the
+// in-memory default loud — a replay position that doesn't survive a restart invalidates recovery tests.
+if (replay.SeedBadReplayId is null && string.IsNullOrWhiteSpace(replay.ConnectionString))
+{
+    host.Services.GetRequiredService<ILoggerFactory>().CreateLogger("Program").LogWarning(
+        "No 'salesforceReplaySettings:connectionString' configured; topic/channel replay positions are IN-MEMORY ONLY and will not survive a restart.");
+}
+
 host.Run();
 
 static Type? ResolveEventType(string name)

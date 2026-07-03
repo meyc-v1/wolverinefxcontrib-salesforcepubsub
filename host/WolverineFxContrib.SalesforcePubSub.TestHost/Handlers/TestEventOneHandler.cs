@@ -14,8 +14,6 @@ public class TestEventOneHandler
     /// </summary>
     public async Task Handle(TestEventOne message, Envelope envelope, RunMetrics metrics, ILogger<TestEventOneHandler> logger)
     {
-        metrics.RecordHandled(nameof(TestEventOne), message.ReplayId);
-
         if (string.Equals(message.Message__c, "poison", StringComparison.OrdinalIgnoreCase))
         {
             logger.LogWarning("Poison TestEventOne received (ReplayId {ReplayId}, attempt {Attempt}) — throwing.",
@@ -29,6 +27,8 @@ public class TestEventOneHandler
             await Task.Delay(TimeSpan.FromSeconds(30));
         }
 
+        // Recorded only on a successful pass so poison retries don't inflate the run's handled ledger.
+        metrics.RecordHandled(nameof(TestEventOne), message.ReplayId);
         logger.LogInformation(
             "Handled TestEventOne from {Source} — ReplayId {ReplayId}, CreatedById {CreatedById}, CreatedDate {CreatedDate}",
             envelope.TopicName, message.ReplayId, message.CreatedById, message.CreatedDate);

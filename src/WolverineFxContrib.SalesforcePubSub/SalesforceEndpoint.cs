@@ -72,9 +72,21 @@ public sealed class SalesforceEndpoint : Endpoint
         if (!typeof(PubSubEvent).IsAssignableFrom(messageType))
             throw new ArgumentException($"Message type '{messageType}' must derive from {nameof(PubSubEvent)}.", nameof(messageType));
 
+        // Re-registering an identical mapping is a no-op — Wolverine's own transports treat repeated
+        // endpoint configuration as idempotent, and config code touching the same topic twice is common.
+        if (eventApiName is null && UnconditionalEventType == messageType)
+        {
+            EventMapSealed |= seal;
+            return;
+        }
+
+        if (eventApiName is not null && EventTypeMap.TryGetValue(eventApiName, out var existing) && existing == messageType)
+            return;
+
         if (EventMapSealed)
-            throw new InvalidOperationException(
-                $"The event map for Salesforce endpoint '{Resource}' was configured with a single-type ListenTo…<T> registration and cannot be extended with MapEvent. Use the non-generic ListenToSalesforceTopic/ListenToSalesforceChannel/ListenToManagedSubscription overload with MapEvent<T>(…) to declare the event types explicitly.");
+            throw new InvalidOperationException(eventApiName is null && seal
+                ? $"Salesforce endpoint '{Resource}' is already registered with the single event type {UnconditionalEventType!.Name}; it cannot be re-registered with the conflicting type {messageType.Name}."
+                : $"The event map for Salesforce endpoint '{Resource}' was configured with a single-type ListenTo…<T> registration and cannot be extended with MapEvent. Use the non-generic ListenToSalesforceTopic/ListenToSalesforceChannel/ListenToManagedSubscription overload with MapEvent<T>(…) to declare the event types explicitly.");
 
         if (eventApiName is null)
         {

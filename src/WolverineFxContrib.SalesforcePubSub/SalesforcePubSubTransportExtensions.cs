@@ -69,6 +69,7 @@ public static class SalesforcePubSubTransportExtensions
     /// <summary>Single-type topic listener with the message type supplied at runtime (e.g. from configuration).</summary>
     public static SalesforceListenerConfiguration ListenToSalesforceTopic(this WolverineOptions options, string topicName, Type messageType)
     {
+        ArgumentNullException.ThrowIfNull(messageType);
         GuardNotChannel(topicName);
         return ConfigureListener(options, SalesforceResourceKind.Topic, topicName, messageType);
     }
@@ -109,7 +110,10 @@ public static class SalesforcePubSubTransportExtensions
 
     /// <summary>Single-type MES listener with the message type supplied at runtime.</summary>
     public static SalesforceListenerConfiguration ListenToManagedSubscription(this WolverineOptions options, string subscriptionName, Type messageType)
-        => ConfigureListener(options, SalesforceResourceKind.ManagedSubscription, subscriptionName, messageType);
+    {
+        ArgumentNullException.ThrowIfNull(messageType);
+        return ConfigureListener(options, SalesforceResourceKind.ManagedSubscription, subscriptionName, messageType);
+    }
 
     /// <summary>
     /// Listen to a managed event subscription, declaring event types via <c>MapEvent</c>. A MES may target
@@ -243,6 +247,7 @@ public class SalesforceListenerConfiguration
     /// <summary>Runtime-typed overload of <see cref="MapEvent{T}"/> (e.g. for configuration-driven wiring).</summary>
     public SalesforceListenerConfiguration MapEvent(Type messageType, string? eventApiName = null)
     {
+        ArgumentNullException.ThrowIfNull(messageType);
         add(e => e.AddEventMapping(messageType, eventApiName));
         return this;
     }

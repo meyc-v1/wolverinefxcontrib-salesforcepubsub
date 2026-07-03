@@ -35,6 +35,52 @@ public class EventMapRegistrationTests
     }
 
     [Fact]
+    public void Re_registering_the_same_single_type_is_idempotent()
+    {
+        // Wolverine's own transports treat repeated endpoint configuration as idempotent; two composition
+        // modules touching the same topic with the same type must not crash startup.
+        var options = new WolverineOptions();
+        options.ListenToSalesforceTopic<EventA>("/event/A__e");
+        options.ListenToSalesforceTopic<EventA>("/event/A__e");
+
+        var endpoint = EndpointOf(options, SalesforceResourceKind.Topic, "/event/A__e");
+        Assert.Equal(typeof(EventA), endpoint.UnconditionalEventType);
+        Assert.True(endpoint.EventMapSealed);
+        endpoint.ValidateEventMap();
+    }
+
+    [Fact]
+    public void Re_registering_a_conflicting_single_type_throws()
+    {
+        var options = new WolverineOptions();
+        options.ListenToSalesforceTopic<EventA>("/event/A__e");
+
+        var ex = Assert.Throws<InvalidOperationException>(() => options.ListenToSalesforceTopic<EventB>("/event/A__e"));
+        Assert.Contains("conflicting", ex.Message);
+    }
+
+    [Fact]
+    public void Duplicate_map_entry_with_the_same_type_is_idempotent()
+    {
+        var options = new WolverineOptions();
+        var config = options.ListenToSalesforceChannel("/event/C__chn").MapEvent<EventA>("A__e").MapEvent<EventA>("A__e");
+        Apply(config);
+
+        var endpoint = EndpointOf(options, SalesforceResourceKind.Topic, "/event/C__chn");
+        Assert.Single(endpoint.EventTypeMap);
+        Assert.Equal(typeof(EventA), endpoint.EventTypeMap["A__e"]);
+    }
+
+    [Fact]
+    public void Null_message_type_is_rejected_at_registration()
+    {
+        var options = new WolverineOptions();
+        Assert.Throws<ArgumentNullException>(() => options.ListenToSalesforceTopic("/event/A__e", null!));
+        Assert.Throws<ArgumentNullException>(() => options.ListenToManagedSubscription("My_Sub", null!));
+        Assert.Throws<ArgumentNullException>(() => options.ListenToSalesforceChannel("/event/C__chn").MapEvent(null!, "A__e"));
+    }
+
+    [Fact]
     public void MapEvent_after_the_sugar_throws_at_apply_time()
     {
         var options = new WolverineOptions();

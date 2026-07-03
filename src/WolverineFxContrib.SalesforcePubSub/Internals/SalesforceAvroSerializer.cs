@@ -74,7 +74,7 @@ internal sealed class SalesforceAvroSerializer : IAsyncMessageSerializer
         {
             schema = await _schemaRepository.GetDeserializationInfoBySchemaIdAsync(schemaId, CancellationToken.None).ConfigureAwait(false);
         }
-        catch (RpcException ex) when (ex.StatusCode is StatusCode.Unauthenticated or StatusCode.PermissionDenied)
+        catch (RpcException ex) when (SalesforceAuthErrors.IsAuthRejection(ex))
         {
             _logger.LogInformation("Authentication failure fetching schema {SchemaId} during recovery decode; invalidating the cached token and retrying once.", schemaId);
             _tokenProvider.Invalidate();

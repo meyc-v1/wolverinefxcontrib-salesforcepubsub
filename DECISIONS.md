@@ -98,6 +98,15 @@ aren't conformance issues go under "Cleanups / tech-debt".
   event warns, dead-letters via the missing-handler path, and the watermark advances past it. New public
   surface: `ListenToSalesforceChannel`, non-generic `ListenToSalesforceTopic`/`ListenToManagedSubscription`
   overloads, `MapEvent<T>`/`MapEvent(Type, string?)`. Unit tests 63 → 94.
+  **Post-review addenda (2026-07-03):** (a) `ListenToSalesforceTopic` rejecting `…__chn` resources is an
+  **intentional breaking change** — the old path force-decoded every channel event into one type, which
+  "worked" only for single-member channels and silently mis-decoded otherwise; migrate to
+  `ListenToSalesforceChannel` + `MapEvent`. (b) Re-registering an *identical* mapping (same resource,
+  same type) is idempotent per Wolverine convention; only a conflicting type throws. (c) A type-resolution
+  failure (unparseable schema / eviction race) stamps a fallback name and rides the missing-handler path —
+  the watermark can never be pinned by a bad schema. (d) A throwing consumer `IBackoffStrategy` degrades
+  to a 15s fallback delay, and a faulted listener loop stops its heartbeat/watchdog sidecars and logs
+  Critical (a dead endpoint must not look alive).
 
 ## 15. Listener heartbeat + silent-cold watchdog (observability port-back from the orchestrator)
 - **Date:** 2026-07-02 · **Status:** Accepted

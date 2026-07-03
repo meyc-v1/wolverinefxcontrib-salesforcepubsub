@@ -144,50 +144,68 @@ internal sealed class SalesforceListener : IListener
         _logger.LogInformation("{Resource}: Starting Salesforce listener.", _resource);
 
         // Observability sidecars (DECISIONS #15): a periodic heartbeat plus a silent-cold watchdog that
-        // surfaces a stream receiving nothing at an alertable level. Both end on shutdown cancellation.
+        // surfaces a stream receiving nothing at an alertable level. They run on their own linked token so
+        // that if the consume loop ever faults, the sidecars stop with it — a dead listener must not keep
+        // emitting healthy-looking heartbeats.
+        using var sidecarCts = CancellationTokenSource.CreateLinkedTokenSource(ct);
         var heartbeat = _settings.HeartbeatInterval > TimeSpan.Zero
-            ? HeartbeatLoopAsync(ct)
+            ? HeartbeatLoopAsync(sidecarCts.Token)
             : Task.CompletedTask;
         var watchdog = _settings.StaleStreamThreshold > TimeSpan.Zero
-            ? WatchdogLoopAsync(ct)
+            ? WatchdogLoopAsync(sidecarCts.Token)
             : Task.CompletedTask;
 
-        await PrewarmSchemasAsync(ct).ConfigureAwait(false);
-
-        while (!ct.IsCancellationRequested)
+        try
         {
-            // Cold start → null → the transport reads the durable store. Reconnect → the in-memory handled
-            // watermark, so we resume after what was handled rather than the last durably-committed position.
-            var resumeFrom = _commits.TryGetResumePosition();
-            if (resumeFrom is { } r)
-            {
-                // Topic feeds the watermark back into the fetch (see #8); MES ignores it and resumes from the
-                // server-side commit checkpoint — so don't claim an in-memory resume it doesn't perform.
-                if (_resumesFromWatermark)
-                    _logger.LogDebug("{Resource}: Reconnecting listener; resuming after handled replayId {ReplayId} (in-memory).", _resource, r);
-                else
-                    _logger.LogDebug("{Resource}: Reconnecting listener; resuming from the server-side commit checkpoint (in-memory handled watermark {ReplayId} is not used for MES).", _resource, r);
-            }
+            await PrewarmSchemasAsync(ct).ConfigureAwait(false);
 
-            using var transport = _transportFactory(resumeFrom);
-            _currentTransport = transport;
-            try
+            while (!ct.IsCancellationRequested)
             {
-                await transport.ConnectAsync(ct).ConfigureAwait(false);
-                await ProcessStreamAsync(transport, ct).ConfigureAwait(false);
-            }
-            catch (Exception) when (ct.IsCancellationRequested)
-            {
-                // shutdown
-            }
-            catch (Exception ex)
-            {
-                await HandleStreamExceptionAsync(transport, ex, ct).ConfigureAwait(false);
+                // Cold start → null → the transport reads the durable store. Reconnect → the in-memory handled
+                // watermark, so we resume after what was handled rather than the last durably-committed position.
+                var resumeFrom = _commits.TryGetResumePosition();
+                if (resumeFrom is { } r)
+                {
+                    // Topic feeds the watermark back into the fetch (see #8); MES ignores it and resumes from the
+                    // server-side commit checkpoint — so don't claim an in-memory resume it doesn't perform.
+                    if (_resumesFromWatermark)
+                        _logger.LogDebug("{Resource}: Reconnecting listener; resuming after handled replayId {ReplayId} (in-memory).", _resource, r);
+                    else
+                        _logger.LogDebug("{Resource}: Reconnecting listener; resuming from the server-side commit checkpoint (in-memory handled watermark {ReplayId} is not used for MES).", _resource, r);
+                }
+
+                using var transport = _transportFactory(resumeFrom);
+                _currentTransport = transport;
+                try
+                {
+                    await transport.ConnectAsync(ct).ConfigureAwait(false);
+                    await ProcessStreamAsync(transport, ct).ConfigureAwait(false);
+                }
+                catch (Exception) when (ct.IsCancellationRequested)
+                {
+                    // shutdown
+                }
+                catch (Exception ex)
+                {
+                    await HandleStreamExceptionAsync(transport, ex, ct).ConfigureAwait(false);
+                }
             }
         }
-
-        await heartbeat.ConfigureAwait(false);
-        await watchdog.ConfigureAwait(false);
+        catch (Exception ex) when (!ct.IsCancellationRequested)
+        {
+            // Should be unreachable — the loop's error handling is designed to never throw out — but if it
+            // is ever breached, say so loudly: Wolverine does not restart a faulted listener, so this
+            // endpoint is DOWN until the process restarts.
+            _logger.LogCritical(ex,
+                "{Resource}: The listener loop faulted and will not restart — this endpoint is no longer consuming events. Heartbeat and watchdog are stopped.",
+                _resource);
+        }
+        finally
+        {
+            sidecarCts.Cancel();
+            await heartbeat.ConfigureAwait(false);
+            await watchdog.ConfigureAwait(false);
+        }
 
         _logger.LogInformation("{Resource}: Salesforce listener stopped.", _resource);
     }
@@ -220,7 +238,28 @@ internal sealed class SalesforceListener : IListener
                     // Per-event type resolution (DECISIONS #16): the record name in the (now-cached) schema
                     // picks the mapped type. An unmapped event is stamped with its raw record name and rides
                     // Wolverine's missing-handler path (dead-letter + complete → the watermark still advances).
-                    var (messageTypeName, mapped, recordName) = _eventTypes.Resolve(schemaId);
+                    string messageTypeName;
+                    bool mapped;
+                    string recordName;
+                    try
+                    {
+                        (messageTypeName, mapped, recordName) = _eventTypes.Resolve(schemaId);
+                    }
+                    catch (Exception resolveEx)
+                    {
+                        // Never wedge: the event is already Tracked, so a resolve failure that threw out of
+                        // the loop would pin the replay watermark below it and redeliver it forever. Stamp a
+                        // fallback name instead — the envelope rides the same missing-handler path as an
+                        // unmapped event (dead-letter + complete), and the watermark advances past it.
+                        mapped = false;
+                        recordName = $"unresolved-schema:{schemaId}";
+                        messageTypeName = recordName;
+                        if (_unmappedWarned.Add(recordName))
+                            _logger.LogError(resolveEx,
+                                "{Resource}: Failed to resolve the event type for schema {SchemaId}; stamping '{Fallback}' and deferring to Wolverine's missing-handler policy (further occurrences will not be logged).",
+                                _resource, schemaId, recordName);
+                    }
+
                     if (!mapped && _unmappedWarned.Add(recordName))
                         _logger.LogWarning(
                             "{Resource}: Event type '{RecordName}' has no MapEvent registration; stamping the raw name and deferring to Wolverine's missing-handler policy (further occurrences will not be logged).",
@@ -312,7 +351,7 @@ internal sealed class SalesforceListener : IListener
 
                 var s = _diagnostics.Snapshot();
                 _logger.Log(_settings.HeartbeatLogLevel,
-                    "{Resource}: Heartbeat — Running since {Start}, Responses: {Responses}, Events: {Events}, Errors: {Errors}, Reconnects: {Reconnects}, LastSuccess: {LastSuccess}, LastError: {LastError}",
+                    "{Resource}: Heartbeat - Running since {Start}, Responses: {Responses}, Events: {Events}, Errors: {Errors}, Reconnects: {Reconnects}, LastSuccess: {LastSuccess}, LastError: {LastError}",
                     _resource, s.StartedOn, s.Responses, s.Events, s.Errors, s.Reconnects, s.LastSuccess, s.LastError);
             }
             catch (OperationCanceledException)
@@ -404,7 +443,7 @@ internal sealed class SalesforceListener : IListener
 
         // An auth failure means the token was rejected (expired or revoked). Drop the cached token so the
         // reconnect below fetches a fresh one — gated on the auth status codes so ordinary reconnects keep it.
-        if (ex is RpcException { StatusCode: StatusCode.Unauthenticated or StatusCode.PermissionDenied })
+        if (ex is RpcException rpcEx && SalesforceAuthErrors.IsAuthRejection(rpcEx))
         {
             _logger.LogInformation("{Resource}: Authentication failure; invalidating cached token before reconnect.", _resource);
             _tokenProvider.Invalidate();
@@ -436,7 +475,26 @@ internal sealed class SalesforceListener : IListener
         catch (OperationCanceledException)
         {
         }
+        catch (Exception backoffEx)
+        {
+            // A consumer-implemented strategy must not be able to fault the reconnect loop (Wolverine never
+            // restarts a faulted listener). Fall back to the default increment so a permanently-throwing
+            // strategy degrades to a paced retry rather than a hot loop.
+            _logger.LogWarning(backoffEx,
+                "{Resource}: IBackoffStrategy threw; falling back to a {Delay} delay before reconnecting.",
+                _resource, FallbackBackoffDelay);
+            try
+            {
+                await Task.Delay(FallbackBackoffDelay, ct).ConfigureAwait(false);
+            }
+            catch (OperationCanceledException)
+            {
+            }
+        }
     }
+
+    /// <summary>Reconnect pacing used when the consumer's <see cref="IBackoffStrategy"/> itself fails.</summary>
+    private static readonly TimeSpan FallbackBackoffDelay = TimeSpan.FromSeconds(15);
 
     /// <summary>
     /// Wraps the transport's read sequence with an idle timeout. If no item arrives within
