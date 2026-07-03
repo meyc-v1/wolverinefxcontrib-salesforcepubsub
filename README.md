@@ -144,10 +144,18 @@ its persisted id if the cache is cold, with token-invalidation-and-retry auth ha
 land in the store's dead-letter table, replayable; and duplicate deliveries dedup by a **deterministic
 envelope id** derived from the Salesforce event UUID.
 
-One consequence of that dedup to know about: the *same Salesforce event* fanned out to **two Durable
-endpoints** (e.g. its topic and a channel) is processed **once** — the second copy is rejected as a
-duplicate (logged at Error by Wolverine). Subscribe an event durably on one endpoint, or accept
-process-once semantics. Inline endpoints fan out normally.
+**Fan-out semantics are a deliberate dial.** The transport derives one message identity per Salesforce
+event — so under Wolverine's default `MessageIdentity.IdOnly`, the *same event* fanned out to two Durable
+endpoints (e.g. its topic and a channel) is processed **once**; the second copy is rejected as a
+duplicate. If you *want* each endpoint to process its own copy independently, that's Wolverine's native
+setting for exactly this scenario:
+
+```csharp
+opts.Durability.MessageIdentity = MessageIdentity.IdAndDestination;
+```
+
+(App-global; it widens the inbox primary key to id + endpoint.) Inline endpoints have no store and always
+fan out.
 
 ## Event types
 

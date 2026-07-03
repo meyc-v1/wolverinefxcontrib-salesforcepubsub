@@ -268,7 +268,7 @@ internal sealed class SalesforceListener : IListener
                     var envelope = new Envelope
                     {
                         // Deterministic Id from the Salesforce event id so a redelivered event is dedup-able.
-                        Id = ResolveEnvelopeId(consumerEvent.Event.Id, _resource, replayId),
+                        Id = ResolveEnvelopeId(consumerEvent.Event.Id, replayId),
                         Data = consumerEvent.Event.Payload.ToByteArray(),
                         ContentType = SalesforceAvroSerializer.SalesforceAvroContentType,
                         MessageType = messageTypeName,
@@ -425,15 +425,21 @@ internal sealed class SalesforceListener : IListener
 
     /// <summary>
     /// Maps the Salesforce event id to a stable <see cref="Envelope.Id"/> so a redelivered event always
-    /// yields the same Id (enables inbox dedup). The SF event id is normally a guid; when it isn't, derive
-    /// a deterministic guid — falling back to resource+replayId when no id is present.
+    /// yields the same Id (enables inbox dedup). All three paths implement ONE semantic — one Salesforce
+    /// event, one message identity, with no per-endpoint salt (DECISIONS #18): the SF event id is normally
+    /// a guid used verbatim; a non-guid id derives a deterministic guid; and with no id at all the replay
+    /// id alone suffices, because replay ids are positions in the org's single shared event bus, so the
+    /// same event carries the same replay id on every topic/channel/MES that delivers it. Consequence:
+    /// under Wolverine's default <c>MessageIdentity.IdOnly</c>, durable endpoints dedup a fan-out of the
+    /// same event; consumers wanting independent per-endpoint processing opt into Wolverine's native
+    /// <c>MessageIdentity.IdAndDestination</c>.
     /// </summary>
-    internal static Guid ResolveEnvelopeId(string? salesforceEventId, string resource, long replayId)
+    internal static Guid ResolveEnvelopeId(string? salesforceEventId, long replayId)
     {
         if (Guid.TryParse(salesforceEventId, out var parsed))
             return parsed;
 
-        var key = string.IsNullOrEmpty(salesforceEventId) ? $"{resource}:{replayId}" : salesforceEventId;
+        var key = string.IsNullOrEmpty(salesforceEventId) ? replayId.ToString() : salesforceEventId;
         return new Guid(MD5.HashData(Encoding.UTF8.GetBytes(key)));
     }
 

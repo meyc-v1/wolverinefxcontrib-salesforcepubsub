@@ -27,6 +27,37 @@ aren't conformance issues go under "Cleanups / tech-debt".
 
 ---
 
+## 18. Envelope identity: one Salesforce event = one message identity; per-endpoint processing is Wolverine's native `MessageIdentity.IdAndDestination`
+- **Date:** 2026-07-03 · **Status:** Accepted
+- **Context:** The code review found `ResolveEnvelopeId`'s three derivation paths implemented *different*
+  dedup semantics by accident: the normal path (SF event UUID, used verbatim) and the non-guid path
+  (MD5 of the id) were unsalted, while the no-id fallback salted with the resource. Concretely: publish
+  `Test_Event_One__e` once while durably subscribed to both its topic and a channel containing it — both
+  endpoints build the same `Envelope.Id`, the durable inbox's id-only primary key rejects the second
+  insert, and one endpoint's handler silently never runs (observed live in the Durable pass as
+  `DuplicateIncomingEnvelopeException`). Whether that is "correct exactly-once" or "silent loss" is a
+  question of intent the transport couldn't express. An opt-in resource-salt flag was designed, then
+  **dropped** when we checked what Wolverine already offers: `DurabilitySettings.MessageIdentity`
+  (default `IdOnly`; `IdAndDestination` documented by Wolverine precisely for "receiving the same message
+  and processing separately in different external transport listening endpoints" — verified present in
+  the pinned 6.12.0).
+- **Decision:** All three derivation paths implement **one unsalted semantic — one Salesforce event, one
+  message identity**: guid passthrough; MD5 of a non-guid id; MD5 of the bare replay id when no id exists
+  (valid as a global identity because replay ids are positions in the org's single shared event bus, so
+  the same event carries the same replay id on every topic/channel/MES). No transport-level salt knob:
+  consumers wanting independent per-endpoint processing of a fanned-out event set Wolverine's native
+  `opts.Durability.MessageIdentity = MessageIdentity.IdAndDestination`.
+- **Why:** The same event on multiple endpoints usually indicates overlapping subscription setup, and
+  dedup is the safer default (user call); the deliberate-fan-out case shouldn't be foreclosed, and
+  Wolverine already models exactly that choice — building our own salt would duplicate a native knob one
+  layer down. Normalizing the fallback paths removes the accidental fork where dedup behavior depended on
+  whether the event id happened to parse as a guid.
+- **Consequences:** Dedup (like all identity semantics) only has teeth under **Durable** — Inline/Buffered
+  have no store and process every delivery. The default cross-endpoint dedup is enforced by the inbox
+  primary key and therefore *contingent on the app's `MessageIdentity` setting* — documented in the
+  README so the semantic is chosen, not discovered. `IdAndDestination` is app-global (all transports) and
+  changes the inbox PK shape (Wolverine migrates it). Supersedes #17's "fan-out caveat" framing.
+
 ## 17. Durable mode: schema strategy A (auth-hardened fetch-on-miss) + eager pre-warm; replay id persisted as a header
 - **Date:** 2026-07-02 · **Status:** Accepted
 - **Context:** `EndpointMode.Durable` (at-least-once with parallelism + a real DLQ; without it a poison
@@ -62,10 +93,9 @@ aren't conformance issues go under "Cleanups / tech-debt".
   dead-letter table (preserved, not discarded — closes #10's caveat); Wolverine auto-provisions its
   envelope storage. Consumer infra: a Wolverine message store (`WolverineFx.SqlServer` here) + note that
   Microsoft.Data.SqlClient 7.x needs `Microsoft.Data.SqlClient.Extensions.Azure` for Entra auth.
-  **Fan-out caveat (observed live):** our deterministic envelope Id means the *same Salesforce event*
-  delivered to two **Durable** endpoints is deduped by the inbox (`DuplicateIncomingEnvelopeException`,
-  logged at Error) — process-once per event across durable endpoints. Guidance: subscribe an event durably
-  on one endpoint, or accept process-once; Inline endpoints fan out normally.
+  **Fan-out behavior:** superseded by #18 — one event = one message identity by design; durable endpoints
+  dedup a fan-out under Wolverine's default `MessageIdentity.IdOnly`, and per-endpoint processing is
+  Wolverine's native `IdAndDestination`.
 
 ## 16. Custom channels: map-only registration, per-event type resolution, missing-handler policy for unmapped events
 - **Date:** 2026-07-02 · **Status:** Accepted (resolves #14)
