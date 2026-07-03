@@ -1,6 +1,6 @@
 using System.Text.Json;
 
-namespace Wolverine.SalesforcePubSub.Internals;
+namespace Wolverine.SalesforcePubSub.Internals.Schema;
 
 /// <summary>
 /// Extracts the top-level Avro record name from a Salesforce <c>schema_json</c>. For platform events

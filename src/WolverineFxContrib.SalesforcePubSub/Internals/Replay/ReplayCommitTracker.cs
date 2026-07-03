@@ -1,4 +1,4 @@
-namespace Wolverine.SalesforcePubSub.Internals;
+namespace Wolverine.SalesforcePubSub.Internals.Replay;
 
 /// <summary>
 /// Tracks the safe replay-commit position for a single subscription so the committed position never

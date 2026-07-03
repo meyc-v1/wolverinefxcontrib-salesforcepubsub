@@ -1,6 +1,6 @@
 using System.Collections.Concurrent;
 
-namespace Wolverine.SalesforcePubSub.Internals;
+namespace Wolverine.SalesforcePubSub.Internals.Replay;
 
 /// <summary>
 /// Non-persistent <see cref="IReplayIdRepository"/> used as a fallback when a consumer registers none.

@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Caching.Memory;
 using SalesforceGrpc;
 using Wolverine.SalesforcePubSub.Events;
-using Wolverine.SalesforcePubSub.Internals;
+using Wolverine.SalesforcePubSub.Internals.Schema;
 using Wolverine.Util;
 
 namespace WolverineFxContrib.SalesforcePubSub.Tests;

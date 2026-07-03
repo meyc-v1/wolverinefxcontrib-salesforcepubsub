@@ -4,8 +4,9 @@ using Google.Protobuf;
 using Grpc.Core;
 using Microsoft.Extensions.Logging;
 using SalesforceGrpc;
+using Wolverine.SalesforcePubSub.Internals.Replay;
 
-namespace Wolverine.SalesforcePubSub.Internals;
+namespace Wolverine.SalesforcePubSub.Internals.Transports;
 
 internal sealed partial class TopicTransport : ISubscriptionTransport
 {

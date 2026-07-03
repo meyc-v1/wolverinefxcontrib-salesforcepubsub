@@ -1,7 +1,7 @@
 using Google.Protobuf;
 using SalesforceGrpc;
 
-namespace Wolverine.SalesforcePubSub.Internals;
+namespace Wolverine.SalesforcePubSub.Internals.Transports;
 
 /// <summary>
 /// Protocol-agnostic projection of a fetch response — the common shape between a topic

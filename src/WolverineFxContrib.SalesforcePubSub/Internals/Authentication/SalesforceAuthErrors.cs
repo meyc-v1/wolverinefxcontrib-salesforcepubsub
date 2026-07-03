@@ -1,6 +1,6 @@
 using Grpc.Core;
 
-namespace Wolverine.SalesforcePubSub.Internals;
+namespace Wolverine.SalesforcePubSub.Internals.Authentication;
 
 /// <summary>
 /// The single definition of "Salesforce rejected our credentials" for gRPC calls. Shared by the

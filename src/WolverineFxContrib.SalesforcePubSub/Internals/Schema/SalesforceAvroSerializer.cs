@@ -5,8 +5,9 @@ using Microsoft.Extensions.Logging.Abstractions;
 using SolTechnology.Avro;
 using Wolverine.Runtime.Serialization;
 using Wolverine.SalesforcePubSub.Events;
+using Wolverine.SalesforcePubSub.Internals.Authentication;
 
-namespace Wolverine.SalesforcePubSub.Internals;
+namespace Wolverine.SalesforcePubSub.Internals.Schema;
 
 /// <summary>
 /// Decodes a Salesforce Avro event body to its .NET message type inside Wolverine's serializer pipeline.

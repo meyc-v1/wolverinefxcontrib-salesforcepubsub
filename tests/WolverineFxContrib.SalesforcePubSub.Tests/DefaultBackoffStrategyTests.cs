@@ -1,5 +1,5 @@
 using Microsoft.Extensions.Logging.Abstractions;
-using Wolverine.SalesforcePubSub.Internals;
+using Wolverine.SalesforcePubSub.Internals.Backoff;
 
 namespace WolverineFxContrib.SalesforcePubSub.Tests;
 

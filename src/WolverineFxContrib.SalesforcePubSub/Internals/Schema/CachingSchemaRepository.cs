@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Caching.Memory;
 using SalesforceGrpc;
 
-namespace Wolverine.SalesforcePubSub.Internals;
+namespace Wolverine.SalesforcePubSub.Internals.Schema;
 
 internal sealed class CachingSchemaRepository
 {

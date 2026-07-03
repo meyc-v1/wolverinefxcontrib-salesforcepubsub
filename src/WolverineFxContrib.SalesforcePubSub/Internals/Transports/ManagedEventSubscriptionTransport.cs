@@ -5,7 +5,7 @@ using Grpc.Core;
 using Microsoft.Extensions.Logging;
 using SalesforceGrpc;
 
-namespace Wolverine.SalesforcePubSub.Internals;
+namespace Wolverine.SalesforcePubSub.Internals.Transports;
 
 internal sealed partial class ManagedEventSubscriptionTransport : ISubscriptionTransport
 {

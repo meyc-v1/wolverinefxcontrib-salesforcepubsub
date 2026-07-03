@@ -4,7 +4,10 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using Wolverine.Configuration;
 using Wolverine.SalesforcePubSub.Events;
-using Wolverine.SalesforcePubSub.Internals;
+using Wolverine.SalesforcePubSub.Internals.Authentication;
+using Wolverine.SalesforcePubSub.Internals.Backoff;
+using Wolverine.SalesforcePubSub.Internals.Replay;
+using Wolverine.SalesforcePubSub.Internals.Schema;
 using Wolverine.Transports;
 using SalesforceGrpc;
 

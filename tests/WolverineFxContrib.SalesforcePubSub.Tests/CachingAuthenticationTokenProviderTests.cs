@@ -1,5 +1,5 @@
 using Wolverine.SalesforcePubSub;
-using Wolverine.SalesforcePubSub.Internals;
+using Wolverine.SalesforcePubSub.Internals.Authentication;
 
 namespace WolverineFxContrib.SalesforcePubSub.Tests;
 

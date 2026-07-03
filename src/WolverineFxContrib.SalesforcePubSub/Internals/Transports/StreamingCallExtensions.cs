@@ -1,6 +1,6 @@
 using Grpc.Core;
 
-namespace Wolverine.SalesforcePubSub.Internals;
+namespace Wolverine.SalesforcePubSub.Internals.Transports;
 
 internal static class AsyncDuplexStreamingCallExtensions
 {

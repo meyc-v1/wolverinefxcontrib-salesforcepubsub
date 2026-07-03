@@ -1,4 +1,4 @@
-using Wolverine.SalesforcePubSub.Internals;
+using Wolverine.SalesforcePubSub.Internals.Schema;
 
 namespace WolverineFxContrib.SalesforcePubSub.Tests;
 

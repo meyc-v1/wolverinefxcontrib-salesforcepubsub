@@ -14,11 +14,14 @@ endpoints. Package id `WolverineFxContrib.SalesforcePubSub`; root namespace `Wol
     (generic sugar seals the type map; non-generic overloads + `MapEvent<T>("Api_Name__e")` declare it —
     DECISIONS #16), `SalesforcePubSubTransport`, `SalesforceEndpoint`.
   - **Namespaces are folder-based:** root files → `Wolverine.SalesforcePubSub`, `Events/` →
-    `Wolverine.SalesforcePubSub.Events`, `Internals/` → `Wolverine.SalesforcePubSub.Internals`.
-  - **`Internals/`** (all `internal`, `sealed`): `ISubscriptionTransport` + `TopicTransport` /
-    `ManagedEventSubscriptionTransport`, the `SalesforceListener` (`IListener`), schema repo,
-    `PlatformEventDeserializer`, the in-memory replay + default backoff fallbacks, and the Salesforce
-    gRPC proto (generated with `Access=Internal`).
+    `Wolverine.SalesforcePubSub.Events`, `Internals/` and its subfolders →
+    `Wolverine.SalesforcePubSub.Internals[.Authentication|.Backoff|.Replay|.Schema|.Transports]`.
+  - **`Internals/`** (all `internal`, `sealed`): root holds the `SalesforceListener` (`IListener`) +
+    `ListenerDiagnostics`; `Authentication/` (token cache + auth-rejection predicate); `Backoff/`
+    (default strategy); `Replay/` (commit tracker, in-memory repo, `ReplayIds`); `Schema/` (schema
+    repositories, `AvroRecordName`, `EventTypeResolver`, the Avro serializer); `Transports/`
+    (`ISubscriptionTransport` + topic/MES impls, `ResponseMessageInfo`). The Salesforce gRPC proto is
+    generated with `Access=Internal`.
 - `tests/WolverineFxContrib.SalesforcePubSub.Tests` — unit (xUnit v3).
 - `tests/WolverineFxContrib.SalesforcePubSub.IntegrationTests` — live Salesforce / SQL.
 - `host/WolverineFxContrib.SalesforcePubSub.TestHost` — Worker app for manual verification.

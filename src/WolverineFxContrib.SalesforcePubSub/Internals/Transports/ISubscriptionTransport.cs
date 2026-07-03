@@ -1,4 +1,6 @@
-namespace Wolverine.SalesforcePubSub.Internals;
+using Wolverine.SalesforcePubSub.Internals.Replay;
+
+namespace Wolverine.SalesforcePubSub.Internals.Transports;
 
 /// <summary>
 /// Abstracts the protocol-specific gRPC streaming behavior for a single connection attempt.

@@ -1,12 +1,6 @@
 using SalesforceGrpc;
 
-namespace Wolverine.SalesforcePubSub.Internals;
-
-internal interface ISchemaRepository
-{
-    Task<SchemaInfo> GetDeserializationInfoByTopicNameAsync(string topicName, CancellationToken cancellationToken = default);
-    Task<SchemaInfo> GetDeserializationInfoBySchemaIdAsync(string schemaId, CancellationToken cancellationToken = default);
-}
+namespace Wolverine.SalesforcePubSub.Internals.Schema;
 
 internal sealed class DefaultSchemaRepository : ISchemaRepository
 {

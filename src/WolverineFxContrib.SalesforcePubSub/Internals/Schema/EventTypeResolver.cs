@@ -1,7 +1,7 @@
 using System.Collections.Concurrent;
 using Wolverine.Util;
 
-namespace Wolverine.SalesforcePubSub.Internals;
+namespace Wolverine.SalesforcePubSub.Internals.Schema;
 
 /// <summary>
 /// Resolves the Wolverine message type name to stamp on each event from its Avro schema: record name →

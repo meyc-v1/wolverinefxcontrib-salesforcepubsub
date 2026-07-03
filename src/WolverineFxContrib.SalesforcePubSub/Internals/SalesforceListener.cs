@@ -5,6 +5,10 @@ using System.Text;
 using Grpc.Core;
 using Microsoft.Extensions.Logging;
 using Wolverine.Runtime;
+using Wolverine.SalesforcePubSub.Internals.Authentication;
+using Wolverine.SalesforcePubSub.Internals.Replay;
+using Wolverine.SalesforcePubSub.Internals.Schema;
+using Wolverine.SalesforcePubSub.Internals.Transports;
 using Wolverine.Transports;
 
 namespace Wolverine.SalesforcePubSub.Internals;

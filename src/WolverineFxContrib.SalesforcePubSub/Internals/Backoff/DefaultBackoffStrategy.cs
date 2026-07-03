@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Logging;
 
-namespace Wolverine.SalesforcePubSub.Internals;
+namespace Wolverine.SalesforcePubSub.Internals.Backoff;
 
 /// <summary>
 /// Linear backoff: no delay on the first error, then increments by <c>BackoffMilliseconds</c>

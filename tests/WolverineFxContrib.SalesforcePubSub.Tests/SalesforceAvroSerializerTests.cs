@@ -5,7 +5,8 @@ using SolTechnology.Avro;
 using Wolverine;
 using Wolverine.SalesforcePubSub;
 using Wolverine.SalesforcePubSub.Events;
-using Wolverine.SalesforcePubSub.Internals;
+using Wolverine.SalesforcePubSub.Internals.Authentication;
+using Wolverine.SalesforcePubSub.Internals.Schema;
 
 namespace WolverineFxContrib.SalesforcePubSub.Tests;
 

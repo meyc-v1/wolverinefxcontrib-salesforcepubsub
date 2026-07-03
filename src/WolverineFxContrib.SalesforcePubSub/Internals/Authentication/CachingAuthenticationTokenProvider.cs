@@ -1,4 +1,4 @@
-namespace Wolverine.SalesforcePubSub.Internals;
+namespace Wolverine.SalesforcePubSub.Internals.Authentication;
 
 /// <summary>
 /// Owns Salesforce access-token caching for the transport. Wraps the consumer's
