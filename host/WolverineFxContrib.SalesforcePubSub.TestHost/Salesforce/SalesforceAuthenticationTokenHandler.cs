@@ -1,27 +1,55 @@
+using System.Text.Json;
+using Microsoft.Extensions.Options;
 using Wolverine.SalesforcePubSub;
-using WolverineFxContrib.SalesforcePubSub.External.Salesforce;
+using WolverineFxContrib.SalesforcePubSub.External.Salesforce.Models;
+using WolverineFxContrib.SalesforcePubSub.TestHost.Settings;
 
 namespace WolverineFxContrib.SalesforcePubSub.TestHost.Salesforce;
 
 /// <summary>
-/// Bridges the local <see cref="ISalesforceTokenClient"/> to the pub/sub transport's
-/// <see cref="IAuthenticationTokenHandler"/>. Mirrors the internal client.SalesforceHandlers.
+/// The transport's <see cref="IAuthenticationTokenHandler"/> over the subscriber ECA: a direct
+/// client-credentials fetch per call — fresh every time, no cache — because the transport owns token
+/// caching and invalidation (a caching handler would defeat revoked-token recovery). The REST
+/// publisher authenticates separately through the External.Salesforce lib and the publisher ECA.
 /// </summary>
-/// <remarks>
-/// The transport owns token caching/invalidation, so this fetches a fresh token (<c>refresh: true</c>)
-/// rather than serving the token client's cached value — otherwise an invalidated transport cache would
-/// just be re-handed the same (possibly revoked) token. The REST publisher keeps using the cached path.
-/// </remarks>
 internal sealed class SalesforceAuthenticationTokenHandler : IAuthenticationTokenHandler
 {
-    private readonly ISalesforceTokenClient _client;
+    internal const string HttpClientName = "salesforce-subscriber-token";
 
-    public SalesforceAuthenticationTokenHandler(ISalesforceTokenClient client)
-        => _client = client ?? throw new ArgumentNullException(nameof(client));
+    private readonly IHttpClientFactory _httpClientFactory;
+    private readonly SubscriberAuthenticationSettings _settings;
+
+    public SalesforceAuthenticationTokenHandler(IHttpClientFactory httpClientFactory, IOptions<SubscriberAuthenticationSettings> settings)
+    {
+        _httpClientFactory = httpClientFactory ?? throw new ArgumentNullException(nameof(httpClientFactory));
+        _settings = settings?.Value ?? throw new ArgumentNullException(nameof(settings));
+    }
 
     public async Task<AuthenticationTokenResponse> GetAuthenticationTokenAsync()
     {
-        var sfToken = await _client.GetTokenResponseAsync(refresh: true);
-        return new AuthenticationTokenResponse(sfToken.AccessToken!, sfToken.InstanceUrl!, sfToken.TenantId!);
+        var client = _httpClientFactory.CreateClient(HttpClientName);
+
+        using var req = new HttpRequestMessage(HttpMethod.Post, new Uri(_settings.LoginUri, "services/oauth2/token"))
+        {
+            Content = new FormUrlEncodedContent(new List<KeyValuePair<string, string>>
+            {
+                new("grant_type", "client_credentials"),
+                new("client_id", _settings.ClientId),
+                new("client_secret", _settings.ClientSecret),
+            })
+        };
+
+        using var resp = await client.SendAsync(req).ConfigureAwait(false);
+        var raw = await resp.Content.ReadAsStringAsync().ConfigureAwait(false);
+
+        // Fail loud on a non-success response; the transport's provider validates the token contents
+        // before caching (a null-token response must never poison its cache).
+        if (!resp.IsSuccessStatusCode)
+            throw new InvalidOperationException($"Salesforce subscriber token request failed ({(int)resp.StatusCode} {resp.StatusCode}): {raw}");
+
+        var token = JsonSerializer.Deserialize<SalesforceTokenResponse>(raw)
+                    ?? throw new InvalidOperationException("Could not deserialize Salesforce authentication response");
+
+        return new AuthenticationTokenResponse(token.AccessToken!, token.InstanceUrl!, token.TenantId!);
     }
 }

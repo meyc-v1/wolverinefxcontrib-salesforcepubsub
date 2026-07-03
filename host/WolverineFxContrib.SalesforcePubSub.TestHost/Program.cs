@@ -55,10 +55,15 @@ builder.Services.ConfigureOpenTelemetryTracerProvider(providerBuilder =>
 // See https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/src/OpenTelemetry.Exporter.OpenTelemetryProtocol/README.md for env var info.
 builder.Services.AddOpenTelemetry().UseOtlpExporter();
 
-// Salesforce auth + REST client from the External.Salesforce support lib (publisher side; the
-// transport authenticates separately via SalesforceAuthenticationTokenHandler below).
-builder.Services.AddSalesforceAuthentication(s => builder.Configuration.GetSection("salesforceAuthenticationSettings").Bind(s));
+// Two ECAs, two token lifecycles: the External.Salesforce lib (REST publisher) authenticates with
+// the publisher ECA; the transport authenticates with the subscriber ECA via the direct-fetch
+// SalesforceAuthenticationTokenHandler (no cache — the transport owns caching/invalidation).
+builder.Services.AddSalesforceAuthentication(s => builder.Configuration.GetSection("publisherAuthenticationSettings").Bind(s));
 builder.Services.AddSalesforce(s => builder.Configuration.GetSection("salesforceSettings").Bind(s));
+
+builder.Services.Configure<SubscriberAuthenticationSettings>(builder.Configuration.GetSection("subscriberAuthenticationSettings"));
+builder.Services.ConfigureOptions<SubscriberAuthenticationSettingsConfigurer>();
+builder.Services.AddHttpClient(SalesforceAuthenticationTokenHandler.HttpClientName);
 
 // Durability-run harness: shared counters, periodic heartbeat snapshot, and the opt-in timed publisher.
 builder.Services.AddSingleton<RunMetrics>();
