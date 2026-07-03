@@ -156,7 +156,7 @@ public sealed class SalesforceEndpoint : Endpoint
         if (Kind == SalesforceResourceKind.Topic)
         {
             var replayRepository = services.GetRequiredService<IReplayIdRepository>();
-            factory = resumeFrom => new TopicTransport(client, replayRepository, effective, logger, Resource, resumeFrom);
+            factory = resumeFrom => new ClientManagedReplayTransport(client, replayRepository, effective, logger, Resource, resumeFrom);
         }
         else
         {

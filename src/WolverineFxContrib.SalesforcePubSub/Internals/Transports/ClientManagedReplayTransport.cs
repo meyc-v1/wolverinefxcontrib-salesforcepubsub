@@ -8,7 +8,14 @@ using Wolverine.SalesforcePubSub.Internals.Replay;
 
 namespace Wolverine.SalesforcePubSub.Internals.Transports;
 
-internal sealed partial class TopicTransport : ISubscriptionTransport
+/// <summary>
+/// The non-MES subscription transport: the plain Subscribe RPC over any topic resource (a single
+/// platform-event topic or a custom channel), with the replay position managed by the client — read
+/// from <see cref="IReplayIdRepository"/> on a cold start, fed from the listener's handled watermark on
+/// an in-process reconnect, and committed back out-of-band. Contrast with
+/// <see cref="ManagedEventSubscriptionTransport"/>, where Salesforce manages the replay position.
+/// </summary>
+internal sealed partial class ClientManagedReplayTransport : ISubscriptionTransport
 {
     private readonly PubSub.PubSubClient _client;
     private readonly IReplayIdRepository _replayIdRepository;
@@ -24,7 +31,7 @@ internal sealed partial class TopicTransport : ISubscriptionTransport
 
     private AsyncDuplexStreamingCall<FetchRequest, FetchResponse>? _call;
 
-    public TopicTransport(
+    public ClientManagedReplayTransport(
         PubSub.PubSubClient client,
         IReplayIdRepository replayIdRepository,
         SubscriberComponentsSettings settings,

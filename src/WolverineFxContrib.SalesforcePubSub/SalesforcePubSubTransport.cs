@@ -10,10 +10,11 @@ namespace Wolverine.SalesforcePubSub;
 public sealed class SalesforcePubSubTransport : TransportBase<SalesforceEndpoint>
 {
     public const string ProtocolName = "sfpubsub";
+    private const string TransportName = "Salesforce Pub/Sub";
 
     private readonly List<SalesforceEndpoint> _endpoints = [];
 
-    public SalesforcePubSubTransport() : base(ProtocolName, "Salesforce Pub/Sub", [ProtocolName])
+    public SalesforcePubSubTransport() : base(ProtocolName, TransportName, [ProtocolName])
     {
     }
 
