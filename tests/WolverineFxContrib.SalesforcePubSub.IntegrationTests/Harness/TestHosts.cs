@@ -21,7 +21,8 @@ public static class TestHosts
     /// registered for them. The <paramref name="configure"/> callback declares the endpoints.
     /// </summary>
     public static async Task<IHost> StartListeningAsync(
-        SalesforceTestContext ctx, EventSink sink, Action<WolverineOptions> configure)
+        SalesforceTestContext ctx, EventSink sink, Action<WolverineOptions> configure,
+        Action<IServiceCollection>? configureServices = null)
     {
         var builder = Host.CreateApplicationBuilder();
 
@@ -30,6 +31,10 @@ public static class TestHosts
 
         builder.Services.AddSingleton(sink);
         builder.Services.AddSingleton(ctx.SubscriberCredentials);
+
+        // Before UseWolverine so a test-supplied registration (e.g. a shared IReplayIdRepository
+        // standing in for the durable store) wins over the transport's TryAdd defaults.
+        configureServices?.Invoke(builder.Services);
 
         builder.UseWolverine(opts =>
         {

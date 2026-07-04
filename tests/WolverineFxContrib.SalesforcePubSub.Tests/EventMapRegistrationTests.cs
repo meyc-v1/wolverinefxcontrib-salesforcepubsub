@@ -56,7 +56,11 @@ public class EventMapRegistrationTests
         var endpoint = EndpointOf(options, SalesforceResourceKind.Topic, "/event/A__e");
         endpoint.ValidateEventMap();
         Assert.Equal(typeof(EventA), endpoint.EventTypeMap["A__e"]);
-        Assert.Equal(typeof(EventA), endpoint.MessageType); // single-entry diagnostics parity
+
+        // MessageType must stay null even for a single-entry map: Wolverine turns a non-null value into
+        // an incoming MessageTypeRule that overwrites every envelope's MessageType, force-decoding
+        // unmapped events into the mapped type (found live by the integration suite).
+        Assert.Null(endpoint.MessageType);
     }
 
     [Fact]
@@ -92,7 +96,7 @@ public class EventMapRegistrationTests
         endpoint.ValidateEventMap();
         Assert.Equal(typeof(EventA), endpoint.EventTypeMap["A__e"]);
         Assert.Equal(typeof(EventB), endpoint.EventTypeMap["B__e"]);
-        Assert.Null(endpoint.MessageType); // multi-entry: no single diagnostic type
+        Assert.Null(endpoint.MessageType); // never set — see the single-entry test
     }
 
     [Fact]

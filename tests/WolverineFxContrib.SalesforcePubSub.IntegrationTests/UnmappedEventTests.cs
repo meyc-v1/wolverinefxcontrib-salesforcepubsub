@@ -33,7 +33,11 @@ public class UnmappedEventTests(SalesforceTestContext ctx)
 
             // B first, A second: replay order guarantees B is resolved (dead-lettered, watermark
             // advanced) before A can arrive. If the unmapped event wedged the stream, A never shows.
+            // The pause matters: Salesforce assigns bus positions server-side, and two back-to-back
+            // POSTs can land in the opposite order (observed live) — spacing them keeps replay order
+            // aligned with publish order.
             await ctx.PublishAsync("WIT_Event_B__e", unmapped, TestContext.Current.CancellationToken);
+            await Task.Delay(TimeSpan.FromSeconds(2), TestContext.Current.CancellationToken);
             await ctx.PublishAsync("WIT_Event_A__e", mapped, TestContext.Current.CancellationToken);
 
             var received = await sink.WaitForAsync(e => e.Message == mapped, count: 1, ReceiveTimeout);

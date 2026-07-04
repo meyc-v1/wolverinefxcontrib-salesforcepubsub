@@ -27,6 +27,29 @@ aren't conformance issues go under "Cleanups / tech-debt".
 
 ---
 
+## 21. Never set the base `Endpoint.MessageType` — it force-decodes unmapped events on single-entry maps
+- **Date:** 2026-07-04 · **Status:** Accepted (bug found by the new integration suite on its first day)
+- **Context:** `AddEventMapping` set the base `Endpoint.MessageType` when the map had exactly one entry
+  ("diagnostics parity" from the #19 rework). Verified in the pinned 6.12.0: a non-null
+  `Endpoint.MessageType` makes Wolverine attach a `MessageTypeRule` **incoming envelope rule** that
+  unconditionally overwrites `envelope.MessageType` on every received envelope
+  (`Endpoint.RulesForIncoming`) — clobbering the listener's per-event resolution. Concretely (observed
+  live in the unmapped-event integration test): a channel endpoint mapping only `WitEventA` received a
+  published `WIT_Event_B__e`; the resolver correctly flagged it unmapped and stamped the raw record name,
+  then the rule overwrote the stamp and the foreign event was **decoded and handled as `WitEventA`**
+  (structurally-compatible Avro payloads decode without error) instead of riding the missing-handler
+  path. Multi-entry maps were unaffected (`MessageType` stayed null), which is why #16's live unmapped
+  verification — done on a two-entry channel — never saw it. The test had also passed once by luck:
+  Salesforce assigned two near-simultaneous publishes bus positions opposite to POST order, and the
+  assertion raced ahead of the foreign event's arrival (the suite's publish helpers now space
+  order-sensitive publishes).
+- **Decision:** Never set the base `Endpoint.MessageType`. Per-event stamping in the listener is the one
+  and only typing mechanism, for N=1 exactly like N>1 (#19's model, now actually enforced end to end).
+- **Consequences:** Unmapped events on single-entry endpoints dead-letter properly instead of silently
+  masquerading as the mapped type. Unit test pins `MessageType` null for single-entry maps; the
+  integration suite's unmapped-event test is the live pin. Endpoint diagnostics lose the single-type
+  display — a non-behavioral surface Wolverine reads for docs/telemetry only; acceptable.
+
 ## 20. Buffered mode characterized: at-most-once has BOTH a loss window and a duplicate window across restarts — documented, not "fixed"
 - **Date:** 2026-07-03 · **Status:** Accepted (documentation decision; no code change)
 - **Context:** The last un-verified delivery mode. `BufferedInMemory` acks at receipt (Wolverine's

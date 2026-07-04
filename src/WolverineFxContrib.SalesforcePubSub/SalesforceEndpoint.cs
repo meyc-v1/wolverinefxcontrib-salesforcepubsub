@@ -82,8 +82,11 @@ public sealed class SalesforceEndpoint : Endpoint
 
         EventTypeMap.Add(eventApiName, messageType);
 
-        // Diagnostics parity: surface the type on the base Endpoint while the map is single-entry.
-        MessageType = EventTypeMap.Count == 1 ? messageType : null;
+        // Deliberately NOT setting the base Endpoint.MessageType, even for a single-entry map: Wolverine
+        // turns a non-null MessageType into an incoming MessageTypeRule that overwrites the envelope's
+        // MessageType on EVERY received envelope — clobbering the listener's per-event resolution and
+        // force-decoding unmapped events into the one mapped type instead of letting them ride the
+        // missing-handler path (found live by the integration suite on a single-MapEvent channel endpoint).
     }
 
     /// <summary>Fail-fast shape validation for the event map (DECISIONS #19).</summary>

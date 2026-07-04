@@ -35,7 +35,9 @@ public class PoisonMessageTests(SalesforceTestContext ctx)
 
             // Poison first, good second: replay order guarantees the poison event is resolved
             // (dead-lettered to the no-op store, watermark advanced) before the good one arrives.
+            // Spaced because Salesforce can order near-simultaneous POSTs opposite to publish order.
             await ctx.PublishAsync("WIT_Event_A__e", poison, TestContext.Current.CancellationToken);
+            await Task.Delay(TimeSpan.FromSeconds(2), TestContext.Current.CancellationToken);
             await ctx.PublishAsync("WIT_Event_A__e", good, TestContext.Current.CancellationToken);
 
             var received = await sink.WaitForAsync(e => e.Message == good, count: 1, ReceiveTimeout);
