@@ -633,6 +633,30 @@ contracts + Kafka/ASB. The port is largely conformant; findings below._
   `main`, ahead of the pinned package). Deferred until a WolverineFx upgrade; not worth upgrading for
   optional diagnostics alone.
 
+- **Stop/Dispose semantics vs the ListeningAgent's stop→rebuild lifecycle** — traced against the
+  **V6.12.0 tag** (2026-07-03): Wolverine never restarts a listener *instance*; every stop path ends in
+  `DisposeAsync` + `Listener = null`, and restart is always a fresh `Endpoint.BuildListenerAsync` with the
+  *receiver* reused. Three live paths: (1) `StopAndDrainAsync` (normal stop / `PauseAsync` /
+  `PauseForInboxRecoveryAsync` — the latter fires for our **Durable** mode on an inbox DB outage):
+  `StopAsync` → latch → `receiver.DrainAsync()` → `DisposeAsync` — so completions flow into the
+  stopped-but-undisposed listener during the drain; (2) `MarkAsTooBusyAndStopReceivingAsync`
+  (backpressure; applies to Buffered/Durable): `StopAsync` → `DisposeAsync` **with no drain** — the
+  receiver's queue keeps processing and completions arrive on an already-disposed listener, then
+  `StartAsync` rebuilds when the queue drains; (3) normal shutdown. The real contract is therefore:
+  StopAsync = stop fetching; the instance must *absorb* post-stop completions; the endpoint must be
+  indefinitely re-buildable. **Status:** recreatability ✓ (`BuildListenerAsync` constructs everything
+  per call; singletons are rebuild-safe; resume comes from the repo / server checkpoint). Our
+  `StopAsync` conflates stop with teardown (flush → cancel → loop exit kills the stream), which costs
+  nothing on correctness: post-stop completions advance the in-memory tracker harmlessly, topic commits
+  need no stream (repository write), `DisposeAsync`'s re-entrant flush catches the drained tail for
+  topic, and MES's drained tail degrades to bounded redelivery. **Open gap found:** in the no-drain
+  backpressure path the *old* disposed listener's queue completions keep committing to the same
+  repository row **while the replacement listener commits newer positions** — our SQL upsert is not
+  monotonic, so a late stale commit can regress `ReplayId` (→ duplicates on a later cold start; never
+  loss). Candidate fixes: a monotonic guard on the commit path, or null `_currentTransport` at dispose
+  so a dead listener loses write authority (trades away the beneficial drain-window commits). →
+  **Open — assessment recorded 2026-07-03; deeper dive before choosing a fix.**
+
 ## Cleanups / tech-debt
 
 Non-conformance, code-quality items — places to make the implementation **read** more like Wolverine's
