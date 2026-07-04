@@ -50,6 +50,12 @@ aren't conformance issues go under "Cleanups / tech-debt".
   with evidence cited, and doubles as the spec for future integration tests. This closes the original
   "Layer B" testing item — Inline was covered by the resiliency campaign, Durable by its live pass and
   the night-1 overnight, and Buffered by this characterization (steady-state overnight to follow).
+- **Addendum (2026-07-04) — steady-state overnight PASSED** (`test-results/z_long-run_buffered.txt`,
+  19h on the WIT channel via the two-ECA credentials): 229 published = 229 handled, zero loss, zero
+  duplicates, zero stream errors/reconnects; graceful shutdown committed the final position. Confirms
+  the loss/duplicate windows open **only around kills** — steady-state Buffered is indistinguishable
+  from exactly-once. (The only log noise was two transient Azure SQL blips against Wolverine's
+  message-store agents, self-recovered, no effect on event flow.)
 
 ## 19. Multi-type-first: a transport carries multiple message types; single-type is the N=1 case, not a different kind
 - **Date:** 2026-07-03 · **Status:** Accepted (supersedes the registration surface of #16 and its addenda)
