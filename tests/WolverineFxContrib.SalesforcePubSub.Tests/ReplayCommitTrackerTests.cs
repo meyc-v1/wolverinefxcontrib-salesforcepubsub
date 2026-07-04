@@ -160,6 +160,57 @@ public class ReplayCommitTrackerTests
     }
 
     [Fact]
+    public async Task Keepalive_triggered_commit_carrying_completed_events_reports_events_received()
+    {
+        // At low volume the completion path rarely reaches the throttle, so the commit is TRIGGERED by a
+        // keep-alive — but it covers handled events and must report events-received (isKeepAlive false),
+        // or a low-volume subscription's last-event diagnostics never update (observed live: 19h overnight
+        // with every commit flagged keepAlive:true).
+        var rec = new Recorder();
+        var t = new ReplayCommitTracker(rec.Commit, commitEvery: 100);
+
+        t.Track(1);
+        await t.CompleteAsync(1);          // below throttle — no commit yet
+        Assert.Empty(rec.Commits);
+
+        await t.ObserveKeepAliveAsync(2);  // keep-alive flushes the pending completion
+
+        Assert.Equal(2, rec.Last);
+        Assert.False(rec.Commits[^1].KeepAlive);
+    }
+
+    [Fact]
+    public async Task Keepalive_drift_after_events_are_committed_reports_keepalive()
+    {
+        // Once handled events are committed, a later keep-alive advancing via global-bus drift alone
+        // carries no events and must report keep-alive.
+        var rec = new Recorder();
+        var t = new ReplayCommitTracker(rec.Commit, commitEvery: 1);
+
+        t.Track(1);
+        await t.CompleteAsync(1);          // commits 1 (events)
+        await t.ObserveKeepAliveAsync(9);  // pure drift — no completions since
+
+        Assert.Equal(9, rec.Last);
+        Assert.False(rec.Commits[0].KeepAlive);
+        Assert.True(rec.Commits[^1].KeepAlive);
+    }
+
+    [Fact]
+    public async Task Flush_with_pending_completions_reports_events_received()
+    {
+        var rec = new Recorder();
+        var t = new ReplayCommitTracker(rec.Commit, commitEvery: 100);
+
+        t.Track(1);
+        await t.CompleteAsync(1);
+        await t.FlushAsync();
+
+        Assert.Equal(1, rec.Last);
+        Assert.False(rec.Commits[^1].KeepAlive);
+    }
+
+    [Fact]
     public async Task Mes_reaffirm_never_commits_past_an_in_flight_event()
     {
         // The keep-alive re-affirm re-sends the last committed position — it must never jump to the tip

@@ -21,7 +21,12 @@ namespace Wolverine.SalesforcePubSub.Internals.Replay;
 /// </summary>
 internal sealed class ReplayCommitTracker
 {
-    /// <summary>Persists a committed position. Args: replayId, isKeepAlive. Best-effort; never cancelled.</summary>
+    /// <summary>
+    /// Persists a committed position. Args: replayId, isKeepAlive — true only when NO completed events
+    /// contributed to the position (idle keep-alive drift or a MES re-affirm); a commit covering handled
+    /// events reports false regardless of whether the completion throttle or a keep-alive triggered the
+    /// write. Best-effort; never cancelled.
+    /// </summary>
     private readonly Func<long, bool, Task> _commit;
     private readonly int _commitEvery;
 
@@ -76,20 +81,32 @@ internal sealed class ReplayCommitTracker
     public Task ObserveKeepAliveAsync(long replayId)
     {
         long? position;
+        bool fromCompletions;
         lock (_lock)
         {
             Observe(replayId);
+
+            // The commit flag reports whether completed events contributed to the position — not what
+            // triggered the write. At low volume the completion path rarely reaches the throttle, so most
+            // commits are keep-alive-TRIGGERED yet carry handled events; flagging those "keep-alive" would
+            // starve the repository's events-received path (its last-event diagnostics never update).
+            // Captured before TryTakeCommittable, which resets the counter.
+            fromCompletions = _sinceCommit > 0;
             position = TryTakeCommittable(force: true); // keep-alives are sparse — commit promptly
 
             // Nothing new to commit, but MES needs a periodic CommitReplayRequest to keep the managed
             // subscription alive (see _refreshOnKeepAlive). Re-affirm the last committed position — a no-op
             // for the watermark (never regresses, never advances past an in-flight event) that just resets
             // the server's deadline. Only once something has been committed (_lastCommitted >= 0).
-            if (position is null && _refreshOnKeepAlive && _lastCommitted >= 0)
-                position = _lastCommitted;
+            if (position is null)
+            {
+                fromCompletions = false; // a pure re-affirm carries no events
+                if (_refreshOnKeepAlive && _lastCommitted >= 0)
+                    position = _lastCommitted;
+            }
         }
 
-        return position is { } p ? CommitAsync(p, isKeepAlive: true) : Task.CompletedTask;
+        return position is { } p ? CommitAsync(p, isKeepAlive: !fromCompletions) : Task.CompletedTask;
     }
 
     /// <summary>
@@ -112,12 +129,16 @@ internal sealed class ReplayCommitTracker
     public Task FlushAsync()
     {
         long? position;
+        bool fromCompletions;
         lock (_lock)
         {
+            // Same flag semantics as the keep-alive path: report events-received only when completed
+            // events contributed to the flushed position (a drift-only flush carries none).
+            fromCompletions = _sinceCommit > 0;
             position = TryTakeCommittable(force: true);
         }
 
-        return position is { } p ? CommitAsync(p, isKeepAlive: false) : Task.CompletedTask;
+        return position is { } p ? CommitAsync(p, isKeepAlive: !fromCompletions) : Task.CompletedTask;
     }
 
     private void Observe(long replayId)
