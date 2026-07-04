@@ -7,6 +7,8 @@
     <OutputType>Exe</OutputType>
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
+    <!-- Same secrets store as the TestHost: subscriber/publisher ECA credentials + salesforceSettings:baseUri. -->
+    <UserSecretsId>wolverine.salesforcepubsub</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
@@ -14,7 +16,9 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.9" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.5.1" />
+    <PackageReference Include="WolverineFx.RuntimeCompilation" Version="6.12.0" />
     <PackageReference Include="xunit.v3" Version="3.2.2" />
     <PackageReference Include="xunit.runner.visualstudio" Version="3.1.5">
       <PrivateAssets>all</PrivateAssets>
@@ -28,6 +32,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\WolverineFxContrib.SalesforcePubSub\WolverineFxContrib.SalesforcePubSub.csproj" />
+    <ProjectReference Include="..\..\src\WolverineFxContrib.SalesforcePubSub.External.Salesforce\WolverineFxContrib.SalesforcePubSub.External.Salesforce.csproj" />
   </ItemGroup>
 
 </Project>
