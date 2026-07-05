@@ -16,6 +16,23 @@ public sealed class LogSink
 
     public bool Any(Func<string, bool> match) => _lines.Any(match);
 
+    public int Count(Func<string, bool> match) => _lines.Count(match);
+
+    /// <summary>Polls until a matching log line appears; false on timeout.</summary>
+    public async Task<bool> WaitForAsync(Func<string, bool> match, TimeSpan timeout)
+    {
+        var deadline = DateTime.UtcNow + timeout;
+        while (DateTime.UtcNow < deadline)
+        {
+            if (Any(match))
+                return true;
+
+            await Task.Delay(200);
+        }
+
+        return false;
+    }
+
     /// <summary>The MES slot is exclusive per client; an unclean disconnect holds it ~15 minutes.</summary>
     public bool SawMesSlotHeld()
         => Any(l => l.Contains("AlreadyExists", StringComparison.OrdinalIgnoreCase)

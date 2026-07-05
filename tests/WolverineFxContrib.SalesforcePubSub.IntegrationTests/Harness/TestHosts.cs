@@ -30,7 +30,12 @@ public static class TestHosts
         builder.Logging.AddFilter("Wolverine.SalesforcePubSub", LogLevel.Information);
 
         if (logSink is not null)
+        {
+            // Tests observing the log also get Wolverine's own lifecycle lines (ListeningAgent's
+            // too-busy / started / stopped) — the only externally visible signal for several behaviors.
+            builder.Logging.AddFilter("Wolverine", LogLevel.Information);
             builder.Logging.AddProvider(new SinkLoggerProvider(logSink));
+        }
 
         builder.Services.AddSingleton(sink);
         builder.Services.AddSingleton(ctx.SubscriberCredentials);
