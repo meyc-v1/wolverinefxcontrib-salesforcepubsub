@@ -224,7 +224,14 @@ default 270s), `StartFromEarliest()` (client-replay subscriptions, cold start on
 
 - `src/WolverineFxContrib.SalesforcePubSub` — the transport (public surface is deliberately minimal;
   everything else is `internal` under `Internals/`).
-- `tests/…Tests` — unit suite (xUnit v3). `tests/…IntegrationTests` — live-environment stub.
-- `host/…TestHost` — a Worker harness used for live verification (resiliency campaign, Durable tests).
+- `src/…External.Salesforce` — repo-internal support lib: the REST publish helper the test projects use
+  (not part of the package; the transport does not reference it).
+- `tests/…Tests` — unit suite (xUnit v3). `tests/…IntegrationTests` — the live suite: 16 facts against
+  a real Salesforce org + SQL Server, mirroring the read-side coverage of Wolverine's own Kafka
+  integration tests (receive per kind, multi-type decode, DLQ paths, retry, replay positions,
+  restart-resume, fan-out identity, backpressure stop/rebuild). See `org-setup/` for the one-time org
+  fixtures and credentials it needs.
+- `host/…TestHost` — a Worker harness used for manual live verification (resiliency campaign,
+  overnight runs).
 - `DECISIONS.md` — the ADR-lite log: every design decision, divergence from Wolverine conventions, and
   the live-test evidence behind them.

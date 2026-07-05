@@ -85,6 +85,60 @@ Each create returns `201` with `{"success": true}`. **Re-running a create agains
 fixture already exists fails with a duplicate-value error — that is expected and harmless**; use
 the verification requests (01–03, 09–10) to check the org's state at any time.
 
+## Step 3 — the two External Client Apps (ECAs)
+
+The suite (and the TestHost) authenticate with **two ECAs, one per role**, so the token lifecycles are
+independent (revoking one can never touch the other) and each run-as user carries only its minimal
+permission:
+
+| ECA | Used by | Run-as user needs |
+|---|---|---|
+| Subscriber | the transport (`IAuthenticationTokenHandler`) | **Read** on `WIT_Event_A__e` and `WIT_Event_B__e` |
+| Publisher | the REST publish helper (External.Salesforce lib) | **Create** on both events |
+
+Create both in **Setup → External Client App Manager** with OAuth + the client-credentials flow enabled
+and a run-as user assigned. Then the part that is easy to miss: with **Permitted Users = "Admin
+approved users are pre-authorized"** (the default), each app rejects its own run-as user
+(`invalid_app_access: user is not admin approved to access this app`) until you attach the user's
+profile or permission set **on the app's Edit Policies page** (External Client App Manager → the app's
+row actions → **Edit Policies** → under OAuth policies) — the grant is *not* made from inside the
+Permission Set editor.
+
+## Machine setup — user secrets
+
+Both the TestHost and the integration tests read one .NET user-secrets store, id
+**`wolverine.salesforcepubsub`**. On a new machine, populate it with (values from your org/ECAs):
+
+```json
+{
+  "subscriberAuthenticationSettings": {
+    "ClientId": "<subscriber ECA consumer key>",
+    "ClientSecret": "<subscriber ECA secret>",
+    "LoginUri": "https://<your-org>.sandbox.my.salesforce.com/"
+  },
+  "publisherAuthenticationSettings": {
+    "ClientId": "<publisher ECA consumer key>",
+    "ClientSecret": "<publisher ECA secret>",
+    "LoginUri": "https://<your-org>.sandbox.my.salesforce.com/"
+  },
+  "salesforceSettings": {
+    "baseUri": "https://<your-org>.sandbox.my.salesforce.com/services/data/v64.0/"
+  },
+  "durabilitySettings": {
+    "connectionString": "<SQL Server for the Wolverine message store — Durable endpoints/facts; AAD auth needs no password>"
+  },
+  "salesforceReplaySettings": {
+    "connectionString": "<SQL Server for the TestHost replay checkpoint table — see the TestHost Replay/CreateReplayTable.sql>"
+  }
+}
+```
+
+Notes: `baseUri` needs the API version segment and the trailing slash. The two connection strings are
+optional — the Durable integration facts and the TestHost's SQL replay store skip / fall back to
+in-memory without them (everything else runs). `salesforceSettings:pubSubUri` may also be set to
+override the default public gRPC endpoint. The suite fails fast with the missing key's name if a
+required section is absent.
+
 ## Notes
 
 - **Managed event subscriptions take a few minutes to provision.** After creating them, wait
@@ -94,3 +148,7 @@ the verification requests (01–03, 09–10) to check the org's state at any tim
   `WIT_Channel_Sub` at a time; the suite's MES tests skip (not fail) when the slot is held.
 - The `WIT_` fixtures are intentionally disjoint from any other subscriptions in the org — the
   test suite never touches channels, subscriptions, or replay state belonging to anything else.
+- Two Salesforce behaviors worth knowing when writing new tests: near-simultaneous REST publishes can
+  receive event-bus positions **opposite** to POST order (space order-sensitive publishes), and replay
+  ids are positions on the org's shared bus, so other org activity creates gaps between your events —
+  never assert contiguity.
