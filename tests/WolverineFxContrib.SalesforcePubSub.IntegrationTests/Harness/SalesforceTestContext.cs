@@ -33,6 +33,8 @@ public sealed class SalesforceTestContext : IDisposable
             ? new Uri(uri)
             : null; // transport default (the public Salesforce endpoint)
 
+        DurabilityConnectionString = config["durabilitySettings:connectionString"] is { Length: > 0 } cs ? cs : null;
+
         // Publisher side: the External.Salesforce lib with the publisher ECA's credentials.
         var services = new ServiceCollection();
         services.AddSalesforceAuthentication(s => config.GetSection("publisherAuthenticationSettings").Bind(s));
@@ -47,6 +49,13 @@ public sealed class SalesforceTestContext : IDisposable
 
     /// <summary>Pub/Sub gRPC endpoint override, or null for the transport default.</summary>
     public Uri? PubSubUri { get; }
+
+    /// <summary>
+    /// SQL Server connection string for the Wolverine message store (Durable-mode tests). Optional —
+    /// the Durable facts skip when it isn't configured (same "durabilitySettings:connectionString"
+    /// secret the TestHost uses).
+    /// </summary>
+    public string? DurabilityConnectionString { get; }
 
     /// <summary>POSTs a platform event by API name with the given Message__c (the correlation id).</summary>
     public Task PublishAsync(string eventApiName, string message, CancellationToken ct = default)
