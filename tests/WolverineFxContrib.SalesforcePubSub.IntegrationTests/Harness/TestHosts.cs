@@ -22,12 +22,15 @@ public static class TestHosts
     /// </summary>
     public static async Task<IHost> StartListeningAsync(
         SalesforceTestContext ctx, EventSink sink, Action<WolverineOptions> configure,
-        Action<IServiceCollection>? configureServices = null)
+        Action<IServiceCollection>? configureServices = null, LogSink? logSink = null)
     {
         var builder = Host.CreateApplicationBuilder();
 
         builder.Logging.SetMinimumLevel(LogLevel.Warning);
         builder.Logging.AddFilter("Wolverine.SalesforcePubSub", LogLevel.Information);
+
+        if (logSink is not null)
+            builder.Logging.AddProvider(new SinkLoggerProvider(logSink));
 
         builder.Services.AddSingleton(sink);
         builder.Services.AddSingleton(ctx.SubscriberCredentials);
