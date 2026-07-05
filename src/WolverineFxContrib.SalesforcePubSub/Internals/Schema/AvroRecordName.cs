@@ -5,7 +5,7 @@ namespace Wolverine.SalesforcePubSub.Internals.Schema;
 /// <summary>
 /// Extracts the top-level Avro record name from a Salesforce <c>schema_json</c>. For platform events
 /// the record name is the full event API name including the <c>__e</c> suffix (e.g.
-/// "CM_Test_Event_Two__e", namespace "com.sforce.eventbus" — verified live against the sandbox org), which is
+/// "CM_Test_Event_Two__e", namespace "com.sforce.eventbus" — verified live against a sandbox org), which is
 /// exactly the <c>MapEvent</c> key.
 /// </summary>
 internal static class AvroRecordName

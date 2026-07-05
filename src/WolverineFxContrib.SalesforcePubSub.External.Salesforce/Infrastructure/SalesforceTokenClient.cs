@@ -7,7 +7,7 @@ using WolverineFxContrib.SalesforcePubSub.External.Salesforce.Settings;
 namespace WolverineFxContrib.SalesforcePubSub.External.Salesforce.Infrastructure;
 
 /// <summary>
-/// Client-credentials token client with in-memory caching. Lifted from the internal client
+/// Client-credentials token client with in-memory caching. Ported from an internal Salesforce client
 /// (Polly retry omitted).
 /// </summary>
 internal sealed class SalesforceTokenClient : ISalesforceTokenClient

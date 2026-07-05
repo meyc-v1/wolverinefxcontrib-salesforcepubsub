@@ -5,7 +5,7 @@ namespace WolverineFxContrib.SalesforcePubSub.External.Salesforce.Settings;
 
 /// <summary>
 /// Salesforce client-credentials auth for the REST publisher (typically bound from a
-/// "salesforceAuthenticationSettings" section in user-secrets). Mirrors the internal client's settings.
+/// "salesforceAuthenticationSettings" section in user-secrets).
 /// </summary>
 public sealed class SalesforceAuthenticationSettings
 {

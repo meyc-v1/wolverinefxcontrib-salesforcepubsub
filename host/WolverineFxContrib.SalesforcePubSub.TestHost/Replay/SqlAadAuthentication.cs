@@ -5,7 +5,7 @@ using Microsoft.Data.SqlClient;
 namespace WolverineFxContrib.SalesforcePubSub.TestHost.Replay;
 
 /// <summary>
-/// Mirrors the org SQL-auth pattern (the internal SQL auth helper): a <see cref="ChainedTokenCredential"/> —
+/// Standard Azure SQL Entra auth pattern: a <see cref="ChainedTokenCredential"/> —
 /// WorkloadIdentity in AKS, AzureCli locally — backing the <c>Active Directory Default</c> connection
 /// string method, instead of the slower built-in DefaultAzureCredential probing. Call
 /// <see cref="Register"/> once at startup.

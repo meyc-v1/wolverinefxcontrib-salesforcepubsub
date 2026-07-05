@@ -6,7 +6,7 @@ using WolverineFxContrib.SalesforcePubSub.External.Salesforce.Settings;
 namespace WolverineFxContrib.SalesforcePubSub.External.Salesforce;
 
 /// <summary>
-/// Registration mirroring the internal Salesforce client lib: a token client (auth) plus a bearer-authed
+/// Registration: a token client (auth) plus a bearer-authed
 /// REST client for publishing platform events. Settings defaults + FluentValidation run via the
 /// *Configurer options bindings; Polly retry is omitted.
 /// </summary>

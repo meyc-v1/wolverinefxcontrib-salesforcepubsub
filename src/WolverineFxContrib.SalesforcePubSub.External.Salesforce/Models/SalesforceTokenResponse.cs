@@ -2,7 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace WolverineFxContrib.SalesforcePubSub.External.Salesforce.Models;
 
-/// <summary>Salesforce OAuth token response. Lifted from the internal client.</summary>
+/// <summary>Salesforce OAuth token response.</summary>
 public sealed class SalesforceTokenResponse
 {
     [JsonPropertyName("access_token")] public string? AccessToken { get; set; }

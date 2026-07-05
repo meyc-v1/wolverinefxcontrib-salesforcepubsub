@@ -16,7 +16,7 @@ using WolverineFxContrib.SalesforcePubSub.TestHost.Settings;
 
 var builder = Host.CreateApplicationBuilder(args);
 
-// OTEL config first, then re-add appsettings.json last so it keeps precedence (mirrors the internal host).
+// OTEL config first, then re-add appsettings.json last so it keeps precedence.
 builder.Configuration.AddJsonFile("appsettings.otel.json", optional: true, reloadOnChange: true);
 builder.Configuration.AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
 
@@ -31,7 +31,7 @@ var sfValidation = sfConfigurer.Validate(Microsoft.Extensions.Options.Options.De
 if (sfValidation.Failed)
     throw new InvalidOperationException($"salesforceSettings validation failed: {sfValidation.FailureMessage}");
 
-// Logging + OpenTelemetry, mirroring the internal host. Console formatter/log levels come from
+// Logging + OpenTelemetry. Console formatter/log levels come from
 // appsettings.otel.json; traces (HTTP token calls + the Pub/Sub gRPC stream) and logs export via OTLP.
 if (builder.Environment.IsProduction())
     builder.Logging.ClearProviders();  // clear these out to improve perf in prod

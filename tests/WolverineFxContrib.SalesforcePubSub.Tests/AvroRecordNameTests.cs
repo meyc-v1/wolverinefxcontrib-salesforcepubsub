@@ -4,14 +4,14 @@ namespace WolverineFxContrib.SalesforcePubSub.Tests;
 
 /// <summary>
 /// The record-name parse that drives per-event type resolution: the top-level "name" of a Salesforce
-/// platform-event schema is the full event API name including __e (verified live against the sandbox org).
+/// platform-event schema is the full event API name including __e (verified live against a sandbox org).
 /// </summary>
 public class AvroRecordNameTests
 {
     [Fact]
     public void Parses_the_real_salesforce_compact_schema_shape()
     {
-        // The verbatim shape Salesforce returns (captured from the sandbox org, 2026-07-02).
+        // The verbatim shape Salesforce returns (captured live, 2026-07-02).
         const string schema = """
             {"name":"CM_Test_Event_Two__e","namespace":"com.sforce.eventbus","type":"record",
              "fields":[{"name":"CreatedDate","type":"long","doc":"CreatedDate:DateTime"},

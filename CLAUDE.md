@@ -26,7 +26,7 @@ endpoints. Package id `WolverineFxContrib.SalesforcePubSub`; root namespace `Wol
     (`ISubscriptionTransport` + topic/MES impls, `ResponseMessageInfo`). The Salesforce gRPC proto is
     generated with `Access=Internal`.
 - `src/WolverineFxContrib.SalesforcePubSub.External.Salesforce` — repo-internal support lib
-  (`IsPackable=false`, the internal Salesforce client lib layout): the client-credentials
+  (`IsPackable=false`): the client-credentials
   `ISalesforceTokenClient` (cached) + bearer `DelegatingHandler` + `ISalesforceClient` for REST-POSTing
   platform events. **Publisher-side only — no reference to the transport.** The transport authenticates
   through consumer-implemented `IAuthenticationTokenHandler`s (direct fetch-fresh, no cache — the
@@ -52,9 +52,10 @@ endpoints. Package id `WolverineFxContrib.SalesforcePubSub`; root namespace `Wol
   Tooling REST). **Read this first on a new machine or org.**
 
 ## Build / test / run
-- Build: `dotnet build C:/src/wolverine-salesforce-pubsub/WolverineFxContrib.SalesforcePubSub.slnx`
-- Test: `dotnet test C:/src/wolverine-salesforce-pubsub/WolverineFxContrib.SalesforcePubSub.slnx`
-- Run host: `dotnet run --project C:/src/wolverine-salesforce-pubsub/host/WolverineFxContrib.SalesforcePubSub.TestHost`
+(paths relative to the repo root)
+- Build: `dotnet build WolverineFxContrib.SalesforcePubSub.slnx`
+- Test: `dotnet test WolverineFxContrib.SalesforcePubSub.slnx`
+- Run host: `dotnet run --project host/WolverineFxContrib.SalesforcePubSub.TestHost`
 
 ## Key facts
 - **net10.0 only** — WolverineFx 6.x dropped net8, so the lib does too.
@@ -76,14 +77,14 @@ endpoints. Package id `WolverineFxContrib.SalesforcePubSub`; root namespace `Wol
 - Keep the public surface minimal (the three interfaces + event types + Wolverine config classes);
   everything else stays `internal`.
 
-## Salesforce environment (the sandbox org) & credentials
+## Salesforce environment & credentials
 - **Org fixtures are the `WIT_` set** (WIT = Wolverine Integration Test), shared by the TestHost and the
   integration suite: platform events `WIT_Event_A__e` / `WIT_Event_B__e` (one nullable `Message__c`
   Text 255 each), custom channel `WIT_Channel__chn` carrying both, MES `WIT_Event_A_Sub` (over event A)
   and `WIT_Channel_Sub` (over the channel). Create-once permanent infra — see `org-setup/README.md` for
   the manual PE walkthrough + Bruno collection (PE definitions are Metadata-API-only; we deliberately
-  ship no metadata deploy). Any `CM_`-prefixed fixtures in the org are the maintainer's personal test infra, not
-  referenced by this repo.
+  ship no metadata deploy). Any `CM_`-prefixed fixtures in the org are the maintainer's personal test
+  infra, not referenced by this repo.
 - **Two ECAs (External Client Apps), one per role** — independent token lifecycles and least-privilege:
   the **subscriber** ECA's run-as user has Read on the WIT events (feeds the transport's
   `IAuthenticationTokenHandler`); the **publisher** ECA's has Create (feeds the External.Salesforce REST
@@ -136,10 +137,10 @@ agreed acceptance gate before shipping as a NuGet package). Open, in rough order
 - **Do it the Wolverine way.** This is a community Wolverine transport and should look/behave like a
   native one. When in doubt about API shape, naming, or behavior, mirror how Wolverine's own transports
   do it rather than inventing. Trace a local clone of the Wolverine source to confirm conventions before
-  deciding (**Kafka** is the primary reference transport, **Azure Service Bus** secondary) — on the maintainer's
-  main machine it lives at `a local Wolverine clone`; clone `JasperFx/wolverine` if absent. The clone
-  tracks `main`, which is AHEAD of the pinned **WolverineFx 6.12.0** — the repo has version tags, so
-  check APIs against the pinned source with `git show V6.12.0:<path>` before relying on them. Where the
+  deciding (**Kafka** is the primary reference transport, **Azure Service Bus** secondary) — clone
+  `JasperFx/wolverine` if absent (the path is machine-specific). A clone tracking `main` is AHEAD of the
+  pinned **WolverineFx 6.12.0** — the repo has version tags, so check APIs against the pinned source
+  with `git show V6.12.0:<path>` (or check out the tag) before relying on them. Where the
   port diverges from Wolverine or under-implements what Wolverine expects, either implement it
   Wolverine's way or document why we can't — and record it in `DECISIONS.md`.
 - Use absolute paths in commands (not `cd`); separate Bash calls (no `&&`/`||`/`;`).

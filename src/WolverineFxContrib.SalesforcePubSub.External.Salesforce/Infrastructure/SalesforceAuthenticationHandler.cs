@@ -4,7 +4,7 @@ namespace WolverineFxContrib.SalesforcePubSub.External.Salesforce.Infrastructure
 
 /// <summary>
 /// DelegatingHandler that attaches the bearer token (from <see cref="ISalesforceTokenClient"/>) to
-/// outgoing REST requests. Lifted from the internal client.
+/// outgoing REST requests. Ported from an internal Salesforce client.
 /// </summary>
 internal sealed class SalesforceAuthenticationHandler : DelegatingHandler
 {
