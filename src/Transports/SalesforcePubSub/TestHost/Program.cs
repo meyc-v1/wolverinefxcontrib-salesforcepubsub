@@ -11,7 +11,6 @@ using Salesforce;
 using MssqlReplay;
 using TestHost;
 using TestHost.Events;
-using TestHost.Replay;
 using TestHost.Salesforce;
 using TestHost.Settings;
 
@@ -75,19 +74,13 @@ if (builder.Configuration.GetValue("heartbeat:enabled", true))
 builder.Services.Configure<PublisherSettings>(builder.Configuration.GetSection("publisherSettings"));
 builder.Services.AddHostedService<PublisherWorker>();
 
-// Replay store / fault injection. Registered before UseWolverine so the transport's TryAdd default
-// (in-memory) is skipped. Precedence: bad-replay fault seam (isolated test) > persistent SQL store >
-// lib in-memory default. Topic only — MES uses server-side replay.
+// Replay store. Registered before UseWolverine so the transport's TryAdd default (in-memory) is
+// skipped when a persistent store is configured. Topic only — MES uses server-side replay.
 builder.Services.Configure<ReplaySettings>(builder.Configuration.GetSection("salesforceReplaySettings"));
 // The MssqlReplay lib binds its SQL detail (application/instance/schema/table) from the same section.
 builder.Services.Configure<MssqlReplaySettings>(builder.Configuration.GetSection("salesforceReplaySettings"));
 var replay = builder.Configuration.GetSection("salesforceReplaySettings").Get<ReplaySettings>() ?? new ReplaySettings();
-if (replay.SeedBadReplayId is { } badReplayId)
-{
-    builder.Services.AddSingleton<IReplayIdRepository>(sp =>
-        new FaultInjectingReplayIdRepository(badReplayId, sp.GetRequiredService<ILogger<FaultInjectingReplayIdRepository>>()));
-}
-else if (!string.IsNullOrWhiteSpace(replay.ConnectionString))
+if (!string.IsNullOrWhiteSpace(replay.ConnectionString))
 {
     MssqlAadAuthentication.Register();
     builder.Services.AddSingleton<IReplayIdRepository, MssqlReplayIdRepository>();
@@ -104,6 +97,25 @@ builder.UseWolverine(opts =>
     if (!string.IsNullOrWhiteSpace(durabilityConnectionString))
         opts.PersistMessagesWithSqlServer(durabilityConnectionString);
 
+    ConfigureSalesforceListeners(opts, sf, durabilityConnectionString);
+});
+
+var host = builder.Build();
+
+// The replay-repository fallback chain is silent by design in the transport; in the harness, make the
+// in-memory default loud — a replay position that doesn't survive a restart invalidates recovery tests.
+if (string.IsNullOrWhiteSpace(replay.ConnectionString))
+{
+    host.Services.GetRequiredService<ILoggerFactory>().CreateLogger("Program").LogWarning(
+        "No 'salesforceReplaySettings:connectionString' configured; topic/channel replay positions are IN-MEMORY ONLY and will not survive a restart.");
+}
+
+host.Run();
+
+// Wires one listening endpoint per enabled subscription from config: kind, event map, delivery mode,
+// and the per-endpoint resiliency knobs.
+static void ConfigureSalesforceListeners(WolverineOptions opts, SalesforcePubSubSettings sf, string? durabilityConnectionString)
+{
     foreach (var sub in sf.Subscriptions)
     {
         if (!sub.Enabled)
@@ -150,19 +162,7 @@ builder.UseWolverine(opts =>
         if (sub.WatchdogThreshold is { } watchdogThreshold)
             listener.Watchdog.Threshold(watchdogThreshold);
     }
-});
-
-var host = builder.Build();
-
-// The replay-repository fallback chain is silent by design in the transport; in the harness, make the
-// in-memory default loud — a replay position that doesn't survive a restart invalidates recovery tests.
-if (replay.SeedBadReplayId is null && string.IsNullOrWhiteSpace(replay.ConnectionString))
-{
-    host.Services.GetRequiredService<ILoggerFactory>().CreateLogger("Program").LogWarning(
-        "No 'salesforceReplaySettings:connectionString' configured; topic/channel replay positions are IN-MEMORY ONLY and will not survive a restart.");
 }
-
-host.Run();
 
 static Type? ResolveEventType(string name)
     => Type.GetType(name)

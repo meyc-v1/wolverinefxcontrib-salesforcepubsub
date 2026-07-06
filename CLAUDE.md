@@ -116,9 +116,9 @@ its two test projects carry the `WolverineFxContrib.` prefix — plain-named sib
 - `salesforceSettings` (appsettings; `baseUri` in user secrets): `pubSubUri` (gRPC) and
   `subscriptions[]` — each `{ type: Topic|ManagedSubscription (Channel = Topic alias), resource
   (topic path or MES developer name), events[] {messageType, eventApiName? (attribute fallback)},
-  mode: Inline|BufferedInMemory|Durable, enabled, … }`. Committed default: WIT topic + MES + channel
-  enabled, all Inline, channel-MES disabled, publisher off; working-tree edits to `appsettings.json`
-  are per-run test config by convention.
+  mode: Inline|BufferedInMemory|Durable, enabled, … }`. Committed default: all five WIT subscriptions
+  enabled (topics A + B, channel, both MES), all Inline, publisher off; working-tree edits to
+  `appsettings.json` are per-run test config by convention.
 - Timed `PublisherWorker` (opt-in `publisherSettings`) POSTs the test PEs; handler seams: `Message__c` =
   "poison" (throws) / "slow" (30s delay) drive manual DLQ / restart-recovery / kill-window tests
   (delivery-guarantee evidence lives in `docs/test-results/`).
