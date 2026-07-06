@@ -25,7 +25,7 @@ public class MesReceiveTests(SalesforceTestContext ctx)
         {
             opts.Discovery.IncludeType<WitEventAHandler>();
             opts.ListenToManagedSubscription("WIT_Event_A_Sub").MapEvent<WitEventA>();
-        }, logSink: logs);
+        }, logSink: logs, readyEvents: 0); // slot-held detection wraps the fact's own first wait
 
         try
         {
@@ -63,7 +63,7 @@ public class MesReceiveTests(SalesforceTestContext ctx)
             opts.ListenToManagedSubscription("WIT_Channel_Sub")
                 .MapEvent<WitEventA>()
                 .MapEvent<WitEventB>();
-        }, logSink: logs);
+        }, logSink: logs, readyEvents: 0); // slot-held detection wraps the fact's own first wait
 
         try
         {

@@ -18,6 +18,9 @@ public sealed class LogSink
 
     public int Count(Func<string, bool> match) => _lines.Count(match);
 
+    /// <summary>The most recent log lines — failure-time diagnostics for conditions the reconnect loop swallows.</summary>
+    public IReadOnlyList<string> Tail(int count) => _lines.TakeLast(count).ToList();
+
     /// <summary>Polls until a matching log line appears; false on timeout.</summary>
     public async Task<bool> WaitForAsync(Func<string, bool> match, TimeSpan timeout)
     {
@@ -41,13 +44,13 @@ public sealed class LogSink
 
 internal sealed class SinkLoggerProvider(LogSink sink) : ILoggerProvider
 {
-    public ILogger CreateLogger(string categoryName) => new SinkLogger(sink);
+    public ILogger CreateLogger(string categoryName) => new SinkLogger(sink, categoryName);
 
     public void Dispose()
     {
     }
 
-    private sealed class SinkLogger(LogSink sink) : ILogger
+    private sealed class SinkLogger(LogSink sink, string category) : ILogger
     {
         public IDisposable? BeginScope<TState>(TState state) where TState : notnull => null;
 
@@ -55,6 +58,8 @@ internal sealed class SinkLoggerProvider(LogSink sink) : ILoggerProvider
 
         public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception,
             Func<TState, Exception?, string> formatter)
-            => sink.Add(exception is null ? formatter(state, exception) : $"{formatter(state, exception)} | {exception}");
+            => sink.Add(exception is null
+                ? $"[{logLevel}] {category}: {formatter(state, exception)}"
+                : $"[{logLevel}] {category}: {formatter(state, exception)} | {exception}");
     }
 }

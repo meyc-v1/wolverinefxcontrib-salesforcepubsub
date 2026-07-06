@@ -118,7 +118,7 @@ public class DurableTests(SalesforceTestContext ctx)
 
             opts.ListenToSalesforceTopic("/event/WIT_Event_A__e").MapEvent<WitEventA>().UseDurableInbox();
             opts.ListenToSalesforceTopic("/event/WIT_Channel__chn").MapEvent<WitEventA>().UseDurableInbox();
-        });
+        }, readyEvents: 2); // IdAndDestination delivers the sentinel per endpoint — prove BOTH live
 
         try
         {
