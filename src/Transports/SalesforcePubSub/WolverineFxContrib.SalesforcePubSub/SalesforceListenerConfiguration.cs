@@ -32,7 +32,7 @@ public class SalesforceListenerConfiguration
     public SalesforceListenerConfiguration MapEvent<T>(string eventApiName) where T : PubSubEvent
         => MapEvent(typeof(T), eventApiName);
 
-    /// <summary>Runtime-typed overload of <see cref="MapEvent{T}"/> (e.g. for configuration-driven wiring).</summary>
+    /// <summary>Runtime-typed overload of <see cref="MapEvent{T}(string)"/> (e.g. for configuration-driven wiring).</summary>
     public SalesforceListenerConfiguration MapEvent(Type messageType, string eventApiName)
     {
         ArgumentNullException.ThrowIfNull(messageType);

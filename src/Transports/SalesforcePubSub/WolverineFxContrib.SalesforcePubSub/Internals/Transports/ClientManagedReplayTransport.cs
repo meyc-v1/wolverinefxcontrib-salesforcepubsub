@@ -131,7 +131,8 @@ internal sealed partial class ClientManagedReplayTransport : ISubscriptionTransp
         {
             if (trailers.Any(x => x.Key == "error-code" && x.Value == _settings.ReplayIdValidationFailedErrorCode))
             {
-                LogStarted("ResetReplayId", _topicName);
+                // An event-skipping recovery decision must be visible at production log levels, not Trace.
+                LogResettingToNewEventsOnly(_topicName);
                 await _replayIdRepository.ResetForNewEventsOnlyAsync(_topicName, ct).ConfigureAwait(false);
                 LogFinished("ResetReplayId", _topicName);
             }
@@ -195,6 +196,10 @@ internal sealed partial class ClientManagedReplayTransport : ISubscriptionTransp
 
     [LoggerMessage(EventId = 2, Level = LogLevel.Debug, Message = "{Resource}: Sending FetchRequest, FetchCount: {FetchCount}, ReplayId: {ReplayId}")]
     private partial void LogSendingFetchRequest(string resource, int fetchCount, long replayId);
+
+    [LoggerMessage(EventId = 5, Level = LogLevel.Warning,
+        Message = "{Resource}: Salesforce rejected the stored replay id (typically aged past event retention); resetting to new-events-only — events between the stored position and the stream tip will not be replayed.")]
+    private partial void LogResettingToNewEventsOnly(string resource);
 
     [LoggerMessage(EventId = 3, Level = LogLevel.Trace, Message = "{Resource}: Started {Operation}")]
     private partial void LogStarted(string operation, string resource);

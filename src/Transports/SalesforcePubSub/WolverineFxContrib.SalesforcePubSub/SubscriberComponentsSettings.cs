@@ -4,7 +4,7 @@ namespace Wolverine.SalesforcePubSub;
 
 /// <summary>
 /// Internal, effective per-listener settings. Transport-level values (PubSubUri, TokenCacheDuration) and
-/// defaults are configured via <c>UseSalesforcePubSub</c> / <see cref="SalesforcePubSubConfiguration"/>;
+/// defaults are configured via <c>UseSalesforcePubSub</c> / <see cref="SalesforcePubSubTransportExpression"/>;
 /// per-endpoint overrides (fetch count/timeout, start-from-earliest) layer on top via
 /// <see cref="SalesforceListenerConfiguration"/> and are merged into an effective instance in
 /// <see cref="SalesforceEndpoint.BuildListenerAsync"/>. Not part of the public surface.

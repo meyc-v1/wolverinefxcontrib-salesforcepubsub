@@ -59,6 +59,13 @@ The topic replay repository is your at-least-once anchor: the transport commits 
 fully-handled replay id to it (throttled), and a cold start resumes from what it returns. Implement it
 over a table keyed by (application, instance, topic).
 
+You don't have to write either from scratch — this repo carries complete, copyable reference
+implementations: **[`MssqlReplay`](src/Transports/SalesforcePubSub/MssqlReplay)** is a SQL Server
+`IReplayIdRepository` (table DDL included, Entra ID auth helper), and
+**[`SalesforceAuthenticationTokenHandler`](src/Transports/SalesforcePubSub/TestHost/Salesforce/SalesforceAuthenticationTokenHandler.cs)**
+is a client-credentials `IAuthenticationTokenHandler` against an External Client App. Lift them into
+your host and adjust.
+
 ## Subscription kinds
 
 There are exactly two, split by **who manages the replay position** — and every subscription declares

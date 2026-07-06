@@ -8,7 +8,18 @@
     <PackageId>WolverineFxContrib.SalesforcePubSub</PackageId>
     <Description>Wolverine transport for the Salesforce Pub/Sub gRPC API (community contrib)</Description>
     <PackageTags>Salesforce pub/sub api subscribe wolverine</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <RepositoryUrl>https://github.com/meyc-v1/wolverinefxcontrib-salesforcepubsub</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <!-- Ship the XML docs; CS1591 stays quiet until a deliberate doc-coverage pass. -->
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\..\..\..\README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
 
   <ItemGroup>
     <InternalsVisibleTo Include="WolverineFxContrib.SalesforcePubSub.Tests" />
