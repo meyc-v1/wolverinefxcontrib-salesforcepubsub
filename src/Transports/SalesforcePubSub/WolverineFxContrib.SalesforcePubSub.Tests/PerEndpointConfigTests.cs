@@ -172,4 +172,26 @@ public class PerEndpointConfigTests
         Assert.Equal(typeof(FakeReplayRepo), replay.ImplementationType); // Replace swapped out the default
         Assert.Equal(typeof(FakeBackoff), backoff.ImplementationType);
     }
+
+    [Fact]
+    public void Calling_UseSalesforcePubSub_again_composes_onto_the_same_settings()
+    {
+        var options = new WolverineOptions();
+        options.UseSalesforcePubSub(new Uri("https://first.example:7443"));
+
+        // A second call must return an expression over the SAME settings instance the container holds —
+        // previously it built a fresh settings object that TryAddSingleton discarded, so the second
+        // call's fluent configuration was silently lost.
+        var second = options.UseSalesforcePubSub();
+        second.TokenCacheDuration(TimeSpan.FromMinutes(5));
+
+        var registered = (SubscriberComponentsSettings)options.Services
+            .Single(d => d.ServiceType == typeof(SubscriberComponentsSettings)).ImplementationInstance!;
+        Assert.Equal(TimeSpan.FromMinutes(5), registered.TokenCacheDuration);            // second call's config took
+        Assert.Equal(new Uri("https://first.example:7443"), registered.PubSubUri);       // first call's uri kept
+
+        // And the DI wiring ran exactly once (the gRPC client registration is not idempotent —
+        // a second pass would stack duplicate call credentials).
+        Assert.Single(options.Services.Where(d => d.ServiceType == typeof(SubscriberComponentsSettings)));
+    }
 }

@@ -18,6 +18,16 @@ public sealed class SalesforcePubSubTransport : TransportBase<SalesforceEndpoint
     {
     }
 
+    /// <summary>
+    /// The transport-level settings, owned by the transport instance (the Kafka pattern) so that a
+    /// second <c>UseSalesforcePubSub</c> call composes onto the same configuration instead of silently
+    /// mutating an instance the container never sees.
+    /// </summary>
+    internal SubscriberComponentsSettings Settings { get; } = new();
+
+    /// <summary>Guards the one-time DI wiring (the gRPC client registration is not idempotent).</summary>
+    internal bool ServicesRegistered { get; set; }
+
     /// <summary>Finds an existing endpoint for the resource or creates and registers a new one.</summary>
     internal SalesforceEndpoint EndpointForResource(SalesforceResourceKind kind, string resource)
     {

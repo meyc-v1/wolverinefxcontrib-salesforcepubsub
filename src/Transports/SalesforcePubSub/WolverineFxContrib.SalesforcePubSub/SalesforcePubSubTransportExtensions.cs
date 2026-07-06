@@ -22,9 +22,18 @@ public static class SalesforcePubSubTransportExtensions
     {
         var transport = options.Transports.GetOrCreate<SalesforcePubSubTransport>();
 
-        var settings = new SubscriberComponentsSettings();
+        // The settings live on the transport instance so a repeated UseSalesforcePubSub call returns an
+        // expression over the SAME configuration (previously the second call silently mutated a fresh
+        // settings object the container never registered). The service wiring runs once — the gRPC
+        // client registration is not idempotent (a second AddCallCredentials would stack duplicate
+        // metadata) — everything after the guard composes safely.
+        var settings = transport.Settings;
         if (pubSubUri is not null)
             settings.PubSubUri = pubSubUri;
+
+        if (transport.ServicesRegistered)
+            return new SalesforcePubSubTransportExpression(transport, options, settings);
+        transport.ServicesRegistered = true;
 
         var services = options.Services;
         services.TryAddSingleton(settings);
