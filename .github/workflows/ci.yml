@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: Restore
+        run: dotnet restore WolverineFxContrib.SalesforcePubSub.slnx
+
+      - name: Build
+        run: dotnet build WolverineFxContrib.SalesforcePubSub.slnx --configuration Release --no-restore
+
+      # Unit tests only. The integration suite needs live Salesforce credentials and the exclusive
+      # MES slot, so it stays on-demand from a dev machine (see CLAUDE.md).
+      - name: Unit tests
+        run: dotnet test src/Transports/SalesforcePubSub/WolverineFxContrib.SalesforcePubSub.Tests/WolverineFxContrib.SalesforcePubSub.Tests.csproj --configuration Release --no-build
+
+      # Validates the NuGet metadata on every commit so packaging errors surface here, not at publish.
+      - name: Pack (validation only)
+        run: dotnet pack src/Transports/SalesforcePubSub/WolverineFxContrib.SalesforcePubSub/WolverineFxContrib.SalesforcePubSub.csproj --configuration Release --no-build --output ./artifacts

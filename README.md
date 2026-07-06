@@ -1,5 +1,7 @@
 # WolverineFxContrib.SalesforcePubSub
 
+[![CI](https://github.com/meyc-v1/wolverinefxcontrib-salesforcepubsub/actions/workflows/ci.yml/badge.svg)](https://github.com/meyc-v1/wolverinefxcontrib-salesforcepubsub/actions/workflows/ci.yml)
+
 A community **[Wolverine](https://wolverinefx.net/) transport for the Salesforce Pub/Sub gRPC API** —
 Salesforce platform events arrive as ordinary Wolverine messages, handled by ordinary Wolverine handlers,
 with Wolverine owning dispatch, retries, and error handling.
