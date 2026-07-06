@@ -46,14 +46,12 @@ public static class TestHosts
         var builder = Host.CreateApplicationBuilder();
 
         builder.Logging.SetMinimumLevel(LogLevel.Warning);
-        builder.Logging.AddFilter("Wolverine.SalesforcePubSub", LogLevel.Information);
 
-        if (logSink is not null)
-        {
-            // Tests observing the log also get Wolverine's own lifecycle lines (ListeningAgent's
-            // too-busy / started / stopped) — the only externally visible signal for several behaviors.
-            builder.Logging.AddFilter("Wolverine", LogLevel.Information);
-        }
+        // The transport's Trace instrumentation exists precisely to show where a stream is in its
+        // lifecycle (fetch written / response received / dispatch); Wolverine at Debug adds dispatch +
+        // codegen activity. A stalled host's failure tail then reads as a timeline instead of a blank.
+        builder.Logging.AddFilter("Wolverine.SalesforcePubSub", LogLevel.Trace);
+        builder.Logging.AddFilter("Wolverine", LogLevel.Debug);
 
         // Always capture the host's log: readiness failures attach the tail, since a listener that
         // receives nothing reports why only here (the reconnect loop never throws out).
@@ -102,7 +100,7 @@ public static class TestHosts
                         continue;
 
                     await StopAsync(host);
-                    var tail = string.Join(Environment.NewLine, diagnostics.Tail(30));
+                    var tail = string.Join(Environment.NewLine, diagnostics.Tail(200));
                     throw new TimeoutException(
                         $"Listener readiness was not proven within {ReadyTimeout} — no sentinel was delivered {readyEvents} time(s). {ex.Message}{Environment.NewLine}" +
                         $"--- host log tail ---{Environment.NewLine}{tail}");
