@@ -4,7 +4,8 @@
     <LangVersion>latest</LangVersion>
     <Authors>meyc-v1</Authors>
     <Company>meyc-v1</Company>
-    <Version>0.1.0</Version>
+    <!-- Neutral preview number until the WolverineFx naming/versioning discussion settles the scheme. -->
+    <Version>0.1.0-preview.1</Version>
   </PropertyGroup>
 
 </Project>
