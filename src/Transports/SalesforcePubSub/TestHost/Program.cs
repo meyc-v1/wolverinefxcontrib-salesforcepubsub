@@ -8,6 +8,7 @@ using Wolverine.SalesforcePubSub;
 using Wolverine.SqlServer;
 using Wolverine.Transports.SharedMemory;
 using External.Salesforce;
+using SqlReplay;
 using TestHost;
 using TestHost.Events;
 using TestHost.Replay;
@@ -78,6 +79,8 @@ builder.Services.AddHostedService<PublisherWorker>();
 // (in-memory) is skipped. Precedence: bad-replay fault seam (isolated test) > persistent SQL store >
 // lib in-memory default. Topic only — MES uses server-side replay.
 builder.Services.Configure<ReplaySettings>(builder.Configuration.GetSection("salesforceReplaySettings"));
+// The SqlReplay lib binds its SQL detail (application/instance/schema/table) from the same section.
+builder.Services.Configure<SqlReplaySettings>(builder.Configuration.GetSection("salesforceReplaySettings"));
 var replay = builder.Configuration.GetSection("salesforceReplaySettings").Get<ReplaySettings>() ?? new ReplaySettings();
 if (replay.SeedBadReplayId is { } badReplayId)
 {

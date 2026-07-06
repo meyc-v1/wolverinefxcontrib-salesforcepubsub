@@ -8,9 +8,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Azure.Identity" Version="1.21.0" />
     <PackageReference Include="FluentValidation" Version="12.1.1" />
-    <PackageReference Include="Microsoft.Data.SqlClient" Version="7.0.2" />
+    <!-- Entra auth for the Wolverine SQL message store's connection string (SqlClient 7.x split it out). -->
     <PackageReference Include="Microsoft.Data.SqlClient.Extensions.Azure" Version="7.0.2" />
     <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="10.0.8" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.9" />
@@ -28,6 +27,7 @@
   <ItemGroup>
     <ProjectReference Include="..\WolverineFxContrib.SalesforcePubSub\WolverineFxContrib.SalesforcePubSub.csproj" />
     <ProjectReference Include="..\External.Salesforce\External.Salesforce.csproj" />
+    <ProjectReference Include="..\SqlReplay\SqlReplay.csproj" />
   </ItemGroup>
 
   <ItemGroup>

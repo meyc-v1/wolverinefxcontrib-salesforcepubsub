@@ -1,6 +1,6 @@
 using Microsoft.Data.SqlClient;
 
-namespace TestHost.Replay;
+namespace SqlReplay;
 
 /// <summary>
 /// Low-level SQL gateway for the replay table, ported from the original

@@ -2,9 +2,8 @@ using System.Collections.Concurrent;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Wolverine.SalesforcePubSub;
-using TestHost.Settings;
 
-namespace TestHost.Replay;
+namespace SqlReplay;
 
 /// <summary>
 /// Persistent topic replay store (raw ADO.NET, AAD auth) for the resume-across-restart durability test.
@@ -14,7 +13,7 @@ namespace TestHost.Replay;
 /// fail-loud: we let it throw so the listener backs off and retries rather than fabricating a position.
 /// MES is unaffected (server-side replay); this only serves topic endpoints.
 /// </summary>
-internal sealed class SqlReplayIdRepository : IReplayIdRepository
+public sealed class SqlReplayIdRepository : IReplayIdRepository
 {
     private const long NewEventsOnly = -1;
 
@@ -30,7 +29,7 @@ internal sealed class SqlReplayIdRepository : IReplayIdRepository
     private readonly SqlReplayStore _store;
     private readonly ILogger<SqlReplayIdRepository> _logger;
 
-    public SqlReplayIdRepository(IOptions<ReplaySettings> options, ILogger<SqlReplayIdRepository> logger)
+    public SqlReplayIdRepository(IOptions<SqlReplaySettings> options, ILogger<SqlReplayIdRepository> logger)
     {
         var settings = options.Value;
         _logger = logger;

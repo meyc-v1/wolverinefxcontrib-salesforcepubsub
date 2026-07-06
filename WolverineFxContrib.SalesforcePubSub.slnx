@@ -3,6 +3,7 @@
   <Project Path="src/Transports/SalesforcePubSub/WolverineFxContrib.SalesforcePubSub.Tests/WolverineFxContrib.SalesforcePubSub.Tests.csproj" />
   <Project Path="src/Transports/SalesforcePubSub/WolverineFxContrib.SalesforcePubSub.IntegrationTests/WolverineFxContrib.SalesforcePubSub.IntegrationTests.csproj" />
   <Project Path="src/Transports/SalesforcePubSub/External.Salesforce/External.Salesforce.csproj" />
+  <Project Path="src/Transports/SalesforcePubSub/SqlReplay/SqlReplay.csproj" />
   <Project Path="src/Transports/SalesforcePubSub/TestHost/TestHost.csproj" />
   <Folder Name="/Solution Items/">
     <File Path=".gitignore" />

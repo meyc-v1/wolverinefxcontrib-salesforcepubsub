@@ -235,6 +235,8 @@ plain-named siblings are repo-internal and never ship.
   org fixtures and credentials it needs.
 - `External.Salesforce` — repo-internal support lib: the REST publish helper the test projects use
   (not part of the package; the transport does not reference it).
+- `SqlReplay` — repo-internal support lib: a SQL Server `IReplayIdRepository` (Entra auth, DDL included)
+  the TestHost uses for resume-across-restart verification.
 - `TestHost` — a Worker harness used for manual live verification (resiliency campaign,
   overnight runs).
 - `docs/DECISIONS.md` — the ADR-lite log: every design decision, divergence from Wolverine conventions,

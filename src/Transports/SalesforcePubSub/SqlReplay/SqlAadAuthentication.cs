@@ -2,7 +2,7 @@ using Azure.Core;
 using Azure.Identity;
 using Microsoft.Data.SqlClient;
 
-namespace TestHost.Replay;
+namespace SqlReplay;
 
 /// <summary>
 /// Standard Azure SQL Entra auth pattern: a <see cref="ChainedTokenCredential"/> —
@@ -10,7 +10,7 @@ namespace TestHost.Replay;
 /// string method, instead of the slower built-in DefaultAzureCredential probing. Call
 /// <see cref="Register"/> once at startup.
 /// </summary>
-internal static class SqlAadAuthentication
+public static class SqlAadAuthentication
 {
     private static readonly TokenCredential Credential =
         new ChainedTokenCredential(new WorkloadIdentityCredential(), new AzureCliCredential());
