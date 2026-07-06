@@ -37,11 +37,16 @@ public static class TestHosts
     /// Pass the number of endpoints that will deliver the sentinel (2 for an IdAndDestination fan-out
     /// pair; 1 covers an IdOnly pair, which dedups the sentinel), or 0 to fall back to
     /// <see cref="SubscribeGracePeriod"/> for hosts whose facts manage their own first wait (MES).</para>
+    ///
+    /// <para>Two contract points, both learned the hard way: <paramref name="readyEventName"/> must be
+    /// an event the host actually listens to (a WIT_Event_B__e-only host never sees an A sentinel), and
+    /// the handler for it must RECORD <c>ready-</c> messages to the sink — a specialized handler that
+    /// filters them out makes readiness unprovable and the host fail every run.</para>
     /// </summary>
     public static async Task<IHost> StartListeningAsync(
         SalesforceTestContext ctx, EventSink sink, Action<WolverineOptions> configure,
         Action<IServiceCollection>? configureServices = null, LogSink? logSink = null,
-        int readyEvents = 1)
+        int readyEvents = 1, string readyEventName = "WIT_Event_A__e")
     {
         var builder = Host.CreateApplicationBuilder();
 
@@ -88,7 +93,7 @@ public static class TestHosts
             while (true)
             {
                 var sentinel = $"ready-{Guid.NewGuid():N}";
-                await ctx.PublishAsync("WIT_Event_A__e", sentinel);
+                await ctx.PublishAsync(readyEventName, sentinel);
                 try
                 {
                     await sink.WaitForAsync(e => e.Message == sentinel, readyEvents, ReadyAttemptWindow);

@@ -56,6 +56,14 @@ public class FlakyEventAHandler
 
     public static void Handle(WitEventA evt, Envelope envelope, EventSink sink)
     {
+        if (evt.Message__c is { } m && m.StartsWith("ready-"))
+        {
+            // The harness readiness sentinel must reach the sink or the host can never prove itself live.
+            sink.Record(new ReceivedEvent(
+                nameof(WitEventA), evt.Message__c, evt.ReplayId, envelope.Id, envelope.TopicName, envelope.SentAt));
+            return;
+        }
+
         if (evt.Message__c is not { } correlation || !correlation.StartsWith("retry-"))
             return; // stray event from another run — ignore, don't fail it
 

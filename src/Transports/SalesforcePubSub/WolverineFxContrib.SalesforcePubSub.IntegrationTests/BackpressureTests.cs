@@ -40,7 +40,8 @@ public class BackpressureTests(SalesforceTestContext ctx, ITestOutputHelper outp
                     .BufferedInMemory(new BufferingLimits(4, 2));
             },
             s => s.AddSingleton<IReplayIdRepository>(repo),
-            logs);
+            logs,
+            readyEventName: "WIT_Event_B__e"); // this host listens only to B — an A sentinel would never arrive
 
         try
         {
