@@ -225,6 +225,35 @@ default 270s), `StartFromEarliest()` (client-replay subscriptions, cold start on
 - **One listener per endpoint** — `ListenerCount > 1` fails at startup (parallel listeners would open
   duplicate subscriptions); use Durable mode for parallel *processing*.
 
+## Building & testing
+
+Requires the .NET 10 SDK (pinned by `global.json`).
+
+```bash
+dotnet build WolverineFxContrib.SalesforcePubSub.slnx
+
+# Unit suite — no external dependencies, runs anywhere (this is what CI runs):
+dotnet test src/Transports/SalesforcePubSub/WolverineFxContrib.SalesforcePubSub.Tests
+
+# Live integration suite — 16 facts against a real Salesforce org (~4.5 min, serial):
+dotnet test src/Transports/SalesforcePubSub/WolverineFxContrib.SalesforcePubSub.IntegrationTests
+```
+
+The integration suite needs one-time setup: the org fixtures (platform events, channel, managed
+subscriptions) and two External Client Apps, plus their credentials in the user-secrets store —
+**[docs/org-setup/README.md](docs/org-setup/README.md)** walks through all of it. Facts that need
+something unavailable skip rather than fail: the three Durable facts skip without a
+`durabilitySettings:connectionString` SQL Server secret, and MES facts skip while another client
+holds the subscription slot.
+
+There is also a manual harness for interactive and long-running verification (the resiliency
+campaign and overnight soaks behind the delivery-guarantee matrix) — it shares the same secrets
+store:
+
+```bash
+dotnet run --project src/Transports/SalesforcePubSub/TestHost
+```
+
 ## Repository layout
 
 All projects sit as siblings under `src/Transports/SalesforcePubSub/`, mirroring Wolverine's own
