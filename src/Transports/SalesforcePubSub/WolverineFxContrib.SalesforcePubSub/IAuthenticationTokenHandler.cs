@@ -12,7 +12,11 @@ namespace Wolverine.SalesforcePubSub;
 /// </summary>
 public interface IAuthenticationTokenHandler
 {
-    Task<AuthenticationTokenResponse> GetAuthenticationTokenAsync();
+    /// <summary>
+    /// Fetches a fresh token. The <paramref name="cancellationToken"/> is the requesting gRPC call's —
+    /// honor it in the HTTP token request so a cancelled subscribe attempt doesn't leave a fetch running.
+    /// </summary>
+    Task<AuthenticationTokenResponse> GetAuthenticationTokenAsync(CancellationToken cancellationToken = default);
 }
 
 public sealed class AuthenticationTokenResponse

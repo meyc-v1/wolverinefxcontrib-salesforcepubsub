@@ -25,7 +25,7 @@ internal sealed class SalesforceAuthenticationTokenHandler : IAuthenticationToke
         _settings = settings?.Value ?? throw new ArgumentNullException(nameof(settings));
     }
 
-    public async Task<AuthenticationTokenResponse> GetAuthenticationTokenAsync()
+    public async Task<AuthenticationTokenResponse> GetAuthenticationTokenAsync(CancellationToken cancellationToken = default)
     {
         var client = _httpClientFactory.CreateClient(HttpClientName);
 
@@ -39,8 +39,8 @@ internal sealed class SalesforceAuthenticationTokenHandler : IAuthenticationToke
             })
         };
 
-        using var resp = await client.SendAsync(req).ConfigureAwait(false);
-        var raw = await resp.Content.ReadAsStringAsync().ConfigureAwait(false);
+        using var resp = await client.SendAsync(req, cancellationToken).ConfigureAwait(false);
+        var raw = await resp.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
 
         // Fail loud on a non-success response; the transport's provider validates the token contents
         // before caching (a null-token response must never poison its cache).

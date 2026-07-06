@@ -45,7 +45,7 @@ public class SalesforceAvroSerializerTests
         private int _calls;
         public int Calls => _calls;
 
-        public Task<AuthenticationTokenResponse> GetAuthenticationTokenAsync()
+        public Task<AuthenticationTokenResponse> GetAuthenticationTokenAsync(CancellationToken cancellationToken = default)
         {
             var n = Interlocked.Increment(ref _calls);
             return Task.FromResult(new AuthenticationTokenResponse($"token-{n}", "https://instance", "tenant"));

@@ -723,6 +723,16 @@ contracts + Kafka/ASB. The port is largely conformant; findings below._
 Non-conformance, code-quality items — places to make the implementation **read** more like Wolverine's
 reference transports (Kafka primary), not just behave like one. Tackle in an update pass.
 
+- **The two gRPC transport classes are live-suite-verified only — by choice.**
+  `ClientManagedReplayTransport` / `ManagedEventSubscriptionTransport` are thin protocol adapters over
+  single-use duplex streams; a unit facsimile means emulating Pub/Sub semantics (duplex fetch/commit
+  interleaving, trailers, replay-id validation, keep-alive cadence) — an emulator that would itself need
+  live verification. Everything above them IS unit-covered: the listener runs against a scripted
+  `ISubscriptionTransport` (deterministic interleavings — see #22's harness) and the tracker is pinned
+  directly, so the transports carry only the wire mapping, which the 16-fact live suite exercises for
+  both kinds. Revisit only if a maintained Pub/Sub API emulator appears or CI gains live credentials.
+  → **Accepted** (2026-07-06; concurred by two independent external reviews' triage).
+
 - **`SalesforceListener` construction is service-locator-ish** — `SalesforceEndpoint.BuildListenerAsync`
   does five `runtime.Services.GetRequiredService<…>()` calls and threads the results into an 11-arg
   constructor. Manual `new` in `BuildListenerAsync` is itself fine and Wolverine-idiomatic (Kafka `new`s

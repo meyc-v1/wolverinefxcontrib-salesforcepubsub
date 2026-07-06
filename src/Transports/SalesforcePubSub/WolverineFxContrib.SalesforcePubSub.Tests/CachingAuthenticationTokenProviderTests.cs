@@ -16,7 +16,7 @@ public class CachingAuthenticationTokenProviderTests
         public int Calls => _calls;
         public Func<int, AuthenticationTokenResponse?>? OnGet { get; init; }
 
-        public Task<AuthenticationTokenResponse> GetAuthenticationTokenAsync()
+        public Task<AuthenticationTokenResponse> GetAuthenticationTokenAsync(CancellationToken cancellationToken = default)
         {
             var n = Interlocked.Increment(ref _calls);
             // When OnGet is set, honor its result verbatim (including null, for the null-guard test).

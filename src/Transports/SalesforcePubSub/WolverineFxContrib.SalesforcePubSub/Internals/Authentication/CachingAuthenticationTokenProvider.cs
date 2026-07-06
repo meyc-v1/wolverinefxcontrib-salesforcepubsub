@@ -40,7 +40,7 @@ internal sealed class CachingAuthenticationTokenProvider
             if (entry is not null && DateTimeOffset.UtcNow < entry.ExpiresAt)
                 return entry.Token;
 
-            var token = await _handler.GetAuthenticationTokenAsync().ConfigureAwait(false)
+            var token = await _handler.GetAuthenticationTokenAsync(ct).ConfigureAwait(false)
                         ?? throw new InvalidOperationException(
                             $"{nameof(IAuthenticationTokenHandler)}.{nameof(IAuthenticationTokenHandler.GetAuthenticationTokenAsync)} returned null.");
 

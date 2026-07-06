@@ -45,7 +45,7 @@ public class SalesforceListenerTests
 
     private sealed class FakeTokenHandler : IAuthenticationTokenHandler
     {
-        public Task<AuthenticationTokenResponse> GetAuthenticationTokenAsync()
+        public Task<AuthenticationTokenResponse> GetAuthenticationTokenAsync(CancellationToken cancellationToken = default)
             => Task.FromResult(new AuthenticationTokenResponse("token", "https://instance", "tenant"));
     }
 

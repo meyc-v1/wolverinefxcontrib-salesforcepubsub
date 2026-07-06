@@ -21,7 +21,7 @@ public sealed class SubscriberTokenHandler : IAuthenticationTokenHandler
     public SubscriberTokenHandler(SubscriberCredentials credentials)
         => _credentials = credentials ?? throw new ArgumentNullException(nameof(credentials));
 
-    public async Task<AuthenticationTokenResponse> GetAuthenticationTokenAsync()
+    public async Task<AuthenticationTokenResponse> GetAuthenticationTokenAsync(CancellationToken cancellationToken = default)
     {
         using var req = new HttpRequestMessage(HttpMethod.Post, new Uri(_credentials.LoginUri, "services/oauth2/token"))
         {
@@ -33,8 +33,8 @@ public sealed class SubscriberTokenHandler : IAuthenticationTokenHandler
             })
         };
 
-        using var resp = await Http.SendAsync(req).ConfigureAwait(false);
-        var raw = await resp.Content.ReadAsStringAsync().ConfigureAwait(false);
+        using var resp = await Http.SendAsync(req, cancellationToken).ConfigureAwait(false);
+        var raw = await resp.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
 
         if (!resp.IsSuccessStatusCode)
             throw new InvalidOperationException($"Salesforce subscriber token request failed ({(int)resp.StatusCode} {resp.StatusCode}): {raw}");
