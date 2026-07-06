@@ -1,9 +1,9 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using WolverineFxContrib.SalesforcePubSub.External.Salesforce.Infrastructure;
-using WolverineFxContrib.SalesforcePubSub.External.Salesforce.Settings;
+using External.Salesforce.Infrastructure;
+using External.Salesforce.Settings;
 
-namespace WolverineFxContrib.SalesforcePubSub.External.Salesforce;
+namespace External.Salesforce;
 
 /// <summary>
 /// Registration: a token client (auth) plus a bearer-authed

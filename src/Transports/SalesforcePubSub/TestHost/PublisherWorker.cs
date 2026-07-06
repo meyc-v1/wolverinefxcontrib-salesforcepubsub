@@ -2,10 +2,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using WolverineFxContrib.SalesforcePubSub.External.Salesforce;
-using WolverineFxContrib.SalesforcePubSub.TestHost.Settings;
+using External.Salesforce;
+using TestHost.Settings;
 
-namespace WolverineFxContrib.SalesforcePubSub.TestHost;
+namespace TestHost;
 
 /// <summary>
 /// Timed test publisher (revived from the original runner's RandomWriterService). On an interval it POSTs a

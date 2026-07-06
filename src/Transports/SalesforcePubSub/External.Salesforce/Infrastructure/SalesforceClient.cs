@@ -1,6 +1,6 @@
 using System.Net.Http.Json;
 
-namespace WolverineFxContrib.SalesforcePubSub.External.Salesforce.Infrastructure;
+namespace External.Salesforce.Infrastructure;
 
 internal sealed class SalesforceClient : ISalesforceClient
 {

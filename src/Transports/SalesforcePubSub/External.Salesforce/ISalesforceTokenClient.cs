@@ -1,6 +1,6 @@
-using WolverineFxContrib.SalesforcePubSub.External.Salesforce.Models;
+using External.Salesforce.Models;
 
-namespace WolverineFxContrib.SalesforcePubSub.External.Salesforce;
+namespace External.Salesforce;
 
 public interface ISalesforceTokenClient
 {

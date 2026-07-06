@@ -2,7 +2,7 @@
 
 using Wolverine.SalesforcePubSub.Events;
 
-namespace WolverineFxContrib.SalesforcePubSub.TestHost.Events;
+namespace TestHost.Events;
 
 /// <summary>
 /// Maps to the "WIT Event B" platform event. Add custom (__c) fields here with names matching the

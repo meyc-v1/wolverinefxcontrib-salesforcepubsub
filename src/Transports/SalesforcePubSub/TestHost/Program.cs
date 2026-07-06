@@ -7,12 +7,12 @@ using Wolverine.Configuration;
 using Wolverine.SalesforcePubSub;
 using Wolverine.SqlServer;
 using Wolverine.Transports.SharedMemory;
-using WolverineFxContrib.SalesforcePubSub.External.Salesforce;
-using WolverineFxContrib.SalesforcePubSub.TestHost;
-using WolverineFxContrib.SalesforcePubSub.TestHost.Events;
-using WolverineFxContrib.SalesforcePubSub.TestHost.Replay;
-using WolverineFxContrib.SalesforcePubSub.TestHost.Salesforce;
-using WolverineFxContrib.SalesforcePubSub.TestHost.Settings;
+using External.Salesforce;
+using TestHost;
+using TestHost.Events;
+using TestHost.Replay;
+using TestHost.Salesforce;
+using TestHost.Settings;
 
 var builder = Host.CreateApplicationBuilder(args);
 

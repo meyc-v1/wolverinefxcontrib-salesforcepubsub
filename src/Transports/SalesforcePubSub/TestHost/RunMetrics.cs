@@ -1,6 +1,6 @@
 using System.Collections.Concurrent;
 
-namespace WolverineFxContrib.SalesforcePubSub.TestHost;
+namespace TestHost;
 
 /// <summary>
 /// Shared counters for the durability/resiliency runs. The publisher records what it sent; handlers record

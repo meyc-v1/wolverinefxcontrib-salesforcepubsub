@@ -1,4 +1,4 @@
-namespace WolverineFxContrib.SalesforcePubSub.TestHost.Settings;
+namespace TestHost.Settings;
 
 /// <summary>
 /// Drives the timed test publisher (revived from the original runner's RandomWriterService). Opt-in: the

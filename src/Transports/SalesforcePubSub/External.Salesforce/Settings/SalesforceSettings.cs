@@ -1,7 +1,7 @@
 using FluentValidation;
 using Microsoft.Extensions.Options;
 
-namespace WolverineFxContrib.SalesforcePubSub.External.Salesforce.Settings;
+namespace External.Salesforce.Settings;
 
 /// <summary>Salesforce REST client configuration (typically bound from a "salesforceSettings" section).</summary>
 public sealed class SalesforceSettings

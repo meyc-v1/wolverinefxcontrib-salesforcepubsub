@@ -2,7 +2,7 @@ using FluentValidation;
 using Microsoft.Extensions.Options;
 using Wolverine.SalesforcePubSub;
 
-namespace WolverineFxContrib.SalesforcePubSub.TestHost.Settings;
+namespace TestHost.Settings;
 
 /// <summary>
 /// Pub/sub subscription configuration, bound from the "salesforceSettings" section. (The REST

@@ -1,7 +1,7 @@
 using FluentValidation;
 using Microsoft.Extensions.Options;
 
-namespace WolverineFxContrib.SalesforcePubSub.TestHost.Settings;
+namespace TestHost.Settings;
 
 /// <summary>
 /// Client-credentials auth for the transport's subscriber ECA, bound from the

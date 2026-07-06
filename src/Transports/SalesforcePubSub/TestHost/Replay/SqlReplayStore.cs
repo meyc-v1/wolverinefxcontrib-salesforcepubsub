@@ -1,6 +1,6 @@
 using Microsoft.Data.SqlClient;
 
-namespace WolverineFxContrib.SalesforcePubSub.TestHost.Replay;
+namespace TestHost.Replay;
 
 /// <summary>
 /// Low-level SQL gateway for the replay table, ported from the original

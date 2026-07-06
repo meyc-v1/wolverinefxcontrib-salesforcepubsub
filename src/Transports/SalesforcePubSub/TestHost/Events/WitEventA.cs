@@ -2,7 +2,7 @@
 
 using Wolverine.SalesforcePubSub.Events;
 
-namespace WolverineFxContrib.SalesforcePubSub.TestHost.Events;
+namespace TestHost.Events;
 
 /// <summary>
 /// Maps to the "WIT Event A" platform event. Inherits the standard CreatedById/CreatedDate. Add

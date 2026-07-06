@@ -2,7 +2,7 @@ using Azure.Core;
 using Azure.Identity;
 using Microsoft.Data.SqlClient;
 
-namespace WolverineFxContrib.SalesforcePubSub.TestHost.Replay;
+namespace TestHost.Replay;
 
 /// <summary>
 /// Standard Azure SQL Entra auth pattern: a <see cref="ChainedTokenCredential"/> —

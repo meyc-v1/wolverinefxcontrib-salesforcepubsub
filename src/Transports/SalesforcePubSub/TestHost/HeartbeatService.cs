@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-namespace WolverineFxContrib.SalesforcePubSub.TestHost;
+namespace TestHost;
 
 /// <summary>
 /// Periodically logs a snapshot of <see cref="RunMetrics"/> (published vs handled counts + last replay id per

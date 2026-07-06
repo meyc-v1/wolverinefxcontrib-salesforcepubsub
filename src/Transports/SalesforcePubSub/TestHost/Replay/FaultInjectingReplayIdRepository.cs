@@ -2,7 +2,7 @@ using System.Collections.Concurrent;
 using Microsoft.Extensions.Logging;
 using Wolverine.SalesforcePubSub;
 
-namespace WolverineFxContrib.SalesforcePubSub.TestHost.Replay;
+namespace TestHost.Replay;
 
 /// <summary>
 /// Layer-A fault injector for the "corrupt replay id" resiliency test. On the first topic replay read it

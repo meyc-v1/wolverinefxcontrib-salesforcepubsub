@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using WolverineFxContrib.SalesforcePubSub.External.Salesforce;
+using External.Salesforce;
 
 namespace WolverineFxContrib.SalesforcePubSub.IntegrationTests.Harness;
 

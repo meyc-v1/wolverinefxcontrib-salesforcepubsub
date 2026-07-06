@@ -1,6 +1,6 @@
 using System.Text.Json;
 using Wolverine.SalesforcePubSub;
-using WolverineFxContrib.SalesforcePubSub.External.Salesforce.Models;
+using External.Salesforce.Models;
 
 namespace WolverineFxContrib.SalesforcePubSub.IntegrationTests.Harness;
 

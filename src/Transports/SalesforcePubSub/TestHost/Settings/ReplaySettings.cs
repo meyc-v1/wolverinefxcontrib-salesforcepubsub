@@ -1,4 +1,4 @@
-namespace WolverineFxContrib.SalesforcePubSub.TestHost.Settings;
+namespace TestHost.Settings;
 
 /// <summary>
 /// Replay-id persistence + fault-injection knobs for the durability runs, bound from "salesforceReplaySettings".

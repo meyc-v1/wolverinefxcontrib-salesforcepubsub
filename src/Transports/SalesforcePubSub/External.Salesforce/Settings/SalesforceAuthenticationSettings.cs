@@ -1,7 +1,7 @@
 using FluentValidation;
 using Microsoft.Extensions.Options;
 
-namespace WolverineFxContrib.SalesforcePubSub.External.Salesforce.Settings;
+namespace External.Salesforce.Settings;
 
 /// <summary>
 /// Salesforce client-credentials auth for the REST publisher (typically bound from a

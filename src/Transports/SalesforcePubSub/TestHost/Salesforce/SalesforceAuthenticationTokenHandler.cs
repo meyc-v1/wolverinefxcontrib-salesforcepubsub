@@ -1,10 +1,10 @@
 using System.Text.Json;
 using Microsoft.Extensions.Options;
 using Wolverine.SalesforcePubSub;
-using WolverineFxContrib.SalesforcePubSub.External.Salesforce.Models;
-using WolverineFxContrib.SalesforcePubSub.TestHost.Settings;
+using External.Salesforce.Models;
+using TestHost.Settings;
 
-namespace WolverineFxContrib.SalesforcePubSub.TestHost.Salesforce;
+namespace TestHost.Salesforce;
 
 /// <summary>
 /// The transport's <see cref="IAuthenticationTokenHandler"/> over the subscriber ECA: a direct

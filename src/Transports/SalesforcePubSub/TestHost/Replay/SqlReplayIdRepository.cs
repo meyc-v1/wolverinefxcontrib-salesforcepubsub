@@ -2,9 +2,9 @@ using System.Collections.Concurrent;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Wolverine.SalesforcePubSub;
-using WolverineFxContrib.SalesforcePubSub.TestHost.Settings;
+using TestHost.Settings;
 
-namespace WolverineFxContrib.SalesforcePubSub.TestHost.Replay;
+namespace TestHost.Replay;
 
 /// <summary>
 /// Persistent topic replay store (raw ADO.NET, AAD auth) for the resume-across-restart durability test.

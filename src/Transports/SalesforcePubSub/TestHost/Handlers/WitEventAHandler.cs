@@ -1,8 +1,8 @@
 using Microsoft.Extensions.Logging;
 using Wolverine;
-using WolverineFxContrib.SalesforcePubSub.TestHost.Events;
+using TestHost.Events;
 
-namespace WolverineFxContrib.SalesforcePubSub.TestHost.Handlers;
+namespace TestHost.Handlers;
 
 public class WitEventAHandler
 {
