@@ -5,7 +5,10 @@ Salesforce topic subscriptions and managed event subscriptions (MES) as Wolverin
 endpoints. Package id `WolverineFxContrib.SalesforcePubSub`; root namespace `Wolverine.SalesforcePubSub`.
 
 ## Structure
-- `src/WolverineFxContrib.SalesforcePubSub` — the transport library (net10.0).
+All projects live as siblings under `src/Transports/SalesforcePubSub/` (mirroring Wolverine's own
+`src/Transports/Kafka` layout); non-code artifacts live under `docs/`. Only the transport library and
+its two test projects carry the `WolverineFxContrib.` prefix — plain-named siblings never ship.
+- `WolverineFxContrib.SalesforcePubSub` — the transport library (net10.0).
   - **Public surface:** the three consumer-implemented interfaces `IReplayIdRepository`,
     `IBackoffStrategy`, `IAuthenticationTokenHandler` (registered via `UseReplayIdRepository<T>` /
     `UseBackoffStrategy<T>` / `UseAuthenticationHandler<T>` on the transport expression); event base
@@ -25,14 +28,14 @@ endpoints. Package id `WolverineFxContrib.SalesforcePubSub`; root namespace `Wol
     repositories, `AvroRecordName`, `EventTypeResolver`, the Avro serializer); `Transports/`
     (`ISubscriptionTransport` + topic/MES impls, `ResponseMessageInfo`). The Salesforce gRPC proto is
     generated with `Access=Internal`.
-- `src/WolverineFxContrib.SalesforcePubSub.External.Salesforce` — repo-internal support lib
+- `External.Salesforce` — repo-internal support lib
   (`IsPackable=false`): the client-credentials
   `ISalesforceTokenClient` (cached) + bearer `DelegatingHandler` + `ISalesforceClient` for REST-POSTing
   platform events. **Publisher-side only — no reference to the transport.** The transport authenticates
   through consumer-implemented `IAuthenticationTokenHandler`s (direct fetch-fresh, no cache — the
   transport owns caching/invalidation), which live host-side in the TestHost and IntegrationTests.
-- `tests/WolverineFxContrib.SalesforcePubSub.Tests` — unit (xUnit v3, ~99 tests).
-- `tests/WolverineFxContrib.SalesforcePubSub.IntegrationTests` — **the live suite**: 16 facts against a
+- `WolverineFxContrib.SalesforcePubSub.Tests` — unit (xUnit v3, ~99 tests).
+- `WolverineFxContrib.SalesforcePubSub.IntegrationTests` — **the live suite**: 16 facts against a
   real Salesforce org + SQL Server, modeled on Wolverine's own Kafka tests (their docker broker ≙ our
   sandbox org; no gRPC mocking). Covers the full Kafka-parity read-side matrix: receive per kind
   (topic/channel/MES/MES-over-channel), multi-type decode, envelope metadata, unmapped→missing-handler,
@@ -45,9 +48,9 @@ endpoints. Package id `WolverineFxContrib.SalesforcePubSub`; root namespace `Wol
   `SalesforceTestContext` (assembly fixture: secrets + REST publisher), `TestHosts` (per-test Wolverine
   host), `EventSink` (sink+poll receive assertions), `RecordingReplayIdRepository`, `LogSink` (captures
   host logs — the reconnect loop never throws, so logs are the only signal for slot-held / too-busy).
-- `host/WolverineFxContrib.SalesforcePubSub.TestHost` — Worker app for manual verification (predates the
+- `TestHost` — Worker app for manual verification (predates the
   integration suite; kept for interactive/overnight runs).
-- `org-setup/` — one-time Salesforce fixture setup for the tests: README (manual platform-event
+- `docs/org-setup/` — one-time Salesforce fixture setup for the tests: README (manual platform-event
   creation + the two ECAs + the user-secrets layout) and a Bruno collection (channel/members/MES via
   Tooling REST). **Read this first on a new machine or org.**
 
@@ -55,7 +58,7 @@ endpoints. Package id `WolverineFxContrib.SalesforcePubSub`; root namespace `Wol
 (paths relative to the repo root)
 - Build: `dotnet build WolverineFxContrib.SalesforcePubSub.slnx`
 - Test: `dotnet test WolverineFxContrib.SalesforcePubSub.slnx`
-- Run host: `dotnet run --project host/WolverineFxContrib.SalesforcePubSub.TestHost`
+- Run host: `dotnet run --project src/Transports/SalesforcePubSub/TestHost`
 
 ## Key facts
 - **net10.0 only** — WolverineFx 6.x dropped net8, so the lib does too.
@@ -81,7 +84,7 @@ endpoints. Package id `WolverineFxContrib.SalesforcePubSub`; root namespace `Wol
 - **Org fixtures are the `WIT_` set** (WIT = Wolverine Integration Test), shared by the TestHost and the
   integration suite: platform events `WIT_Event_A__e` / `WIT_Event_B__e` (one nullable `Message__c`
   Text 255 each), custom channel `WIT_Channel__chn` carrying both, MES `WIT_Event_A_Sub` (over event A)
-  and `WIT_Channel_Sub` (over the channel). Create-once permanent infra — see `org-setup/README.md` for
+  and `WIT_Channel_Sub` (over the channel). Create-once permanent infra — see `docs/org-setup/README.md` for
   the manual PE walkthrough + Bruno collection (PE definitions are Metadata-API-only; we deliberately
   ship no metadata deploy). Any `CM_`-prefixed fixtures in the org are the maintainer's personal test
   infra, not referenced by this repo.
@@ -92,7 +95,7 @@ endpoints. Package id `WolverineFxContrib.SalesforcePubSub`; root namespace `Wol
   is attached **on the app's Edit Policies page** (External Client App Manager → row actions → Edit
   Policies), not inside the Permission Set editor.
 - **User secrets** (single store, id `wolverine.salesforcepubsub`, shared by TestHost and
-  IntegrationTests — full skeleton in `org-setup/README.md`): `subscriberAuthenticationSettings` +
+  IntegrationTests — full skeleton in `docs/org-setup/README.md`): `subscriberAuthenticationSettings` +
   `publisherAuthenticationSettings` (each ClientId/ClientSecret/LoginUri), `salesforceSettings:baseUri`
   (REST data API base incl. version, trailing slash), optional `salesforceSettings:pubSubUri`,
   `durabilitySettings:connectionString` (Wolverine SQL message store — Durable endpoints and Durable
@@ -115,7 +118,7 @@ endpoints. Package id `WolverineFxContrib.SalesforcePubSub`; root namespace `Wol
   are per-run test config by convention.
 - Timed `PublisherWorker` (opt-in `publisherSettings`) POSTs the test PEs; handler seams: `Message__c` =
   "poison" (throws) / "slow" (30s delay) drive manual DLQ / restart-recovery / kill-window tests
-  (delivery-guarantee evidence lives in `test-results/`).
+  (delivery-guarantee evidence lives in `docs/test-results/`).
 
 ## Current state & open work (2026-07-05)
 Feature-complete and design-settled: all delivery modes live-verified (Inline: resiliency campaign;
@@ -146,6 +149,6 @@ agreed acceptance gate before shipping as a NuGet package). Open, in rough order
 - Use absolute paths in commands (not `cd`); separate Bash calls (no `&&`/`||`/`;`).
 - Prefer transient DI registrations unless there's a specific reason otherwise; internal types live in
   `Internals/`.
-- Design decisions (what + why) live in `DECISIONS.md` at the repo root — read it first; it is the
+- Design decisions (what + why) live in `docs/DECISIONS.md` — read it first; it is the
   source of truth for every decision, divergence, and the live-test evidence behind them. Full
   step-by-step history lives in `git log` (tag `pre-wolverine-glue` → HEAD) — not duplicated here.

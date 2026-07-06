@@ -10,7 +10,7 @@ namespace WolverineFxContrib.SalesforcePubSub.IntegrationTests.Harness;
 /// REST publisher (publisher ECA, via the External.Salesforce lib) plus the subscriber credentials each
 /// test host authenticates the transport with.
 ///
-/// Org fixtures (WIT_ events / channel / MES) are permanent infra created per org-setup/README.md —
+/// Org fixtures (WIT_ events / channel / MES) are permanent infra created per docs/org-setup/README.md —
 /// this context verifies configuration, and a missing org fixture surfaces on the first subscribe with
 /// the transport's own error.
 /// </summary>
@@ -67,7 +67,7 @@ public sealed class SalesforceTestContext : IDisposable
             : throw new InvalidOperationException(
                 $"Missing required configuration '{key}' in user secrets (id 'wolverine.salesforcepubsub'). " +
                 "The integration tests need the subscriber and publisher ECA credentials plus " +
-                "salesforceSettings:baseUri — see org-setup/README.md for the org fixtures and the TestHost " +
+                "salesforceSettings:baseUri — see docs/org-setup/README.md for the org fixtures and the TestHost " +
                 "secrets layout for the sections.");
 
     public void Dispose() => _publisherServices.Dispose();

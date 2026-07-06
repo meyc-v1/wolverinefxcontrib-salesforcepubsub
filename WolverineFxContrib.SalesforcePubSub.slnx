@@ -1,16 +1,34 @@
 <Solution>
-  <Folder Name="/.claude/">
+  <Project Path="src/Transports/SalesforcePubSub/WolverineFxContrib.SalesforcePubSub/WolverineFxContrib.SalesforcePubSub.csproj" />
+  <Project Path="src/Transports/SalesforcePubSub/WolverineFxContrib.SalesforcePubSub.Tests/WolverineFxContrib.SalesforcePubSub.Tests.csproj" />
+  <Project Path="src/Transports/SalesforcePubSub/WolverineFxContrib.SalesforcePubSub.IntegrationTests/WolverineFxContrib.SalesforcePubSub.IntegrationTests.csproj" />
+  <Project Path="src/Transports/SalesforcePubSub/External.Salesforce/External.Salesforce.csproj" />
+  <Project Path="src/Transports/SalesforcePubSub/TestHost/TestHost.csproj" />
+  <Folder Name="/Solution Items/">
+    <File Path=".gitignore" />
     <File Path="CLAUDE.md" />
+    <File Path="Directory.Build.props" />
+    <File Path="LICENSE" />
+    <File Path="README.md" />
   </Folder>
-  <Folder Name="/host/">
-    <Project Path="host/WolverineFxContrib.SalesforcePubSub.TestHost/WolverineFxContrib.SalesforcePubSub.TestHost.csproj" />
+  <Folder Name="/docs/">
+    <File Path="docs/DECISIONS.md" />
   </Folder>
-  <Folder Name="/src/">
-    <Project Path="src/WolverineFxContrib.SalesforcePubSub/WolverineFxContrib.SalesforcePubSub.csproj" />
-    <Project Path="src/WolverineFxContrib.SalesforcePubSub.External.Salesforce/WolverineFxContrib.SalesforcePubSub.External.Salesforce.csproj" />
+  <Folder Name="/docs/org-setup/">
+    <File Path="docs/org-setup/README.md" />
   </Folder>
-  <Folder Name="/tests/">
-    <Project Path="tests/WolverineFxContrib.SalesforcePubSub.IntegrationTests/WolverineFxContrib.SalesforcePubSub.IntegrationTests.csproj" />
-    <Project Path="tests/WolverineFxContrib.SalesforcePubSub.Tests/WolverineFxContrib.SalesforcePubSub.Tests.csproj" />
+  <Folder Name="/docs/org-setup/bruno/">
+    <File Path="docs/org-setup/bruno/01-verify-event-a.bru" />
+    <File Path="docs/org-setup/bruno/02-verify-event-b.bru" />
+    <File Path="docs/org-setup/bruno/03-verify-message-fields.bru" />
+    <File Path="docs/org-setup/bruno/04-create-channel.bru" />
+    <File Path="docs/org-setup/bruno/05-create-channel-member-a.bru" />
+    <File Path="docs/org-setup/bruno/06-create-channel-member-b.bru" />
+    <File Path="docs/org-setup/bruno/07-create-mes-event-a.bru" />
+    <File Path="docs/org-setup/bruno/08-create-mes-channel.bru" />
+    <File Path="docs/org-setup/bruno/09-verify-channel-and-members.bru" />
+    <File Path="docs/org-setup/bruno/10-verify-mes.bru" />
+    <File Path="docs/org-setup/bruno/bruno.json" />
+    <File Path="docs/org-setup/bruno/environments/example.bru" />
   </Folder>
 </Solution>

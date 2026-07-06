@@ -33,7 +33,7 @@ public class OrderShippedHandler
 ```
 
 Requires **.NET 10** and **WolverineFx 6.12+**. Design decisions and their rationale live in
-[DECISIONS.md](DECISIONS.md).
+[DECISIONS.md](docs/DECISIONS.md).
 
 ## What you implement
 
@@ -129,7 +129,7 @@ Per endpoint, via the standard Wolverine listener configuration:
 | `UseDurableInbox()` | at-least-once **with parallelism** + a real DLQ | persisted before processing; a crash mid-handle is recovered from the inbox on restart with full fidelity | preserved in the store's dead-letter table, replayable |
 
 Every cell above is live-verified against a sandbox org (resiliency campaign + kill-window tests; evidence
-logs in `test-results/`).
+logs in `docs/test-results/`).
 
 Replay tracking is a per-envelope **watermark**: events are tracked on receive, and the committed
 position advances only through fully-resolved envelopes — never past one still in flight. Handler
@@ -222,16 +222,20 @@ default 270s), `StartFromEarliest()` (client-replay subscriptions, cold start on
 
 ## Repository layout
 
-- `src/WolverineFxContrib.SalesforcePubSub` — the transport (public surface is deliberately minimal;
+All projects sit as siblings under `src/Transports/SalesforcePubSub/`, mirroring Wolverine's own
+`src/Transports/Kafka` layout. Only the transport and its test projects carry the package prefix;
+plain-named siblings are repo-internal and never ship.
+
+- `WolverineFxContrib.SalesforcePubSub` — the transport (public surface is deliberately minimal;
   everything else is `internal` under `Internals/`).
-- `src/…External.Salesforce` — repo-internal support lib: the REST publish helper the test projects use
-  (not part of the package; the transport does not reference it).
-- `tests/…Tests` — unit suite (xUnit v3). `tests/…IntegrationTests` — the live suite: 16 facts against
+- `…Tests` — unit suite (xUnit v3). `…IntegrationTests` — the live suite: 16 facts against
   a real Salesforce org + SQL Server, mirroring the read-side coverage of Wolverine's own Kafka
   integration tests (receive per kind, multi-type decode, DLQ paths, retry, replay positions,
-  restart-resume, fan-out identity, backpressure stop/rebuild). See `org-setup/` for the one-time org
-  fixtures and credentials it needs.
-- `host/…TestHost` — a Worker harness used for manual live verification (resiliency campaign,
+  restart-resume, fan-out identity, backpressure stop/rebuild). See `docs/org-setup/` for the one-time
+  org fixtures and credentials it needs.
+- `External.Salesforce` — repo-internal support lib: the REST publish helper the test projects use
+  (not part of the package; the transport does not reference it).
+- `TestHost` — a Worker harness used for manual live verification (resiliency campaign,
   overnight runs).
-- `DECISIONS.md` — the ADR-lite log: every design decision, divergence from Wolverine conventions, and
-  the live-test evidence behind them.
+- `docs/DECISIONS.md` — the ADR-lite log: every design decision, divergence from Wolverine conventions,
+  and the live-test evidence behind them. Evidence logs live in `docs/test-results/`.
