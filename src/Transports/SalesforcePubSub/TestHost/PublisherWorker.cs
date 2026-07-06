@@ -8,9 +8,9 @@ using TestHost.Settings;
 namespace TestHost;
 
 /// <summary>
-/// Timed test publisher (revived from the original runner's RandomWriterService). On an interval it POSTs a
-/// platform event via <see cref="ISalesforceClient"/>, round-robin across the configured events, so a
-/// resiliency run has steady traffic to verify recovery against. Opt-in via <see cref="PublisherSettings"/>.
+/// Timed test publisher (revived from the original runner's RandomWriterService). On an interval it POSTs
+/// every configured platform event via <see cref="ISalesforceClient"/>, so a resiliency run has steady
+/// traffic on every subscription kind. Opt-in via <see cref="PublisherSettings"/>.
 /// </summary>
 public sealed class PublisherWorker(
     IServiceProvider services,
@@ -38,24 +38,28 @@ public sealed class PublisherWorker(
         {
             while (await timer.WaitForNextTickAsync(stoppingToken).ConfigureAwait(false))
             {
-                var eventName = settings.Events[count % settings.Events.Count];
-                var message = $"msg-{++count}-{Guid.NewGuid():N}";
-                try
+                // Every configured event publishes each tick, so multi-type endpoints (the channel,
+                // the channel MES) see interleaved traffic every interval.
+                foreach (var eventName in settings.Events)
                 {
-                    // Resolve per-iteration: the REST client is a typed HttpClient (transient handler chain).
-                    var client = services.GetRequiredService<ISalesforceClient>();
-                    await client.SendPlatformEventAsync(eventName, message, stoppingToken).ConfigureAwait(false);
-                    metrics.RecordPublished(eventName);
-                    logger.LogInformation("Published {Event}: {Message}", eventName, message);
-                }
-                catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
-                {
-                    break;
-                }
-                catch (Exception ex)
-                {
-                    // Terse — during a network-death test this fires every interval; the full stack is noise.
-                    logger.LogWarning("Failed to publish {Event}: {Error}", eventName, ex.Message);
+                    var message = $"msg-{++count}-{Guid.NewGuid():N}";
+                    try
+                    {
+                        // Resolve per-iteration: the REST client is a typed HttpClient (transient handler chain).
+                        var client = services.GetRequiredService<ISalesforceClient>();
+                        await client.SendPlatformEventAsync(eventName, message, stoppingToken).ConfigureAwait(false);
+                        metrics.RecordPublished(eventName);
+                        logger.LogInformation("Published {Event}: {Message}", eventName, message);
+                    }
+                    catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+                    {
+                        return;
+                    }
+                    catch (Exception ex)
+                    {
+                        // Terse — during a network-death test this fires every interval; the full stack is noise.
+                        logger.LogWarning("Failed to publish {Event}: {Error}", eventName, ex.Message);
+                    }
                 }
             }
         }
