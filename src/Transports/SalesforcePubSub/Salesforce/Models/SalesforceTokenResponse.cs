@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace External.Salesforce.Models;
+namespace Salesforce.Models;
 
 /// <summary>Salesforce OAuth token response.</summary>
 public sealed class SalesforceTokenResponse

@@ -7,7 +7,7 @@ using Wolverine.Configuration;
 using Wolverine.SalesforcePubSub;
 using Wolverine.SqlServer;
 using Wolverine.Transports.SharedMemory;
-using External.Salesforce;
+using Salesforce;
 using SqlReplay;
 using TestHost;
 using TestHost.Events;
@@ -56,7 +56,7 @@ builder.Services.ConfigureOpenTelemetryTracerProvider(providerBuilder =>
 // See https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/src/OpenTelemetry.Exporter.OpenTelemetryProtocol/README.md for env var info.
 builder.Services.AddOpenTelemetry().UseOtlpExporter();
 
-// Two ECAs, two token lifecycles: the External.Salesforce lib (REST publisher) authenticates with
+// Two ECAs, two token lifecycles: the Salesforce lib (REST publisher) authenticates with
 // the publisher ECA; the transport authenticates with the subscriber ECA via the direct-fetch
 // SalesforceAuthenticationTokenHandler (no cache — the transport owns caching/invalidation).
 builder.Services.AddSalesforceAuthentication(s => builder.Configuration.GetSection("publisherAuthenticationSettings").Bind(s));

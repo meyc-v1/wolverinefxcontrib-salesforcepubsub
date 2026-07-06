@@ -6,7 +6,7 @@ namespace TestHost.Settings;
 
 /// <summary>
 /// Pub/sub subscription configuration, bound from the "salesforceSettings" section. (The REST
-/// publisher's BaseUri binds from the same section into the External.Salesforce lib's settings;
+/// publisher's BaseUri binds from the same section into the Salesforce lib's settings;
 /// auth — ClientId/ClientSecret/LoginUri — lives separately under "salesforceAuthenticationSettings".)
 /// </summary>
 public sealed class SalesforcePubSubSettings

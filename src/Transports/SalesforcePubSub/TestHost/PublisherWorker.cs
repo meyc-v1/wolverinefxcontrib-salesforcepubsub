@@ -2,7 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using External.Salesforce;
+using Salesforce;
 using TestHost.Settings;
 
 namespace TestHost;

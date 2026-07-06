@@ -1,7 +1,7 @@
 using FluentValidation;
 using Microsoft.Extensions.Options;
 
-namespace External.Salesforce.Settings;
+namespace Salesforce.Settings;
 
 /// <summary>
 /// Salesforce client-credentials auth for the REST publisher (typically bound from a

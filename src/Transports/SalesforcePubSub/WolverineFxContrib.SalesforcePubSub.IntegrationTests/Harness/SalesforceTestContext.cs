@@ -1,13 +1,13 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using External.Salesforce;
+using Salesforce;
 
 namespace WolverineFxContrib.SalesforcePubSub.IntegrationTests.Harness;
 
 /// <summary>
 /// Assembly-wide fixture: loads the shared user-secrets store (id <c>wolverine.salesforcepubsub</c>,
 /// same as the TestHost), fails fast with pointers when required config is missing, and provides the
-/// REST publisher (publisher ECA, via the External.Salesforce lib) plus the subscriber credentials each
+/// REST publisher (publisher ECA, via the Salesforce lib) plus the subscriber credentials each
 /// test host authenticates the transport with.
 ///
 /// Org fixtures (WIT_ events / channel / MES) are permanent infra created per docs/org-setup/README.md —
@@ -35,7 +35,7 @@ public sealed class SalesforceTestContext : IDisposable
 
         DurabilityConnectionString = config["durabilitySettings:connectionString"] is { Length: > 0 } cs ? cs : null;
 
-        // Publisher side: the External.Salesforce lib with the publisher ECA's credentials.
+        // Publisher side: the Salesforce lib with the publisher ECA's credentials.
         var services = new ServiceCollection();
         services.AddSalesforceAuthentication(s => config.GetSection("publisherAuthenticationSettings").Bind(s));
         services.AddSalesforce(s => config.GetSection("salesforceSettings").Bind(s));

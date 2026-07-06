@@ -1,6 +1,6 @@
 using System.Text.Json;
 using Wolverine.SalesforcePubSub;
-using External.Salesforce.Models;
+using Salesforce.Models;
 
 namespace WolverineFxContrib.SalesforcePubSub.IntegrationTests.Harness;
 
@@ -11,7 +11,7 @@ public sealed record SubscriberCredentials(string ClientId, string ClientSecret,
 /// The transport's <see cref="IAuthenticationTokenHandler"/> over the subscriber ECA: a direct
 /// client-credentials fetch per call — fresh every time, no cache — because the transport owns token
 /// caching and invalidation. Mirrors the TestHost's handler; the REST publisher authenticates
-/// separately through the External.Salesforce lib with the publisher ECA.
+/// separately through the Salesforce lib with the publisher ECA.
 /// </summary>
 public sealed class SubscriberTokenHandler : IAuthenticationTokenHandler
 {

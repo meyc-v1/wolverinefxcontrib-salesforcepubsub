@@ -6,7 +6,7 @@ namespace TestHost.Settings;
 /// <summary>
 /// Client-credentials auth for the transport's subscriber ECA, bound from the
 /// "subscriberAuthenticationSettings" section (user secrets). Distinct from the publisher ECA
-/// (External.Salesforce lib, "publisherAuthenticationSettings") so the two token lifecycles are
+/// (Salesforce lib, "publisherAuthenticationSettings") so the two token lifecycles are
 /// independent. No cache knob: the auth handler fetches fresh every call — the transport owns
 /// token caching and invalidation.
 /// </summary>

@@ -1,7 +1,7 @@
 using System.Text.Json;
 using Microsoft.Extensions.Options;
 using Wolverine.SalesforcePubSub;
-using External.Salesforce.Models;
+using Salesforce.Models;
 using TestHost.Settings;
 
 namespace TestHost.Salesforce;
@@ -10,7 +10,7 @@ namespace TestHost.Salesforce;
 /// The transport's <see cref="IAuthenticationTokenHandler"/> over the subscriber ECA: a direct
 /// client-credentials fetch per call — fresh every time, no cache — because the transport owns token
 /// caching and invalidation (a caching handler would defeat revoked-token recovery). The REST
-/// publisher authenticates separately through the External.Salesforce lib and the publisher ECA.
+/// publisher authenticates separately through the Salesforce lib and the publisher ECA.
 /// </summary>
 internal sealed class SalesforceAuthenticationTokenHandler : IAuthenticationTokenHandler
 {

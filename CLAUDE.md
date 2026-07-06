@@ -31,7 +31,7 @@ its two test projects carry the `WolverineFxContrib.` prefix — plain-named sib
 - `SqlReplay` — repo-internal support lib (`IsPackable=false`): the SQL Server `IReplayIdRepository`
   (raw ADO.NET, Entra auth via `SqlAadAuthentication`, `CreateReplayTable.sql` DDL) used by the TestHost
   for resume-across-restart runs; binds `SqlReplaySettings` from the host's replay section.
-- `External.Salesforce` — repo-internal support lib
+- `Salesforce` — repo-internal support lib
   (`IsPackable=false`): the client-credentials
   `ISalesforceTokenClient` (cached) + bearer `DelegatingHandler` + `ISalesforceClient` for REST-POSTing
   platform events. **Publisher-side only — no reference to the transport.** The transport authenticates
@@ -93,7 +93,7 @@ its two test projects carry the `WolverineFxContrib.` prefix — plain-named sib
   infra, not referenced by this repo.
 - **Two ECAs (External Client Apps), one per role** — independent token lifecycles and least-privilege:
   the **subscriber** ECA's run-as user has Read on the WIT events (feeds the transport's
-  `IAuthenticationTokenHandler`); the **publisher** ECA's has Create (feeds the External.Salesforce REST
+  `IAuthenticationTokenHandler`); the **publisher** ECA's has Create (feeds the Salesforce lib REST
   client). ECA gotcha: under "Admin approved users are pre-authorized" the profile/permission-set grant
   is attached **on the app's Edit Policies page** (External Client App Manager → row actions → Edit
   Policies), not inside the Permission Set editor.
@@ -110,7 +110,7 @@ its two test projects carry the `WolverineFxContrib.` prefix — plain-named sib
   names; a MES slot is exclusive per client and an unclean disconnect holds it ~15 min (DECISIONS #13).
 
 ## TestHost
-- Auth: the REST publisher comes from the External.Salesforce lib (publisher ECA,
+- Auth: the REST publisher comes from the Salesforce lib (publisher ECA,
   `publisherAuthenticationSettings`); the transport uses the host-side `SalesforceAuthenticationTokenHandler`
   (subscriber ECA, `subscriberAuthenticationSettings`, direct fetch — no cache).
 - `salesforceSettings` (appsettings; `baseUri` in user secrets): `pubSubUri` (gRPC) and

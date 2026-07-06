@@ -233,7 +233,7 @@ plain-named siblings are repo-internal and never ship.
   integration tests (receive per kind, multi-type decode, DLQ paths, retry, replay positions,
   restart-resume, fan-out identity, backpressure stop/rebuild). See `docs/org-setup/` for the one-time
   org fixtures and credentials it needs.
-- `External.Salesforce` — repo-internal support lib: the REST publish helper the test projects use
+- `Salesforce` — repo-internal support lib: the REST publish helper the test projects use
   (not part of the package; the transport does not reference it).
 - `SqlReplay` — repo-internal support lib: a SQL Server `IReplayIdRepository` (Entra auth, DDL included)
   the TestHost uses for resume-across-restart verification.

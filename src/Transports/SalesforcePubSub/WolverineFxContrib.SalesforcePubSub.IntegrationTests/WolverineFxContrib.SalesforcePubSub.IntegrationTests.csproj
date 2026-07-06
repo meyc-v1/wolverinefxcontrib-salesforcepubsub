@@ -35,7 +35,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\WolverineFxContrib.SalesforcePubSub\WolverineFxContrib.SalesforcePubSub.csproj" />
-    <ProjectReference Include="..\External.Salesforce\External.Salesforce.csproj" />
+    <ProjectReference Include="..\Salesforce\Salesforce.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,4 +1,4 @@
-namespace External.Salesforce;
+namespace Salesforce;
 
 /// <summary>Publishes platform events via the Salesforce REST API (publisher-side only — the
 /// pub/sub transport authenticates separately through its own <c>IAuthenticationTokenHandler</c>).</summary>

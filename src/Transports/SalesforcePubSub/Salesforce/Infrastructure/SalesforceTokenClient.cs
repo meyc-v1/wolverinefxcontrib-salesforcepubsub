@@ -1,10 +1,10 @@
 using System.Text.Json;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
-using External.Salesforce.Models;
-using External.Salesforce.Settings;
+using Salesforce.Models;
+using Salesforce.Settings;
 
-namespace External.Salesforce.Infrastructure;
+namespace Salesforce.Infrastructure;
 
 /// <summary>
 /// Client-credentials token client with in-memory caching. Ported from an internal Salesforce client

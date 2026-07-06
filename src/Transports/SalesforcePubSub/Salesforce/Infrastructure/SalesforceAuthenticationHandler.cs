@@ -1,6 +1,6 @@
 using System.Net.Http.Headers;
 
-namespace External.Salesforce.Infrastructure;
+namespace Salesforce.Infrastructure;
 
 /// <summary>
 /// DelegatingHandler that attaches the bearer token (from <see cref="ISalesforceTokenClient"/>) to

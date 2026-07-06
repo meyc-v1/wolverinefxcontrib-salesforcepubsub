@@ -1,9 +1,9 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using External.Salesforce.Infrastructure;
-using External.Salesforce.Settings;
+using Salesforce.Infrastructure;
+using Salesforce.Settings;
 
-namespace External.Salesforce;
+namespace Salesforce;
 
 /// <summary>
 /// Registration: a token client (auth) plus a bearer-authed

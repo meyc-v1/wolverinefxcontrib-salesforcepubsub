@@ -1,6 +1,6 @@
 using System.Net.Http.Json;
 
-namespace External.Salesforce.Infrastructure;
+namespace Salesforce.Infrastructure;
 
 internal sealed class SalesforceClient : ISalesforceClient
 {

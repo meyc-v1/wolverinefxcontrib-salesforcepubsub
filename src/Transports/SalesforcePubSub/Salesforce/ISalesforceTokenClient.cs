@@ -1,6 +1,6 @@
-using External.Salesforce.Models;
+using Salesforce.Models;
 
-namespace External.Salesforce;
+namespace Salesforce;
 
 public interface ISalesforceTokenClient
 {
