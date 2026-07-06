@@ -27,6 +27,36 @@ aren't conformance issues go under "Cleanups / tech-debt".
 
 ---
 
+## 22. Replay commits are monotonic: a disposed listener loses write authority; the tracker's write gate drops stale positions
+- **Date:** 2026-07-06 · **Status:** Accepted (resolves the "Stop/Dispose semantics" open gap below; also
+  external-review findings #1/#2)
+- **Context:** Two related regression paths could write a stale replay position over a newer one — never
+  loss, but unearned duplicates on the next cold start. (a) **Cross-instance** (the documented open gap):
+  in Wolverine's no-drain backpressure path (`MarkAsTooBusyAndStopReceivingAsync`, traced at V6.12.0:
+  `StopAsync` → `DisposeAsync`, no drain), the old listener's receiver queue keeps completing envelopes
+  and its topic commits go out-of-band to the repository — racing the replacement listener's newer
+  commits on the same row. (b) **In-instance:** the tracker computes positions in order under its lock,
+  but a caller can be preempted between compute and the write gate, so a staler position can be written
+  last. Both were theory until this entry's test work: a new deterministic listener unit harness (scripted
+  `ISubscriptionTransport` + a recording receiver whose completions the test hand-drives) reproduced (a)
+  on demand — red without the fix, the first time the race was ever forced rather than observed.
+- **Decision:** Two thin guards. (1) `SalesforceListener.DisposeAsync` revokes commit authority: a
+  disposed listener still absorbs completions (in-memory watermark advances harmlessly) but never writes
+  them out. Revocation happens at **dispose**, not stop, so the stop-and-drain path's beneficial
+  drain-window commits are preserved (drain runs between `StopAsync` and `DisposeAsync`). (2) The
+  tracker's write gate drops **strictly-older** positions; equal positions pass because the MES idle
+  re-affirm deliberately re-sends the last committed position to reset the server's 1800s deadline.
+- **Why:** The repository-contract alternative (require every consumer `IReplayIdRepository` to upsert
+  monotonically) guards the same row but relies on every implementation getting it right; transport-side
+  guards make the contract unnecessary. Revoking at stop instead of dispose was rejected — it would
+  discard the drain-window commits that make graceful stops resume cleanly.
+- **Consequences:** The stop→rebuild path can no longer regress the replay row; a dropped late commit
+  just means the tail redelivers under at-least-once (and dedups under Durable). The Backpressure
+  integration fact's monotonicity **observation is promoted to a hard assertion**. The listener gained
+  its first CI-runnable unit coverage as a side effect: the fake-transport harness also pins
+  drain-window commits, writer-side monotonicity under concurrent out-of-order completions, the MES
+  equal-position re-affirm surviving the guard, and #8's resume-from-handled-watermark threading.
+
 ## 21. Never set the base `Endpoint.MessageType` — it force-decodes unmapped events on single-entry maps
 - **Date:** 2026-07-04 · **Status:** Accepted (bug found by the new integration suite on its first day)
 - **Context:** `AddEventMapping` set the base `Endpoint.MessageType` when the map had exactly one entry
@@ -684,7 +714,9 @@ contracts + Kafka/ASB. The port is largely conformant; findings below._
   monotonic, so a late stale commit can regress `ReplayId` (→ duplicates on a later cold start; never
   loss). Candidate fixes: a monotonic guard on the commit path, or null `_currentTransport` at dispose
   so a dead listener loses write authority (trades away the beneficial drain-window commits). →
-  **Open — assessment recorded 2026-07-03; deeper dive before choosing a fix.**
+  **Resolved (#22)** — commit authority is revoked at dispose (preserving drain-window commits) and the
+  tracker's write gate drops strictly-older positions; the race is deterministically pinned in the new
+  listener unit harness and the Backpressure fact's monotonicity observation is now a hard assertion.
 
 ## Cleanups / tech-debt
 

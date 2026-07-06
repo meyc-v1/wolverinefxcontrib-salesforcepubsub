@@ -42,6 +42,7 @@ internal sealed class ReplayCommitTracker
 
     private long _highWater = -1;
     private long _lastCommitted = -1;
+    private long _lastWritten = -1;
     private bool _seen;
     private int _sinceCommit;
 
@@ -180,6 +181,16 @@ internal sealed class ReplayCommitTracker
         await _writeGate.WaitAsync().ConfigureAwait(false);
         try
         {
+            // Writer-side monotonicity: positions are handed out in increasing order under _lock, but
+            // callers can reach this gate out of that order (computed, then preempted before WaitAsync),
+            // and a staler position written last would regress the durable row — bounded duplicates on
+            // the next cold start. Drop strictly-older writes; an EQUAL position passes deliberately,
+            // because the MES idle re-affirm re-sends the last committed position to reset the server's
+            // 1800s no-commit deadline.
+            if (replayId < _lastWritten)
+                return;
+
+            _lastWritten = replayId;
             await _commit(replayId, isKeepAlive).ConfigureAwait(false);
         }
         finally

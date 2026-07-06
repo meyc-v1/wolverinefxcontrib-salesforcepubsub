@@ -16,11 +16,10 @@ namespace WolverineFxContrib.SalesforcePubSub.IntegrationTests;
 /// BuildListenerAsync. A second wave published after the trip can only arrive through the rebuilt
 /// listener.
 ///
-/// The replay-commit monotonicity across the rebuild is REPORTED, not asserted, for now: the open
-/// DECISIONS gap ("stale-commit regression") predicts an old listener's late commit can regress the
-/// repository under the replacement's newer commits. Under Buffered the ack-at-receipt timing makes the
-/// racy window narrow (completions land at receipt, before the dispose), so observations here feed the
-/// deeper dive; the assertion gets promoted once the gap is resolved.
+/// The replay-commit monotonicity across the rebuild is a HARD assertion: the once-open DECISIONS gap
+/// ("stale-commit regression") is closed — a disposed listener loses commit authority, and the tracker's
+/// write gate drops stale positions — with the deterministic reproduction pinned in the unit suite
+/// (SalesforceListenerTests). This live fact confirms the guarantee holds under a real stop→rebuild.
 /// </summary>
 public class BackpressureTests(SalesforceTestContext ctx, ITestOutputHelper output)
 {
@@ -71,7 +70,7 @@ public class BackpressureTests(SalesforceTestContext ctx, ITestOutputHelper outp
             Assert.True(logs.Count(l => l.Contains("Started message listening at sfpubsub", StringComparison.OrdinalIgnoreCase)) >= 2,
                 "no listener restart observed after the too-busy stop");
 
-            ReportCommitMonotonicity(repo);
+            AssertCommitMonotonicity(repo);
         }
         finally
         {
@@ -80,10 +79,11 @@ public class BackpressureTests(SalesforceTestContext ctx, ITestOutputHelper outp
     }
 
     /// <summary>
-    /// Observation only (see class docs): reports any committed replay position that regressed below an
-    /// earlier one. Promote to a hard assertion once the DECISIONS stale-commit gap is resolved.
+    /// Hard assertion (see class docs): no committed replay position may regress below an earlier one
+    /// across the stop→rebuild — the live confirmation of the guard pinned deterministically in
+    /// SalesforceListenerTests.
     /// </summary>
-    private void ReportCommitMonotonicity(RecordingReplayIdRepository repo)
+    private void AssertCommitMonotonicity(RecordingReplayIdRepository repo)
     {
         var commits = repo.Commits;
         var violations = new List<string>();
@@ -96,12 +96,11 @@ public class BackpressureTests(SalesforceTestContext ctx, ITestOutputHelper outp
             highWater = Math.Max(highWater, commit.ReplayId);
         }
 
-        output.WriteLine($"[monotonicity observation] {commits.Count} commits across the rebuild; " +
-                         (violations.Count == 0
-                             ? "no regressions observed."
-                             : $"{violations.Count} REGRESSION(S): {string.Join("; ", violations)}"));
         foreach (var commit in commits)
             output.WriteLine($"  {commit.At:HH:mm:ss.fff} {commit.Method} @ {commit.ReplayId}");
+
+        Assert.True(violations.Count == 0,
+            $"replay commits regressed across the stop→rebuild: {string.Join("; ", violations)}");
     }
 }
 

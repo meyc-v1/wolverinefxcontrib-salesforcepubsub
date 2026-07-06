@@ -45,6 +45,7 @@ internal sealed class SalesforceListener : IListener
 
     private Task? _runner;
     private ISubscriptionTransport? _currentTransport;
+    private volatile bool _commitAuthorityRevoked;
 
     public SalesforceListener(
         Uri address,
@@ -155,6 +156,15 @@ internal sealed class SalesforceListener : IListener
     public async ValueTask DisposeAsync()
     {
         await StopAsync().ConfigureAwait(false);
+
+        // Wolverine's no-drain backpressure path (MarkAsTooBusyAndStopReceivingAsync) disposes the
+        // listener while its receiver queue keeps completing envelopes — and a REPLACEMENT listener may
+        // already be committing newer positions to the same replay row. A disposed listener still
+        // absorbs those completions (the in-memory watermark advances harmlessly) but loses the
+        // authority to write them out, so a late stale commit can never regress the replacement's
+        // position. The stop-and-drain path is unaffected: draining happens between StopAsync and
+        // DisposeAsync, so drain-window completions commit normally.
+        _commitAuthorityRevoked = true;
         _cts.Dispose();
     }
 
@@ -425,6 +435,14 @@ internal sealed class SalesforceListener : IListener
     /// </summary>
     private async Task CommitToCurrentTransportAsync(long replayId, bool isKeepAlive)
     {
+        if (_commitAuthorityRevoked)
+        {
+            _logger.LogDebug(
+                "{Resource}: Dropped a post-dispose replay commit ({ReplayId}) — a replacement listener owns the position; the tail redelivers under at-least-once.",
+                _resource, replayId);
+            return;
+        }
+
         var transport = _currentTransport;
         if (transport is null)
             return;
