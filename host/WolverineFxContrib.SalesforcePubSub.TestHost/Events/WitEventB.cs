@@ -9,7 +9,7 @@ namespace WolverineFxContrib.SalesforcePubSub.TestHost.Events;
 /// platform event schema.
 /// </summary>
 [SalesforcePlatformEvent("WIT_Event_B__e")]
-public sealed class TestEventTwo : PlatformEvent
+public sealed class WitEventB : PlatformEvent
 {
     public string Message__c { get; set; } = null!;
 }
