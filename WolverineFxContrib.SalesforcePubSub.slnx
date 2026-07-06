@@ -6,7 +6,7 @@
   </Folder>
   <Folder Name="/testrunner/">
     <Project Path="src/Transports/SalesforcePubSub/TestHost/TestHost.csproj" />
-    <Project Path="src/Transports/SalesforcePubSub/SqlReplay/SqlReplay.csproj" />
+    <Project Path="src/Transports/SalesforcePubSub/MssqlReplay/MssqlReplay.csproj" />
     <Project Path="src/Transports/SalesforcePubSub/Salesforce/Salesforce.csproj" />
   </Folder>
   <Folder Name="/.sln/">

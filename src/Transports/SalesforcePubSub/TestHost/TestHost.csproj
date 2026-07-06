@@ -27,7 +27,7 @@
   <ItemGroup>
     <ProjectReference Include="..\WolverineFxContrib.SalesforcePubSub\WolverineFxContrib.SalesforcePubSub.csproj" />
     <ProjectReference Include="..\Salesforce\Salesforce.csproj" />
-    <ProjectReference Include="..\SqlReplay\SqlReplay.csproj" />
+    <ProjectReference Include="..\MssqlReplay\MssqlReplay.csproj" />
   </ItemGroup>
 
   <ItemGroup>

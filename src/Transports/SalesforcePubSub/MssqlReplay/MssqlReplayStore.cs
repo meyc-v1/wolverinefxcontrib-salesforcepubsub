@@ -1,15 +1,15 @@
 using Microsoft.Data.SqlClient;
 
-namespace SqlReplay;
+namespace MssqlReplay;
 
 /// <summary>
 /// Low-level SQL gateway for the replay table, ported from the original
 /// <c>Salesforce.Subscriber.Services.Replay.Sql</c>. Opens a fresh pooled connection per call; auth is the
-/// connection string's concern (AAD via <see cref="SqlAadAuthentication"/>). Identity is (Application,
+/// connection string's concern (AAD via <see cref="MssqlAadAuthentication"/>). Identity is (Application,
 /// Instance, Topic). LastEvent* columns use COALESCE so a keepalive/reset write never clobbers the last
 /// real-event diagnostics with NULL.
 /// </summary>
-internal sealed class SqlReplayStore
+internal sealed class MssqlReplayStore
 {
     private readonly string _connectionString;
     private readonly string _application;
@@ -18,7 +18,7 @@ internal sealed class SqlReplayStore
     private readonly string _insertNewSql;
     private readonly string _upsertSql;
 
-    public SqlReplayStore(string connectionString, string schema, string table, string application, string instance)
+    public MssqlReplayStore(string connectionString, string schema, string table, string application, string instance)
     {
         _connectionString = connectionString;
         _application = application;

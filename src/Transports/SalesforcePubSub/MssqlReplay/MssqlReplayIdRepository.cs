@@ -3,7 +3,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Wolverine.SalesforcePubSub;
 
-namespace SqlReplay;
+namespace MssqlReplay;
 
 /// <summary>
 /// Persistent topic replay store (raw ADO.NET, AAD auth) for the resume-across-restart durability test.
@@ -13,7 +13,7 @@ namespace SqlReplay;
 /// fail-loud: we let it throw so the listener backs off and retries rather than fabricating a position.
 /// MES is unaffected (server-side replay); this only serves topic endpoints.
 /// </summary>
-public sealed class SqlReplayIdRepository : IReplayIdRepository
+public sealed class MssqlReplayIdRepository : IReplayIdRepository
 {
     private const long NewEventsOnly = -1;
 
@@ -26,14 +26,14 @@ public sealed class SqlReplayIdRepository : IReplayIdRepository
     }
 
     private readonly ConcurrentDictionary<string, TopicPosition> _topics = new(StringComparer.OrdinalIgnoreCase);
-    private readonly SqlReplayStore _store;
-    private readonly ILogger<SqlReplayIdRepository> _logger;
+    private readonly MssqlReplayStore _store;
+    private readonly ILogger<MssqlReplayIdRepository> _logger;
 
-    public SqlReplayIdRepository(IOptions<SqlReplaySettings> options, ILogger<SqlReplayIdRepository> logger)
+    public MssqlReplayIdRepository(IOptions<MssqlReplaySettings> options, ILogger<MssqlReplayIdRepository> logger)
     {
         var settings = options.Value;
         _logger = logger;
-        _store = new SqlReplayStore(settings.ConnectionString!, settings.Schema, settings.TableName, settings.Application, settings.Instance);
+        _store = new MssqlReplayStore(settings.ConnectionString!, settings.Schema, settings.TableName, settings.Application, settings.Instance);
         _logger.LogInformation(
             "SQL replay store configured. Schema: {Schema}, Table: {Table}, Application: {Application}, Instance: {Instance}",
             settings.Schema, settings.TableName, settings.Application, settings.Instance);

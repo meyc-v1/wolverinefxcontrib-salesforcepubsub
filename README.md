@@ -235,7 +235,7 @@ plain-named siblings are repo-internal and never ship.
   org fixtures and credentials it needs.
 - `Salesforce` — repo-internal support lib: the REST publish helper the test projects use
   (not part of the package; the transport does not reference it).
-- `SqlReplay` — repo-internal support lib: a SQL Server `IReplayIdRepository` (Entra auth, DDL included)
+- `MssqlReplay` — repo-internal support lib: a SQL Server `IReplayIdRepository` (Entra auth, DDL included)
   the TestHost uses for resume-across-restart verification.
 - `TestHost` — a Worker harness used for manual live verification (resiliency campaign,
   overnight runs).

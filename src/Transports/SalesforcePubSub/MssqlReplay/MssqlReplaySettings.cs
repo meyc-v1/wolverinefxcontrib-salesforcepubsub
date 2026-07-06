@@ -1,11 +1,11 @@
-namespace SqlReplay;
+namespace MssqlReplay;
 
 /// <summary>
-/// SQL Server persistence settings for <see cref="SqlReplayIdRepository"/>. The host binds these from
+/// SQL Server persistence settings for <see cref="MssqlReplayIdRepository"/>. The host binds these from
 /// its replay configuration section (the TestHost shares the "salesforceReplaySettings" section with
 /// its own fault-injection knobs).
 /// </summary>
-public sealed class SqlReplaySettings
+public sealed class MssqlReplaySettings
 {
     /// <summary>SQL Server connection for persistent topic replay (resume-across-restart).</summary>
     public string? ConnectionString { get; set; }

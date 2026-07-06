@@ -1,9 +1,9 @@
--- Replay checkpoint table for the SqlReplay store (ported from the original
+-- Replay checkpoint table for the MssqlReplay store (ported from the original
 -- Salesforce.Subscriber.Services.Replay.Sql). NOT auto-created — run once against the target DB
 -- (CM_SalesforceReplayIdTest). The runtime principal then needs SELECT/INSERT/UPDATE.
 --
 -- Identity is (Application, Instance, Topic). VARCHAR keeps the clustered PK under the 900-byte
--- index limit. Times are UTC. Match [dbo].[SalesforceSubscriberReplay] to SqlReplaySettings.Schema/TableName.
+-- index limit. Times are UTC. Match [dbo].[SalesforceSubscriberReplay] to MssqlReplaySettings.Schema/TableName.
 
 IF NOT EXISTS (
     SELECT 1 FROM sys.objects

@@ -28,9 +28,9 @@ its two test projects carry the `WolverineFxContrib.` prefix — plain-named sib
     repositories, `AvroRecordName`, `EventTypeResolver`, the Avro serializer); `Transports/`
     (`ISubscriptionTransport` + topic/MES impls, `ResponseMessageInfo`). The Salesforce gRPC proto is
     generated with `Access=Internal`.
-- `SqlReplay` — repo-internal support lib (`IsPackable=false`): the SQL Server `IReplayIdRepository`
-  (raw ADO.NET, Entra auth via `SqlAadAuthentication`, `CreateReplayTable.sql` DDL) used by the TestHost
-  for resume-across-restart runs; binds `SqlReplaySettings` from the host's replay section.
+- `MssqlReplay` — repo-internal support lib (`IsPackable=false`): the SQL Server `IReplayIdRepository`
+  (raw ADO.NET, Entra auth via `MssqlAadAuthentication`, `CreateReplayTable.sql` DDL) used by the TestHost
+  for resume-across-restart runs; binds `MssqlReplaySettings` from the host's replay section.
 - `Salesforce` — repo-internal support lib
   (`IsPackable=false`): the client-credentials
   `ISalesforceTokenClient` (cached) + bearer `DelegatingHandler` + `ISalesforceClient` for REST-POSTing
@@ -102,7 +102,7 @@ its two test projects carry the `WolverineFxContrib.` prefix — plain-named sib
   `publisherAuthenticationSettings` (each ClientId/ClientSecret/LoginUri), `salesforceSettings:baseUri`
   (REST data API base incl. version, trailing slash), optional `salesforceSettings:pubSubUri`,
   `durabilitySettings:connectionString` (Wolverine SQL message store — Durable endpoints and Durable
-  facts), `salesforceReplaySettings:connectionString` (the SqlReplay store, used by the TestHost).
+  facts), `salesforceReplaySettings:connectionString` (the MssqlReplay store, used by the TestHost).
 - **Salesforce facts learned live** (also in DECISIONS): near-simultaneous REST publishes can receive
   bus positions opposite to POST order (order-sensitive tests space publishes); replay ids are global
   to the org's event bus (foreign events create gaps in observed ids — never assume contiguity);
