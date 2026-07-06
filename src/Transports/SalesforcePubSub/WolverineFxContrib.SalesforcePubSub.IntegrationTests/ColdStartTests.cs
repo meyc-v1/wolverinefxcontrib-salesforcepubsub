@@ -1,3 +1,4 @@
+using Wolverine;
 using Wolverine.SalesforcePubSub;
 using WolverineFxContrib.SalesforcePubSub.IntegrationTests.Events;
 using WolverineFxContrib.SalesforcePubSub.IntegrationTests.Harness;
@@ -19,15 +20,32 @@ public class ColdStartTests(SalesforceTestContext ctx)
     [Fact]
     public async Task A_cold_start_defaults_to_latest_and_never_sees_earlier_events()
     {
-        var beforeSubscribe = $"before-subscribe-{Guid.NewGuid():N}";
-        await ctx.PublishAsync("WIT_Event_A__e", beforeSubscribe, TestContext.Current.CancellationToken);
-
-        var sink = new EventSink();
-        var host = await TestHosts.StartListeningAsync(ctx, sink, opts =>
+        Action<WolverineOptions> endpoint = opts =>
         {
             opts.Discovery.IncludeType<WitEventAHandler>();
             opts.ListenToSalesforceTopic("/event/WIT_Event_A__e").MapEvent<WitEventA>();
-        });
+        };
+
+        // Salesforce publishes are async-queued: the REST accept does NOT mean the event is on the bus
+        // yet, and a subscribe that pins Latest before the queued event lands will (correctly) deliver
+        // it — failing this fact for the wrong reason (observed live: the "before" event bus-stamped a
+        // second AFTER the readiness sentinel). So prove the before-event is on the bus with a probe
+        // subscriber before the fact's host ever subscribes.
+        var beforeSubscribe = $"before-subscribe-{Guid.NewGuid():N}";
+        var probeSink = new EventSink();
+        var probe = await TestHosts.StartListeningAsync(ctx, probeSink, endpoint);
+        try
+        {
+            await ctx.PublishAsync("WIT_Event_A__e", beforeSubscribe, TestContext.Current.CancellationToken);
+            await probeSink.WaitForAsync(e => e.Message == beforeSubscribe, count: 1, ReceiveTimeout);
+        }
+        finally
+        {
+            await TestHosts.StopAsync(probe);
+        }
+
+        var sink = new EventSink();
+        var host = await TestHosts.StartListeningAsync(ctx, sink, endpoint);
 
         try
         {
