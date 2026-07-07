@@ -27,6 +27,22 @@ aren't conformance issues go under "Cleanups / tech-debt".
 
 ---
 
+## 26. The gRPC client registers under an explicit name — the default short-name key collides across libraries
+- **Date:** 2026-07-07 · **Status:** Accepted (found adopting the package into a real host)
+- **Context:** `AddGrpcClient<TClient>()` keys the client's configuration bucket by the type's **short**
+  name. Our generated client is `internal`, but its short name is `PubSubClient` — and so is that of any
+  other library's generated client for the same proto. A host running this transport alongside an older
+  Pub/Sub subscriber lib shared one `"PubSubClient"` options bucket: addresses overwrote each other and
+  both libs' `AddCallCredentials` stacked onto both clients' calls.
+- **Decision:** Register with an explicit, collision-proof name:
+  `AddGrpcClient<PubSub.PubSubClient>("WolverineSalesforcePubSub", …)`. Nothing else changes — the name
+  only selects the options bucket; the typed client resolves through DI exactly as before.
+- **Why:** A redistributable library must not squat on a default options name derived from a generated
+  type it doesn't uniquely own. One line, no public-surface impact, verified by the full live suite
+  (16/16, zero skips).
+- **Consequences:** Coexists cleanly with any other Pub/Sub API client in the same host. Ships in the
+  next package push (not respun immediately — queued behind the Kubernetes-deployment feedback).
+
 ## 25. Pre-1.0 `IReplayIdRepository` pass: one intent-named store method, the fabricated per-event list is gone
 - **Date:** 2026-07-07 · **Status:** Accepted
 - **Context:** The interface freezes at 1.0 and still carried its pre-watermark shape:

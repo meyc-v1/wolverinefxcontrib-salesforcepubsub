@@ -44,7 +44,11 @@ public static class SalesforcePubSubTransportExtensions
         services.TryAddSingleton<CachingAuthenticationTokenProvider>();
         services.AddMemoryCache();
 
-        services.AddGrpcClient<PubSub.PubSubClient>(o => { o.Address = settings.PubSubUri; })
+        // Explicitly named: the default name is the type's SHORT name ("PubSubClient"), so any other
+        // library in the host that registers its own generated Pub/Sub client would share our options
+        // bucket — addresses overwrite and call credentials stack across the two (observed live in a
+        // host running this transport next to an older Pub/Sub subscriber lib).
+        services.AddGrpcClient<PubSub.PubSubClient>("WolverineSalesforcePubSub", o => { o.Address = settings.PubSubUri; })
             .ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler
             {
                 PooledConnectionIdleTimeout = Timeout.InfiniteTimeSpan,
