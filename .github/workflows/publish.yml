@@ -1,0 +1,69 @@
+# Manually-triggered NuGet publish via Trusted Publishing (OIDC — no stored API key).
+# The nuget.org policy is pinned to this exact filename (publish.yml); renaming the file
+# breaks the token exchange until the policy is updated to match.
+name: Publish
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to publish — must equal <Version> in Directory.Build.props"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publish
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # GitHub OIDC token issuance, exchanged for the temporary NuGet key
+
+    env:
+      VERSION: ${{ inputs.version }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      # The dispatch input is a deliberate second key-turn: publishing a version nobody typed in
+      # (a stale branch, a forgotten bump) fails here instead of landing on nuget.org.
+      - name: Verify the dispatched version matches the source
+        run: |
+          version=$(sed -n 's:.*<Version>\(.*\)</Version>.*:\1:p' Directory.Build.props)
+          if [ "$version" != "$VERSION" ]; then
+            echo "::error::Directory.Build.props has <Version>$version</Version> but the dispatch asked for '$VERSION'. Refusing to publish."
+            exit 1
+          fi
+
+      - name: Restore
+        run: dotnet restore WolverineFxContrib.SalesforcePubSub.slnx
+
+      - name: Build
+        run: dotnet build WolverineFxContrib.SalesforcePubSub.slnx --configuration Release --no-restore
+
+      - name: Unit tests
+        run: dotnet test src/Transports/SalesforcePubSub/WolverineFxContrib.SalesforcePubSub.Tests/WolverineFxContrib.SalesforcePubSub.Tests.csproj --configuration Release --no-build
+
+      - name: Pack
+        run: dotnet pack src/Transports/SalesforcePubSub/WolverineFxContrib.SalesforcePubSub/WolverineFxContrib.SalesforcePubSub.csproj --configuration Release --no-build --output ./artifacts
+
+      # Exchanges this job's OIDC token for a single-use NuGet API key (1-hour validity),
+      # per the meyc-v1 Trusted Publishing policy. Pinned by commit SHA (not GitHub-owned).
+      - name: NuGet login (OIDC)
+        id: login
+        uses: NuGet/login@8d196754b4036150537f80ac539e15c2f1028841 # v1.2.0
+        with:
+          user: meyc-v1
+
+      - name: Push
+        run: dotnet nuget push "./artifacts/WolverineFxContrib.SalesforcePubSub.$VERSION.nupkg" --api-key ${{ steps.login.outputs.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
