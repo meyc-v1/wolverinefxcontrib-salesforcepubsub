@@ -1,10 +1,16 @@
 # WolverineFxContrib.SalesforcePubSub
 
 [![CI](https://github.com/meyc-v1/wolverinefxcontrib-salesforcepubsub/actions/workflows/ci.yml/badge.svg)](https://github.com/meyc-v1/wolverinefxcontrib-salesforcepubsub/actions/workflows/ci.yml)
+[![NuGet](https://img.shields.io/nuget/vpre/WolverineFxContrib.SalesforcePubSub?logo=nuget)](https://www.nuget.org/packages/WolverineFxContrib.SalesforcePubSub)
 
-> **Prerelease** — no NuGet package yet; the first package lands after a final API pass
-> ([naming and versioning are settled](https://github.com/JasperFx/wolverine/discussions/3325)).
-> Until then, build from source.
+> **Prerelease** — on [NuGet](https://www.nuget.org/packages/WolverineFxContrib.SalesforcePubSub) as a
+> preview while the API soaks with early consumers; 1.0.0 final follows
+> ([naming and versioning](https://github.com/JasperFx/wolverine/discussions/3325) are settled with the
+> Wolverine maintainers).
+
+```shell
+dotnet add package WolverineFxContrib.SalesforcePubSub --prerelease
+```
 
 A community **[Wolverine](https://wolverinefx.net/) transport for the Salesforce Pub/Sub gRPC API** —
 Salesforce platform events arrive as ordinary Wolverine messages, handled by ordinary Wolverine handlers,
