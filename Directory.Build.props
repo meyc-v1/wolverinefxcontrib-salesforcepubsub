@@ -4,8 +4,9 @@
     <LangVersion>latest</LangVersion>
     <Authors>meyc-v1</Authors>
     <Company>meyc-v1</Company>
-    <!-- Neutral preview number until the WolverineFx naming/versioning discussion settles the scheme. -->
-    <Version>0.1.0-preview.1</Version>
+    <!-- Independent SemVer, 1.0 at first stable — per the maintainer guidance in
+         https://github.com/JasperFx/wolverine/discussions/3325. -->
+    <Version>1.0.0-preview.1</Version>
   </PropertyGroup>
 
 </Project>
