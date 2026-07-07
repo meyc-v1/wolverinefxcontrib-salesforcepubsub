@@ -107,7 +107,13 @@ its two test projects carry the `WolverineFxContrib.` prefix — plain-named sib
   bus positions opposite to POST order (order-sensitive tests space publishes); replay ids are global
   to the org's event bus (foreign events create gaps in observed ids — never assume contiguity);
   `PlatformEventChannelMember.EventChannel`/`SelectedEntity` Tooling queries return record **Ids**, not
-  names; a MES slot is exclusive per client and an unclean disconnect holds it ~15 min (DECISIONS #13).
+  names; a MES slot is exclusive per client and an unclean disconnect holds it ~15 min (DECISIONS #13);
+  **observed (not documented by Salesforce): sandboxes appear to reset their replay ids, usually after
+  an org update — production has not been seen to do this.** A stored id invalidated by a reset is
+  handled by the default `ProcessNewEventsIfReplayIdValidationFails` recovery (reset to
+  new-events-only + Warning log), which assumes the rejection carries the matched error-code trailer —
+  if a post-update listener ever sits stuck in reconnect/backoff instead, capture the trailer: it
+  would mean resets can surface under a different code.
 
 ## TestHost
 - Auth: the REST publisher comes from the Salesforce lib (publisher ECA,
