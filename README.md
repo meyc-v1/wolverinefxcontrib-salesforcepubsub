@@ -181,6 +181,20 @@ opts.Durability.MessageIdentity = MessageIdentity.IdAndDestination;
 (App-global; it widens the inbox primary key to id + endpoint.) Inline endpoints have no store and always
 fan out.
 
+**Dedup has a time boundary.** The inbox keeps a handled envelope's row for Wolverine's
+`Durability.KeepAfterMessageHandling` window (default 5 minutes) — a duplicate delivery arriving *later*
+than that is processed again. In practice the only thing that late is a Salesforce-managed (MES)
+checkpoint rewinding after a long outage: in a 13-hour soak with ~6 network interruptions, all 2,074
+same-second fan-out duplicates were rejected, and the only re-processed events (11) were MES redeliveries
+landing 6–18 minutes after the original handling (evidence:
+`docs/test-results/overnight-durable-13h.txt`). Topic endpoints resume from the handled watermark and
+never rewind. If your handlers aren't idempotent and you need dedup to survive long outages, raise the
+window above your worst tolerated outage:
+
+```csharp
+opts.Durability.KeepAfterMessageHandling = TimeSpan.FromMinutes(60);
+```
+
 ## Event types
 
 Events derive from the public base types in `Wolverine.SalesforcePubSub.Events`:
