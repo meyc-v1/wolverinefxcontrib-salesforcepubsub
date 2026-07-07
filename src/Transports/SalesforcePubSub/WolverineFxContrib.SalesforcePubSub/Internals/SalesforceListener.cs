@@ -76,7 +76,8 @@ internal sealed class SalesforceListener : IListener
         _logger = logger;
         // MES (which resumes server-side, not from the watermark) must re-commit on idle keep-alives to keep
         // its managed subscription within Salesforce's 1800s no-commit deadline; topic has no such deadline.
-        _commits = new ReplayCommitTracker(CommitToCurrentTransportAsync, settings.FetchCount,
+        _commits = new ReplayCommitTracker(CommitToCurrentTransportAsync,
+            settings.ReplayCommitThreshold ?? settings.FetchCount,
             commitKeepAliveWhenIdle: !resumesFromWatermark);
         _cts = CancellationTokenSource.CreateLinkedTokenSource(runtimeCancellation);
     }

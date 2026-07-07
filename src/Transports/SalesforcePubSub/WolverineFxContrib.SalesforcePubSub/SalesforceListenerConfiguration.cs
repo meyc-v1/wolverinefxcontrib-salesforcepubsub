@@ -68,6 +68,18 @@ public class SalesforceListenerConfiguration
         return this;
     }
 
+    /// <summary>
+    /// Override how many completions accumulate before the throttled replay commit writes the advanced
+    /// position for this listener (keep-alives and shutdown always flush). Defaults to the listener's
+    /// fetch count; a lower value commits more often (tighter restart-resume window, more repository
+    /// writes), a higher one batches commits.
+    /// </summary>
+    public SalesforceListenerConfiguration ReplayCommitThreshold(int threshold)
+    {
+        add(e => e.ReplayCommitThreshold = threshold);
+        return this;
+    }
+
     /// <summary>Override the idle/fetch timeout that triggers a reconnect for this listener (default 270s).</summary>
     public SalesforceListenerConfiguration FetchTimeout(TimeSpan timeout)
     {

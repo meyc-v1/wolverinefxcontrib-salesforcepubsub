@@ -29,6 +29,14 @@ internal sealed class SubscriberComponentsSettings
     public int FetchCount { get; set; } = DefaultFetchCount;
 
     /// <summary>
+    /// How many completions must accumulate before the throttled replay commit writes the advanced
+    /// position (keep-alives and shutdown always flush regardless). Null — the default — tracks
+    /// <see cref="FetchCount"/>, preserving the historical coupling; set explicitly to tune commit
+    /// cadence (durability granularity vs. repository write volume) independently of fetch batching.
+    /// </summary>
+    public int? ReplayCommitThreshold { get; set; }
+
+    /// <summary>
     /// Upper bound on any consumer <see cref="IReplayIdRepository"/> call (and the MES stream commit).
     /// The transport must not trust a consumer implementation to be prompt — a black-holed connection
     /// that hangs instead of failing wedged the read loop deaf in the 13.6h soak (DECISIONS #23). A

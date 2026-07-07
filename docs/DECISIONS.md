@@ -27,6 +27,18 @@ aren't conformance issues go under "Cleanups / tech-debt".
 
 ---
 
+## 27. `ReplayCommitThreshold`: commit cadence gets its own knob, defaulting to the fetch count
+- **Date:** 2026-07-07 · **Status:** Accepted
+- **Context:** The commit tracker's `commitEvery` was hard-wired to the endpoint's `FetchCount` — tuning
+  fetch batching silently retuned commit cadence (durability granularity vs. repository write volume),
+  and the coupling was invisible from the config surface.
+- **Decision:** New per-endpoint `ReplayCommitThreshold(int)` (nullable setting, same
+  override-then-default merge as its siblings). **Null still means "track the fetch count"** — the
+  historical behavior is the default, so existing configs are unaffected; setting it decouples the two.
+  Per-endpoint only, mirroring `FetchCount` (no transport-level setter).
+- **Consequences:** Fine-grained commit tuning for the scaling work (e.g. high fetch count with tight
+  commit cadence, or the reverse). Keep-alive and shutdown flushes ignore the threshold as before.
+
 ## 26. The gRPC client registers under an explicit name — the default short-name key collides across libraries
 - **Date:** 2026-07-07 · **Status:** Accepted (found adopting the package into a real host)
 - **Context:** `AddGrpcClient<TClient>()` keys the client's configuration bucket by the type's **short**

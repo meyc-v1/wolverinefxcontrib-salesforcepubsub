@@ -33,6 +33,7 @@ public class PerEndpointConfigTests
         var transport = new SalesforcePubSubTransport();
         var endpoint = transport.EndpointForResource(SalesforceResourceKind.Topic, "/event/A__e");
         endpoint.FetchCount = 50; // override; FetchTimeout / StartFromEarliest left to inherit
+        endpoint.ReplayCommitThreshold = 5; // override
 
         var defaults = new SubscriberComponentsSettings
         {
@@ -44,8 +45,23 @@ public class PerEndpointConfigTests
         var effective = endpoint.ResolveEffectiveSettings(defaults);
 
         Assert.Equal(50, effective.FetchCount);                         // override wins
+        Assert.Equal(5, effective.ReplayCommitThreshold);               // override wins
         Assert.Equal(TimeSpan.FromSeconds(99), effective.FetchTimeout); // inherited default
         Assert.True(effective.StartFromEarliest);                       // inherited default
+    }
+
+    [Fact]
+    public void Replay_commit_threshold_defaults_to_null_so_the_listener_falls_back_to_fetch_count()
+    {
+        var transport = new SalesforcePubSubTransport();
+        var endpoint = transport.EndpointForResource(SalesforceResourceKind.Topic, "/event/A__e");
+
+        var effective = endpoint.ResolveEffectiveSettings(new SubscriberComponentsSettings { FetchCount = 40 });
+
+        // Null all the way through the merge — the listener's `?? FetchCount` preserves the historical
+        // coupling (commit cadence tracks the fetch batch) unless a threshold is set explicitly.
+        Assert.Null(effective.ReplayCommitThreshold);
+        Assert.Equal(40, effective.ReplayCommitThreshold ?? effective.FetchCount);
     }
 
     [Fact]
@@ -55,10 +71,11 @@ public class PerEndpointConfigTests
         var endpoint = transport.EndpointForResource(SalesforceResourceKind.Topic, "/event/B__e");
         var config = new SalesforceListenerConfiguration(endpoint);
 
-        config.FetchCount(25).FetchTimeout(TimeSpan.FromSeconds(30)).StartFromEarliest();
+        config.FetchCount(25).ReplayCommitThreshold(5).FetchTimeout(TimeSpan.FromSeconds(30)).StartFromEarliest();
         ((IDelayedEndpointConfiguration)config).Apply(); // run the deferred config actions
 
         Assert.Equal(25, endpoint.FetchCount);
+        Assert.Equal(5, endpoint.ReplayCommitThreshold);
         Assert.Equal(TimeSpan.FromSeconds(30), endpoint.FetchTimeout);
         Assert.True(endpoint.StartFromEarliest);
     }

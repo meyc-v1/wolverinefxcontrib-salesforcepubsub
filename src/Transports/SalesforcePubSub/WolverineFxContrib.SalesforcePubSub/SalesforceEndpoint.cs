@@ -39,6 +39,7 @@ public sealed class SalesforceEndpoint : Endpoint
     // Per-endpoint overrides (null = inherit the transport-level default). Set via the fluent
     // SalesforceListenerConfiguration and merged into the effective settings in BuildListenerAsync.
     internal int? FetchCount { get; set; }
+    internal int? ReplayCommitThreshold { get; set; }
     internal TimeSpan? FetchTimeout { get; set; }
     internal bool? StartFromEarliest { get; set; }
     internal TimeSpan? HeartbeatInterval { get; set; }
@@ -185,6 +186,7 @@ public sealed class SalesforceEndpoint : Endpoint
         TokenCacheDuration = defaults.TokenCacheDuration,
         RepositoryCallTimeout = defaults.RepositoryCallTimeout,
         FetchCount = FetchCount ?? defaults.FetchCount,
+        ReplayCommitThreshold = ReplayCommitThreshold ?? defaults.ReplayCommitThreshold,
         FetchTimeout = FetchTimeout ?? defaults.FetchTimeout,
         StartFromEarliest = StartFromEarliest ?? defaults.StartFromEarliest,
         HeartbeatInterval = HeartbeatInterval ?? defaults.HeartbeatInterval,
