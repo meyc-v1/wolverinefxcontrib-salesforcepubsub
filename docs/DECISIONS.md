@@ -27,6 +27,50 @@ aren't conformance issues go under "Cleanups / tech-debt".
 
 ---
 
+## 23. Topic-listener liveness: an unbounded `IReplayIdRepository` call can wedge the read loop deaf (first volume soak)
+- **Date:** 2026-07-07 · **Status:** **Open — fix pending** (found by the first 13.6h volume soak; full
+  evidence log: `docs/test-results/overnight-inline-13h-win.txt`)
+- **Context:** Overnight soak (all five WIT subscriptions Inline, publisher both events every 60s,
+  815 published each, SQL replay store over VPN). At 05:14 the VPN dropped — severing only the route to
+  the SQL replay store; Salesforce connectivity was unaffected (the REST publisher and both MES listeners,
+  which have no repository dependency, ran clean to the last minute — MES ledger even slightly over par
+  from at-least-once redeliveries). The established pooled `SqlClient` connections **black-holed**
+  (half-open TCP: writes sat in retransmit for 34–57+ minutes instead of failing) — while Wolverine's own
+  durability agent against the *same server* failed fast all night because its polling kept opening fresh
+  connections (~15s connect timeout). Each topic listener wedged inside the hung repository call: the
+  commit is awaited on the response path, so the read loop blocked — no further `FetchRequest`s, hence no
+  responses, not even keep-alives; the 270s idle-timeout wrapper never fired because it guards only
+  `MoveNext` and the loop wasn't in `MoveNext`; nothing threw, so the reconnect loop never engaged.
+  "Never throws out" held — this is a **liveness** failure, not a fault-out. When the first hang finally
+  errored (chn 05:49:42; A/B topics 06:21:43/58) the designed path worked exactly as built: "Replay
+  commit failed; will retry on next commit" → reconnect → the backlog batch was received and handled —
+  then the *next* commit hung again, this time until process kill 2h later. Net effect: each topic
+  ~170 events undelivered (recoverable lag, not loss — the durable replay positions sit before the gap);
+  the #15 watchdog fired at Error every minute for 2.5h, so the state was loudly alertable throughout.
+  Earlier the same night, two transient network blips (22:52, 23:58) were recovered perfectly by the
+  reconnect loop with zero ledger impact — the failure is specific to a *hanging* dependency, not a
+  failing one.
+- **Fix direction (for the implementing session):**
+  1. **Bound every consumer-repository call** (`GetLastReplayIdAsync`, `Report…ResponseAsync`,
+     `ResetForNewEventsOnlyAsync`) with a transport-owned timeout (linked CTS, ~30s). A timeout becomes an
+     ordinary commit failure feeding the existing absorb-and-retry path — which the log proves works when
+     the call *returns*. The transport must not trust a consumer implementation to be prompt, same
+     philosophy as #22 not trusting it to be monotonic.
+  2. Keep the read loop off the commit's critical path, or give the consume iteration a whole-loop
+     deadline — the idle wrapper guarding only `MoveNext` is the gap that let this hang hide.
+  3. Consider watchdog escalation: after N consecutive deaf polls, force transport teardown → reconnect,
+     instead of log-only (turns the existing detection into self-healing).
+  4. **Reproduce red-first in the #22 fake-transport unit harness**: a `CommitAsync` returning a
+     never-completing `Task` should wedge the listener today exactly as observed live. Pin the fix with
+     that test. (The TestHost `FaultInjectingReplayIdRepository` seam was removed in the pre-public
+     cleanup; the unit harness is the right home for this anyway.)
+- **Consequences (current state):** At-least-once held — the outage produced recoverable lag and
+  duplicates, never loss. MES endpoints are structurally immune (server-side replay, no repo). Until
+  fixed, the watchdog is the operational mitigation: its every-minute Error line is the page-someone
+  signal, and a process restart fully recovers (topics resume from the last committed position and
+  replay the gap). Ops guidance meanwhile: run the replay store on a connection path that fails fast
+  rather than black-holes, or front it with a repository decorator that enforces its own timeout.
+
 ## 22. Replay commits are monotonic: a disposed listener loses write authority; the tracker's write gate drops stale positions
 - **Date:** 2026-07-06 · **Status:** Accepted (resolves the "Stop/Dispose semantics" open gap below; also
   external-review findings #1/#2)
