@@ -49,6 +49,22 @@ aren't conformance issues go under "Cleanups / tech-debt".
   path in 2s exactly as observed live): loop liveness, prompt completions, bounded shutdown, and writer
   recovery once the repository heals. Tracker tests gained explicit writer-drain awaits (the
   single-flight writer made commit recording asynchronous).
+- **Addendum — the zombie-write edge (2026-07-07, external review of the fix):** `WaitAsync` abandons a
+  hung write but doesn't kill it; the underlying store call can complete long after newer commits landed
+  (commit(100) black-holes and is abandoned → repo heals → writer lands 112 → the zombie's retransmits
+  finally flush 100 over it). The tracker's monotonic guard can't see this — it runs before dispatch, and
+  the writer believes the abandoned call finished. Strictly the benign class (row regression → bounded
+  duplicates on a later cold start, never loss), and it needs an unlucky heal-then-complete ordering.
+  Closed at the row level in the reference `MssqlReplayStore`: the upsert **clamps with CASE** rather than
+  filtering in the WHERE (the row always matches, so the `IF @@ROWCOUNT = 0` insert fallback stays
+  reliable, and a blocked write still refreshes `UpdatedOn` — the row's liveness heartbeat); equal passes,
+  matching the tracker's guard; `LastEvent*` diagnostics get the same clamp. The **reset path bypasses the
+  clamp** via a dedicated statement — it is a deliberate regression to −1, and clamping it would strand
+  every cold start on the stale invalid id (re-fail validation, re-reset, forever). The in-memory position
+  needs no guard: the single-flight writer issues calls sequentially and the repository updates memory
+  before the SQL call, so in-memory ordering is call ordering. Consumer implementations get the same
+  guidance in the `IReplayIdRepository` xmldoc — the transport cannot enforce promptness (#23) *or*
+  monotonicity (#22) on a store it doesn't own, so the contract documents both.
 - **Context:** Overnight soak (all five WIT subscriptions Inline, publisher both events every 60s,
   815 published each, SQL replay store over VPN). At 05:14 the VPN dropped — severing only the route to
   the SQL replay store; Salesforce connectivity was unaffected (the REST publisher and both MES listeners,

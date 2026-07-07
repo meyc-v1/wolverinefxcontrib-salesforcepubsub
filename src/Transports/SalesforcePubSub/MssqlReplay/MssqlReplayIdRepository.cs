@@ -105,6 +105,7 @@ public sealed class MssqlReplayIdRepository : IReplayIdRepository
         var state = _topics.GetOrAdd(topicName, _ => new TopicPosition());
         lock (state) { state.ReplayId = NewEventsOnly; state.Loaded = true; }
         _logger.LogInformation("Resetting replay id to NewEventsOnly for Topic: {Topic}", topicName);
-        return _store.UpsertAsync(topicName, NewEventsOnly, null, null, DateTime.UtcNow, token);
+        // Dedicated statement: a deliberate regression must bypass the upsert's monotonic clamp.
+        return _store.ResetAsync(topicName, NewEventsOnly, DateTime.UtcNow, token);
     }
 }
