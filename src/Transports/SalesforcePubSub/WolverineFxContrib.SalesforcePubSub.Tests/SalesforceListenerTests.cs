@@ -262,7 +262,7 @@ public class SalesforceListenerTests
 
         // The old receiver queue finally completes the stale envelope on the DISPOSED listener.
         await gen1.Listener.CompleteAsync(inflight);
-        await Task.Delay(100); // give a (wrong) late write every chance to land
+        await Task.Delay(100, TestContext.Current.CancellationToken); // give a (wrong) late write every chance to land
 
         var positions = gen1.CommittedPositions();
         Assert.Equal(positions.OrderBy(p => p), positions);       // the row never regressed
@@ -341,7 +341,7 @@ public class SalesforceListenerTests
         rig.Transport.HangCommits = true;
 
         // Completion must return promptly even though its commit write hangs forever.
-        await rig.Listener.CompleteAsync(first).AsTask().WaitAsync(TimeSpan.FromSeconds(2));
+        await rig.Listener.CompleteAsync(first).AsTask().WaitAsync(TimeSpan.FromSeconds(2), TestContext.Current.CancellationToken);
 
         // A keep-alive routes another (hung) commit through the read loop itself...
         rig.Transport.Yield(KeepAlive(11));

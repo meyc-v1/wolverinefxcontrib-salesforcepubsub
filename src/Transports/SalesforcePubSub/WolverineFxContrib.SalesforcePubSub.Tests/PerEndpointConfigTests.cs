@@ -191,6 +191,6 @@ public class PerEndpointConfigTests
 
         // And the DI wiring ran exactly once (the gRPC client registration is not idempotent —
         // a second pass would stack duplicate call credentials).
-        Assert.Single(options.Services.Where(d => d.ServiceType == typeof(SubscriberComponentsSettings)));
+        Assert.Single(options.Services, d => d.ServiceType == typeof(SubscriberComponentsSettings));
     }
 }
