@@ -128,16 +128,15 @@ Feature-complete and design-settled: all delivery modes live-verified (Inline: r
 13.6h volume soak; Durable: live pass + overnight; Buffered: kill-window characterization + 19h
 steady-state — DECISIONS #20), the stop/dispose stale-commit gap is fixed with a deterministic listener
 unit harness (DECISIONS #22), and the integration suite covers the full Kafka-parity read-side matrix
-(16 facts, ~4.5 min — the agreed acceptance gate before shipping as a NuGet package). Open, in rough
-order:
-1. **Ship the first package** — identity is settled (DECISIONS #24: maintainer-approved id/namespace,
-   independent SemVer, version now 1.0.0-preview.1) and the pre-1.0 API pass is done (DECISIONS #25:
-   `IReplayIdRepository` reshaped to Get/Store/Reset + `ReplayCommitKind`). Remaining: NuGet account +
-   a manually-triggered publish workflow + first prerelease push.
-2. In flight: a docs PR to JasperFx/wolverine linking this project (maintainer-invited, discussion
-   #3325) — branch `docs/community-salesforce-pubsub-transport` on the local Wolverine clone.
-3. Opportunistic: consumer adoption; a Postgres replay sibling to `MssqlReplay`. (The #23 liveness gap
-   is RESOLVED: single-flight commit writer + transport-owned `RepositoryCallTimeout`.)
+(16 facts, ~4.5 min — the agreed acceptance gate, run green with zero skips before the first package).
+**SHIPPED: `1.0.0-preview.1` is live on nuget.org (2026-07-07)** — identity per DECISIONS #24, pre-1.0
+API pass per #25 (`IReplayIdRepository` → Get/Store/Reset + `ReplayCommitKind`; auth + backoff
+interfaces reviewed), published via the manually-dispatched `publish.yml` (NuGet Trusted Publishing /
+OIDC, no stored key — the dispatch `version` input must match `Directory.Build.props`). Open:
+1. Awaiting review: the maintainer-invited docs PR to JasperFx/wolverine (from discussion #3325),
+   opened from the meyc-v1/wolverine fork.
+2. Opportunistic: consumer adoption; a Postgres replay sibling to `MssqlReplay`; 1.0.0 final when
+   the preview has soaked with real consumers.
 
 ## Conventions
 - **Do it the Wolverine way.** This is a community Wolverine transport and should look/behave like a
