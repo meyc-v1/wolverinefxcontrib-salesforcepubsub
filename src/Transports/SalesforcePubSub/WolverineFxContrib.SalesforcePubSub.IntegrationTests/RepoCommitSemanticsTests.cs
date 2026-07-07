@@ -8,7 +8,7 @@ namespace WolverineFxContrib.SalesforcePubSub.IntegrationTests;
 /// <summary>
 /// Kafka-suite equivalent: kafka_offset_committer, taken live. At low volume the completion throttle is
 /// never reached, so the pending handled position is flushed by the next idle keep-alive — and that
-/// commit must report events-received (it covers a handled event), not keep-alive. This is the
+/// commit must be events-handled (it covers a handled event), not keep-alive. This is the
 /// regression pin, in its natural low-volume shape, for the bug where a 19h overnight never populated
 /// the repository's last-event diagnostics because every commit was flagged by its trigger.
 /// </summary>
@@ -39,19 +39,19 @@ public class RepoCommitSemanticsTests(SalesforceTestContext ctx)
             var handledReplayId = Assert.Single(received).ReplayId;
 
             // One handled event is far below the commit throttle, so nothing commits until the next
-            // idle keep-alive flushes the pending position — which must cover our event and report
-            // events-received.
+            // idle keep-alive flushes the pending position — which must cover our event and commit
+            // as events-handled.
             var deadline = DateTime.UtcNow + KeepAliveFlushTimeout;
             while (DateTime.UtcNow < deadline)
             {
-                if (repo.Commits.Any(c => c.Method == "EventsReceived" && c.ReplayId >= handledReplayId))
+                if (repo.Commits.Any(c => c.Kind == ReplayCommitKind.EventsHandled && c.ReplayId >= handledReplayId))
                     return;
 
                 await Task.Delay(500, TestContext.Current.CancellationToken);
             }
 
-            var seen = string.Join("; ", repo.Commits.Select(c => $"{c.Method}@{c.ReplayId}"));
-            Assert.Fail($"No events-received commit covering replay {handledReplayId} within {KeepAliveFlushTimeout}. Commits seen: {seen}");
+            var seen = string.Join("; ", repo.Commits.Select(c => $"{c.Kind}@{c.ReplayId}"));
+            Assert.Fail($"No events-handled commit covering replay {handledReplayId} within {KeepAliveFlushTimeout}. Commits seen: {seen}");
         }
         finally
         {

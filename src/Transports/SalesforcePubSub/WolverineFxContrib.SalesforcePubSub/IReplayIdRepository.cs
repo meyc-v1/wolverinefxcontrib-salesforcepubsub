@@ -20,17 +20,11 @@ public interface IReplayIdRepository
     Task<long> GetLastReplayIdAsync(string topicName, CancellationToken token = default);
 
     /// <summary>
-    /// Reports a committed position that no handled event contributed to — the replay id advanced through
-    /// keep-alive drift alone (replay ids are global across all Salesforce streaming events, so the
-    /// position moves during idle). Store the position; do not update any last-event diagnostics.
+    /// Stores a committed replay position for a topic. <paramref name="kind"/> says whether handled
+    /// events contributed to it or the position advanced through idle keep-alive drift alone —
+    /// implementations that don't care about the distinction can ignore it.
     /// </summary>
-    Task ReportKeepAliveResponseAsync(string topicName, long replayId, CancellationToken token = default);
-
-    /// <summary>
-    /// Reports a committed position that covers one or more handled events, regardless of whether the
-    /// commit was triggered by the completion throttle or flushed by a keep-alive/shutdown.
-    /// </summary>
-    Task ReportEventsReceivedResponseAsync(string topicName, long replayId, List<long> replayIdsReceived, CancellationToken token = default);
+    Task StoreReplayIdAsync(string topicName, long replayId, ReplayCommitKind kind, CancellationToken token = default);
 
     /// <summary>
     /// Resets the stored position so the subscription restarts from new-events-only.

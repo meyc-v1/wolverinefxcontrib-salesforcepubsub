@@ -68,8 +68,9 @@ public sealed class MssqlReplayIdRepository : IReplayIdRepository
         return NewEventsOnly;
     }
 
-    public Task ReportKeepAliveResponseAsync(string topicName, long replayId, CancellationToken token = default)
+    public Task StoreReplayIdAsync(string topicName, long replayId, ReplayCommitKind kind, CancellationToken token = default)
     {
+        var now = DateTime.UtcNow;
         var state = _topics.GetOrAdd(topicName, _ => new TopicPosition());
         long? lastEvent;
         DateTime? lastEventOn;
@@ -77,27 +78,17 @@ public sealed class MssqlReplayIdRepository : IReplayIdRepository
         {
             state.ReplayId = replayId;
             state.Loaded = true;
+            if (kind == ReplayCommitKind.EventsHandled)
+            {
+                state.LastEventReplayId = replayId;
+                state.LastEventOn = now;
+            }
+
             lastEvent = state.LastEventReplayId;
             lastEventOn = state.LastEventOn;
         }
 
-        return _store.UpsertAsync(topicName, replayId, lastEvent, lastEventOn, DateTime.UtcNow, token);
-    }
-
-    public Task ReportEventsReceivedResponseAsync(string topicName, long replayId, List<long> replayIdsReceived, CancellationToken token = default)
-    {
-        var lastEventReplayId = replayIdsReceived is { Count: > 0 } ? replayIdsReceived.Max() : replayId;
-        var now = DateTime.UtcNow;
-        var state = _topics.GetOrAdd(topicName, _ => new TopicPosition());
-        lock (state)
-        {
-            state.ReplayId = replayId;
-            state.LastEventReplayId = lastEventReplayId;
-            state.LastEventOn = now;
-            state.Loaded = true;
-        }
-
-        return _store.UpsertAsync(topicName, replayId, lastEventReplayId, now, now, token);
+        return _store.UpsertAsync(topicName, replayId, lastEvent, lastEventOn, now, token);
     }
 
     public Task ResetForNewEventsOnlyAsync(string topicName, CancellationToken token = default)

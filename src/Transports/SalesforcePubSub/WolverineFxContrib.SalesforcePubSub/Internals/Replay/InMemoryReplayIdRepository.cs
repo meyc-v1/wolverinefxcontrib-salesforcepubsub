@@ -15,12 +15,7 @@ internal sealed class InMemoryReplayIdRepository : IReplayIdRepository
         return Task.FromResult(_replayIds.GetOrAdd(topicName, ReplayIds.NewEventsOnly));
     }
 
-    public Task ReportKeepAliveResponseAsync(string topicName, long replayId, CancellationToken token = default)
-    {
-        return AddOrUpdateReplayIdForTopicAsync(topicName, replayId);
-    }
-
-    public Task ReportEventsReceivedResponseAsync(string topicName, long replayId, List<long> replayIdsReceived, CancellationToken token = default)
+    public Task StoreReplayIdAsync(string topicName, long replayId, ReplayCommitKind kind, CancellationToken token = default)
     {
         return AddOrUpdateReplayIdForTopicAsync(topicName, replayId);
     }

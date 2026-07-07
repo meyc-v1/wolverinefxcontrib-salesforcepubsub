@@ -18,8 +18,7 @@ public class PerEndpointConfigTests
     private sealed class FakeReplayRepo : IReplayIdRepository
     {
         public Task<long> GetLastReplayIdAsync(string topicName, CancellationToken cancellationToken = default) => Task.FromResult(-1L);
-        public Task ReportEventsReceivedResponseAsync(string topicName, long lastReplayId, List<long> replayIds, CancellationToken cancellationToken = default) => Task.CompletedTask;
-        public Task ReportKeepAliveResponseAsync(string topicName, long lastReplayId, CancellationToken cancellationToken = default) => Task.CompletedTask;
+        public Task StoreReplayIdAsync(string topicName, long replayId, ReplayCommitKind kind, CancellationToken cancellationToken = default) => Task.CompletedTask;
         public Task ResetForNewEventsOnlyAsync(string topicName, CancellationToken cancellationToken = default) => Task.CompletedTask;
     }
 

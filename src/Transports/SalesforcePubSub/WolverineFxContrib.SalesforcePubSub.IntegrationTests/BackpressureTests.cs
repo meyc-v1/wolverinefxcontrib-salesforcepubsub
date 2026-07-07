@@ -92,12 +92,12 @@ public class BackpressureTests(SalesforceTestContext ctx, ITestOutputHelper outp
         foreach (var commit in commits)
         {
             if (commit.ReplayId < highWater)
-                violations.Add($"{commit.Method}@{commit.ReplayId} after high-water {highWater}");
+                violations.Add($"{commit.Kind}@{commit.ReplayId} after high-water {highWater}");
             highWater = Math.Max(highWater, commit.ReplayId);
         }
 
         foreach (var commit in commits)
-            output.WriteLine($"  {commit.At:HH:mm:ss.fff} {commit.Method} @ {commit.ReplayId}");
+            output.WriteLine($"  {commit.At:HH:mm:ss.fff} {commit.Kind} @ {commit.ReplayId}");
 
         Assert.True(violations.Count == 0,
             $"replay commits regressed across the stop→rebuild: {string.Join("; ", violations)}");

@@ -1,3 +1,4 @@
+using Wolverine.SalesforcePubSub;
 using Wolverine.SalesforcePubSub.Internals.Replay;
 
 namespace WolverineFxContrib.SalesforcePubSub.Tests;
@@ -17,23 +18,23 @@ public class InMemoryReplayIdRepositoryTests
     }
 
     [Fact]
-    public async Task ReportEventsReceived_advances_the_stored_position()
+    public async Task Store_for_handled_events_advances_the_stored_position()
     {
         var ct = TestContext.Current.CancellationToken;
         var repo = new InMemoryReplayIdRepository();
 
-        await repo.ReportEventsReceivedResponseAsync("topic-a", 42, [42], ct);
+        await repo.StoreReplayIdAsync("topic-a", 42, ReplayCommitKind.EventsHandled, ct);
 
         Assert.Equal(42, await repo.GetLastReplayIdAsync("topic-a", ct));
     }
 
     [Fact]
-    public async Task ReportKeepAlive_advances_the_stored_position()
+    public async Task Store_for_keep_alive_advances_the_stored_position()
     {
         var ct = TestContext.Current.CancellationToken;
         var repo = new InMemoryReplayIdRepository();
 
-        await repo.ReportKeepAliveResponseAsync("topic-a", 7, ct);
+        await repo.StoreReplayIdAsync("topic-a", 7, ReplayCommitKind.KeepAlive, ct);
 
         Assert.Equal(7, await repo.GetLastReplayIdAsync("topic-a", ct));
     }
@@ -44,7 +45,7 @@ public class InMemoryReplayIdRepositoryTests
         var ct = TestContext.Current.CancellationToken;
         var repo = new InMemoryReplayIdRepository();
 
-        await repo.ReportEventsReceivedResponseAsync("topic-a", 99, [99], ct);
+        await repo.StoreReplayIdAsync("topic-a", 99, ReplayCommitKind.EventsHandled, ct);
         await repo.ResetForNewEventsOnlyAsync("topic-a", ct);
 
         Assert.Equal(NewEventsOnly, await repo.GetLastReplayIdAsync("topic-a", ct));
@@ -56,8 +57,8 @@ public class InMemoryReplayIdRepositoryTests
         var ct = TestContext.Current.CancellationToken;
         var repo = new InMemoryReplayIdRepository();
 
-        await repo.ReportEventsReceivedResponseAsync("topic-a", 10, [10], ct);
-        await repo.ReportEventsReceivedResponseAsync("topic-b", 20, [20], ct);
+        await repo.StoreReplayIdAsync("topic-a", 10, ReplayCommitKind.EventsHandled, ct);
+        await repo.StoreReplayIdAsync("topic-b", 20, ReplayCommitKind.EventsHandled, ct);
 
         Assert.Equal(10, await repo.GetLastReplayIdAsync("topic-a", ct));
         Assert.Equal(20, await repo.GetLastReplayIdAsync("topic-b", ct));

@@ -97,7 +97,7 @@ internal sealed class ReplayCommitTracker
             // The commit flag reports whether completed events contributed to the position — not what
             // triggered the write. At low volume the completion path rarely reaches the throttle, so most
             // commits are keep-alive-TRIGGERED yet carry handled events; flagging those "keep-alive" would
-            // starve the repository's events-received path (its last-event diagnostics never update).
+            // starve the repository's events-handled path (its last-event diagnostics never update).
             // Captured before TryTakeCommittable, which resets the counter.
             fromCompletions = _sinceCommit > 0;
             position = TryTakeCommittable(force: true); // keep-alives are sparse — commit promptly
@@ -146,7 +146,7 @@ internal sealed class ReplayCommitTracker
     {
         lock (_lock)
         {
-            // Same flag semantics as the keep-alive path: report events-received only when completed
+            // Same flag semantics as the keep-alive path: commit as events-handled only when completed
             // events contributed to the flushed position (a drift-only flush carries none).
             var fromCompletions = _sinceCommit > 0;
             if (TryTakeCommittable(force: true) is { } position)

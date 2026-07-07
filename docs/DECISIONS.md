@@ -27,6 +27,29 @@ aren't conformance issues go under "Cleanups / tech-debt".
 
 ---
 
+## 25. Pre-1.0 `IReplayIdRepository` pass: one intent-named store method, the fabricated per-event list is gone
+- **Date:** 2026-07-07 · **Status:** Accepted
+- **Context:** The interface freezes at 1.0 and still carried its pre-watermark shape:
+  `ReportKeepAliveResponseAsync` / `ReportEventsReceivedResponseAsync` were named after which gRPC
+  response the old orchestrator was handling, and the latter took a `List<long> replayIdsReceived`.
+  Under the watermark model (#8) the transport commits a safe *position*, not per-event ids — the only
+  call site fabricated the list as `[replayId]`, and the SQL implementation's `.Max()` over it always
+  equaled `replayId`. The parameter promised per-event detail the transport can never honor.
+- **Decision:** Collapse to a Get / Store / Reset triad:
+  `StoreReplayIdAsync(topicName, replayId, ReplayCommitKind kind, token)`, with a two-value public enum
+  `ReplayCommitKind { EventsHandled, KeepAlive }` carrying the one real distinction (did handled events
+  contribute, or is this idle keep-alive drift). `GetLastReplayIdAsync` and
+  `ResetForNewEventsOnlyAsync` keep their intent-based names. The list parameter is deleted outright.
+- **Why:** Smallest surface to freeze; names say what the repository does (store a committed position)
+  rather than what the caller was doing when it called; the enum keeps the events-vs-drift signal that
+  last-event diagnostics need (#23's soak found commits starving that path) without a `bool` flag that
+  reads as noise at call sites and can't grow. An enum over two methods means implementers who don't
+  care about the distinction ignore one parameter instead of writing a delegating second method.
+- **Consequences:** Breaking for any pre-package implementer (there are none — this is why the pass
+  happens now). All implementations updated (in-memory fallback, `MssqlReplay`, the recording test
+  harness); prose references to "events-received" became "events-handled". Historical entries (#23)
+  retain the old names as written.
+
 ## 24. Package identity settled with the Wolverine maintainers: keep the names, version independently from 1.0
 - **Date:** 2026-07-08 · **Status:** Accepted (maintainer guidance in
   https://github.com/JasperFx/wolverine/discussions/3325)

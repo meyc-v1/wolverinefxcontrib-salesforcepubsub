@@ -181,10 +181,10 @@ public class ReplayCommitTrackerTests
     }
 
     [Fact]
-    public async Task Keepalive_triggered_commit_carrying_completed_events_reports_events_received()
+    public async Task Keepalive_triggered_commit_carrying_completed_events_commits_as_events_handled()
     {
         // At low volume the completion path rarely reaches the throttle, so the commit is TRIGGERED by a
-        // keep-alive — but it covers handled events and must report events-received (isKeepAlive false),
+        // keep-alive — but it covers handled events and must commit as events-handled (isKeepAlive false),
         // or a low-volume subscription's last-event diagnostics never update (observed live: 19h overnight
         // with every commit flagged keepAlive:true).
         var rec = new Recorder();

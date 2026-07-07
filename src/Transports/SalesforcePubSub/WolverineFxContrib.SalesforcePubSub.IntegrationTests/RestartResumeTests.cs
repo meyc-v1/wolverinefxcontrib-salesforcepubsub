@@ -60,9 +60,9 @@ public class RestartResumeTests(SalesforceTestContext ctx)
             // Resuming after the committed position means the handled tail is NOT redelivered.
             Assert.DoesNotContain(sink2.Snapshot(), e => e.Message == handledBeforeStop);
 
-            // The stop-flush covered a handled event, so it must have reported events-received —
-            // the live pin on the commit-flag semantics (one keep-alive drift commit is also fine).
-            Assert.Contains(repo.Commits, c => c.Method == "EventsReceived");
+            // The stop-flush covered a handled event, so it must have committed as events-handled —
+            // the live pin on the commit-kind semantics (one keep-alive drift commit is also fine).
+            Assert.Contains(repo.Commits, c => c.Kind == ReplayCommitKind.EventsHandled);
         }
         finally
         {

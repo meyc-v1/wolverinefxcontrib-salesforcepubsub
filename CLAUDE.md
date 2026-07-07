@@ -131,9 +131,9 @@ unit harness (DECISIONS #22), and the integration suite covers the full Kafka-pa
 (16 facts, ~4.5 min — the agreed acceptance gate before shipping as a NuGet package). Open, in rough
 order:
 1. **Ship the first package** — identity is settled (DECISIONS #24: maintainer-approved id/namespace,
-   independent SemVer, version now 1.0.0-preview.1): do the pre-1.0 API pass (`IReplayIdRepository`
-   shape — the fabricated `replayIdsReceived` param + naming), then NuGet account + a manually-triggered
-   publish workflow + first prerelease push.
+   independent SemVer, version now 1.0.0-preview.1) and the pre-1.0 API pass is done (DECISIONS #25:
+   `IReplayIdRepository` reshaped to Get/Store/Reset + `ReplayCommitKind`). Remaining: NuGet account +
+   a manually-triggered publish workflow + first prerelease push.
 2. In flight: a docs PR to JasperFx/wolverine linking this project (maintainer-invited, discussion
    #3325) — branch `docs/community-salesforce-pubsub-transport` on the local Wolverine clone.
 3. Opportunistic: consumer adoption; a Postgres replay sibling to `MssqlReplay`. (The #23 liveness gap

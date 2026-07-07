@@ -97,16 +97,10 @@ internal sealed partial class ClientManagedReplayTransport : ISubscriptionTransp
         LogStarted("SaveReplayId", _topicName);
 
         // Commit regardless of cancellation so a shutdown still persists progress.
-        if (isKeepAlive)
-        {
-            await _replayIdRepository.ReportKeepAliveResponseAsync(
-                _topicName, replayId, CancellationToken.None).ConfigureAwait(false);
-        }
-        else
-        {
-            await _replayIdRepository.ReportEventsReceivedResponseAsync(
-                _topicName, replayId, [replayId], CancellationToken.None).ConfigureAwait(false);
-        }
+        await _replayIdRepository.StoreReplayIdAsync(
+            _topicName, replayId,
+            isKeepAlive ? ReplayCommitKind.KeepAlive : ReplayCommitKind.EventsHandled,
+            CancellationToken.None).ConfigureAwait(false);
 
         LogFinished("SaveReplayId", _topicName);
     }
