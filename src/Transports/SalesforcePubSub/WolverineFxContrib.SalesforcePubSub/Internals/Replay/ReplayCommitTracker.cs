@@ -45,6 +45,9 @@ internal sealed class ReplayCommitTracker
     private long _lastWritten = -1;
     private bool _seen;
     private int _sinceCommit;
+    private (long ReplayId, bool IsKeepAlive)? _pending;
+    private bool _writerRunning;
+    private Task _writer = Task.CompletedTask;
 
     public ReplayCommitTracker(Func<long, bool, Task> commit, int commitEvery, bool commitKeepAliveWhenIdle = false)
     {
@@ -63,19 +66,23 @@ internal sealed class ReplayCommitTracker
         }
     }
 
-    /// <summary>An envelope was resolved (handled / dead-lettered / discarded). Advance and maybe commit.</summary>
+    /// <summary>
+    /// An envelope was resolved (handled / dead-lettered / discarded). Advance and maybe commit.
+    /// Returns immediately — the write happens on the single-flight writer (see <see cref="ScheduleLocked"/>),
+    /// so a slow or hung repository can never stall the completion path (DECISIONS #23).
+    /// </summary>
     public Task CompleteAsync(long replayId)
     {
-        long? position;
         lock (_lock)
         {
             _inflight.Remove(replayId);
             Observe(replayId);
             _sinceCommit++;
-            position = TryTakeCommittable(force: false);
+            if (TryTakeCommittable(force: false) is { } position)
+                ScheduleLocked(position, isKeepAlive: false);
         }
 
-        return position is { } p ? CommitAsync(p, isKeepAlive: false) : Task.CompletedTask;
+        return Task.CompletedTask;
     }
 
     /// <summary>A keep-alive carries a position but no events; advance during idle (respects the in-flight floor).</summary>
@@ -105,9 +112,14 @@ internal sealed class ReplayCommitTracker
                 if (_refreshOnKeepAlive && _lastCommitted >= 0)
                     position = _lastCommitted;
             }
+
+            if (position is { } p)
+                ScheduleLocked(p, isKeepAlive: !fromCompletions);
         }
 
-        return position is { } p ? CommitAsync(p, isKeepAlive: !fromCompletions) : Task.CompletedTask;
+        // Returns immediately: the read loop awaits this call, and a hung repository on that path is
+        // exactly how the #23 soak went deaf. The single-flight writer owns the wait.
+        return Task.CompletedTask;
     }
 
     /// <summary>
@@ -126,20 +138,29 @@ internal sealed class ReplayCommitTracker
         }
     }
 
-    /// <summary>Force a final commit of the current safe position (shutdown).</summary>
+    /// <summary>
+    /// Force a final commit of the current safe position (shutdown) and wait for the writer to drain —
+    /// the one caller that genuinely needs the write completed (the listener bounds the wait at 5s).
+    /// </summary>
     public Task FlushAsync()
     {
-        long? position;
-        bool fromCompletions;
         lock (_lock)
         {
             // Same flag semantics as the keep-alive path: report events-received only when completed
             // events contributed to the flushed position (a drift-only flush carries none).
-            fromCompletions = _sinceCommit > 0;
-            position = TryTakeCommittable(force: true);
-        }
+            var fromCompletions = _sinceCommit > 0;
+            if (TryTakeCommittable(force: true) is { } position)
+                ScheduleLocked(position, isKeepAlive: !fromCompletions);
 
-        return position is { } p ? CommitAsync(p, isKeepAlive: !fromCompletions) : Task.CompletedTask;
+            return _writer;
+        }
+    }
+
+    /// <summary>The current writer task — test hook for awaiting commit quiescence without forcing a flush.</summary>
+    internal Task WaitForWriterAsync()
+    {
+        lock (_lock)
+            return _writer;
     }
 
     private void Observe(long replayId)
@@ -176,26 +197,65 @@ internal sealed class ReplayCommitTracker
         return candidate;
     }
 
-    private async Task CommitAsync(long replayId, bool isKeepAlive)
+    /// <summary>
+    /// Latest-wins hand-off to the single-flight writer. Called under <see cref="_lock"/>. Positions
+    /// coalesce: if a write is already in flight, only the newest pending position is kept — the same
+    /// semantics the commit throttle already gives, now decoupled from the caller (DECISIONS #23: a
+    /// hung repository parks the writer, never the completion path or the read loop).
+    /// </summary>
+    private void ScheduleLocked(long replayId, bool isKeepAlive)
     {
-        await _writeGate.WaitAsync().ConfigureAwait(false);
-        try
-        {
-            // Writer-side monotonicity: positions are handed out in increasing order under _lock, but
-            // callers can reach this gate out of that order (computed, then preempted before WaitAsync),
-            // and a staler position written last would regress the durable row — bounded duplicates on
-            // the next cold start. Drop strictly-older writes; an EQUAL position passes deliberately,
-            // because the MES idle re-affirm re-sends the last committed position to reset the server's
-            // 1800s no-commit deadline.
-            if (replayId < _lastWritten)
-                return;
+        _pending = (replayId, isKeepAlive);
+        if (_writerRunning)
+            return;
 
-            _lastWritten = replayId;
-            await _commit(replayId, isKeepAlive).ConfigureAwait(false);
-        }
-        finally
+        _writerRunning = true;
+        _writer = Task.Run(WriteLoopAsync);
+    }
+
+    private async Task WriteLoopAsync()
+    {
+        while (true)
         {
-            _writeGate.Release();
+            (long ReplayId, bool IsKeepAlive) next;
+            lock (_lock)
+            {
+                if (_pending is not { } pending)
+                {
+                    _writerRunning = false;
+                    return;
+                }
+
+                _pending = null;
+                next = pending;
+            }
+
+            await _writeGate.WaitAsync().ConfigureAwait(false);
+            try
+            {
+                // Writer-side monotonicity: a staler position written last would regress the durable
+                // row — bounded duplicates on the next cold start. Drop strictly-older writes; an EQUAL
+                // position passes deliberately, because the MES idle re-affirm re-sends the last
+                // committed position to reset the server's 1800s no-commit deadline.
+                if (next.ReplayId >= _lastWritten)
+                {
+                    _lastWritten = next.ReplayId;
+                    // Best-effort by contract (the listener's delegate absorbs and logs failures), but a
+                    // throwing delegate must not kill the writer and silently stop all future commits.
+                    try
+                    {
+                        await _commit(next.ReplayId, next.IsKeepAlive).ConfigureAwait(false);
+                    }
+                    catch
+                    {
+                        // The position is re-committed on the next completion/keep-alive.
+                    }
+                }
+            }
+            finally
+            {
+                _writeGate.Release();
+            }
         }
     }
 }

@@ -183,6 +183,7 @@ public sealed class SalesforceEndpoint : Endpoint
     {
         PubSubUri = defaults.PubSubUri,
         TokenCacheDuration = defaults.TokenCacheDuration,
+        RepositoryCallTimeout = defaults.RepositoryCallTimeout,
         FetchCount = FetchCount ?? defaults.FetchCount,
         FetchTimeout = FetchTimeout ?? defaults.FetchTimeout,
         StartFromEarliest = StartFromEarliest ?? defaults.StartFromEarliest,

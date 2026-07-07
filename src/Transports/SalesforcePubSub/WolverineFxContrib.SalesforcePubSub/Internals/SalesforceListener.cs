@@ -449,9 +449,21 @@ internal sealed class SalesforceListener : IListener
 
         try
         {
-            await transport.CommitAsync(replayId, isKeepAlive, CancellationToken.None).ConfigureAwait(false);
+            // Bounded: a consumer repository (or a black-holed connection under it) that HANGS instead
+            // of failing wedged the read loop deaf for hours in the 13.6h soak (DECISIONS #23). The
+            // token cancels cooperative implementations; WaitAsync abandons ones that ignore it. A
+            // timeout is an ordinary commit failure — absorbed here, retried on the next commit.
+            using var timeout = new CancellationTokenSource(_settings.RepositoryCallTimeout);
+            await transport.CommitAsync(replayId, isKeepAlive, timeout.Token)
+                .WaitAsync(timeout.Token).ConfigureAwait(false);
             _logger.LogDebug("{Resource}: Committed replay position {ReplayId} (keepAlive: {IsKeepAlive}).",
                 _resource, replayId, isKeepAlive);
+        }
+        catch (OperationCanceledException)
+        {
+            _logger.LogWarning(
+                "{Resource}: Replay commit (replayId {ReplayId}) exceeded RepositoryCallTimeout ({Timeout}) and was abandoned; the position retries on the next commit.",
+                _resource, replayId, _settings.RepositoryCallTimeout);
         }
         catch (Exception ex)
         {

@@ -130,16 +130,9 @@ steady-state — DECISIONS #20), the stop/dispose stale-commit gap is fixed with
 unit harness (DECISIONS #22), and the integration suite covers the full Kafka-parity read-side matrix
 (16 facts, ~4.5 min — the agreed acceptance gate before shipping as a NuGet package). Open, in rough
 order:
-1. **Topic-listener liveness fix — DECISIONS #23 (read it first; evidence:
-   `docs/test-results/overnight-inline-13h-win.txt`)**: an unbounded consumer `IReplayIdRepository` call
-   can wedge the read loop deaf (observed live: a VPN drop black-holed the SQL replay store's pooled
-   connections; commits hung 34–57+ min; no reconnect, no idle-timeout, watchdog alerting throughout;
-   ~170 events/topic recoverable lag, never loss; MES immune). Fix direction in the entry: bound repo
-   calls with a transport-owned timeout feeding the existing commit-failure retry path; consider a
-   whole-iteration deadline and watchdog escalation. Reproduce red-first in the #22 fake-transport unit
-   harness (`CommitAsync` returning a never-completing `Task`).
-2. Opportunistic: NuGet packaging (metadata done; id/versioning pending with maintainers), consumer
-   adoption.
+1. Opportunistic: NuGet packaging (metadata done; id/versioning pending with maintainers), consumer
+   adoption. (The #23 topic-listener liveness gap is RESOLVED: single-flight commit writer +
+   transport-owned `RepositoryCallTimeout`; red-first pins in the #22 unit harness.)
 
 ## Conventions
 - **Do it the Wolverine way.** This is a community Wolverine transport and should look/behave like a

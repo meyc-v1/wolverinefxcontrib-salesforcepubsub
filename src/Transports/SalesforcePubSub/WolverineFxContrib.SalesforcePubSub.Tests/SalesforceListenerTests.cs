@@ -92,6 +92,9 @@ public class SalesforceListenerTests
 
         public long? ResumeFrom { get; } = resumeFrom;
 
+        /// <summary>DECISIONS #23: commits that never complete — the black-holed SQL connection.</summary>
+        public bool HangCommits { get; set; }
+
         public void Yield(ResponseMessageInfo response) => _responses.Writer.TryWrite(response);
 
         public void EndStream() => _responses.Writer.TryComplete();
@@ -106,6 +109,9 @@ public class SalesforceListenerTests
 
         public Task CommitAsync(long replayId, bool isKeepAlive, CancellationToken ct)
         {
+            if (HangCommits)
+                return new TaskCompletionSource().Task; // half-open TCP: never completes, never throws
+
             lock (commits)
                 commits.Add((replayId, isKeepAlive));
             return Task.CompletedTask;
@@ -131,7 +137,8 @@ public class SalesforceListenerTests
 
         public ScriptedTransport Transport => Transports[^1];
 
-        public Rig(bool resumesFromWatermark = true, List<(long, bool)>? sharedCommits = null)
+        public Rig(bool resumesFromWatermark = true, List<(long, bool)>? sharedCommits = null,
+            TimeSpan? repositoryCallTimeout = null)
         {
             Commits = sharedCommits ?? [];
             var settings = new SubscriberComponentsSettings
@@ -139,7 +146,8 @@ public class SalesforceListenerTests
                 FetchCount = 1,                            // commit throttle = every completion
                 FetchTimeout = TimeSpan.FromMinutes(10),
                 HeartbeatInterval = TimeSpan.Zero,         // sidecars off
-                WatchdogThreshold = TimeSpan.Zero
+                WatchdogThreshold = TimeSpan.Zero,
+                RepositoryCallTimeout = repositoryCallTimeout ?? SubscriberComponentsSettings.DefaultRepositoryCallTimeout
             };
 
             var schemas = new CachingSchemaRepository(new FakeSchemaRepo(), new MemoryCache(new MemoryCacheOptions()));
@@ -318,6 +326,37 @@ public class SalesforceListenerTests
         Assert.Equal(10, commits[^1].replayId);
         Assert.True(commits[^1].keepAlive);                       // the re-affirm went through
         await rig.DisposeAsync();
+    }
+
+    [Fact]
+    public async Task A_hanging_repository_commit_cannot_wedge_the_read_loop_or_the_completion_path()
+    {
+        // DECISIONS #23, reproduced from the 13.6h soak: a VPN drop black-holed the SQL replay store's
+        // pooled connections — commits hung 34-57+ minutes without throwing. The commit was awaited on
+        // the response path, so the read loop went deaf (no fetches, no keep-alives, no reconnect —
+        // nothing threw, and the idle wrapper guards only MoveNext). Liveness must never depend on a
+        // consumer repository being prompt.
+        var rig = new Rig(repositoryCallTimeout: TimeSpan.FromMilliseconds(300));
+        var first = await rig.ReceiveAsync(10);
+        rig.Transport.HangCommits = true;
+
+        // Completion must return promptly even though its commit write hangs forever.
+        await rig.Listener.CompleteAsync(first).AsTask().WaitAsync(TimeSpan.FromSeconds(2));
+
+        // A keep-alive routes another (hung) commit through the read loop itself...
+        rig.Transport.Yield(KeepAlive(11));
+
+        // ...and the loop must still be alive to receive and dispatch the next event.
+        var second = await rig.ReceiveAsync(12);
+        Assert.Equal(12, second.Offset);
+
+        // And the writer must RECOVER: the RepositoryCallTimeout abandons the hung write, so once the
+        // repository heals, the next commit lands (the soak's designed retry path, now time-bounded).
+        rig.Transport.HangCommits = false;
+        await rig.Listener.CompleteAsync(second);
+        await WaitUntilAsync(() => rig.CommittedPositions().Contains(12));
+
+        await rig.DisposeAsync(); // shutdown stays bounded even with a write still hung
     }
 
     [Fact]

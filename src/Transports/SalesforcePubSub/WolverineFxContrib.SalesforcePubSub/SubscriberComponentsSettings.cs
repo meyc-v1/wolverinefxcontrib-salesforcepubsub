@@ -22,9 +22,19 @@ internal sealed class SubscriberComponentsSettings
     public static readonly string DefaultReplayIdValidationFailedErrorCode =
         "sfdc.platform.eventbus.grpc.subscription.fetch.replayid.corrupted";
 
+    internal static readonly TimeSpan DefaultRepositoryCallTimeout = TimeSpan.FromSeconds(30);
+
     public Uri PubSubUri { get; set; } = DefaultPubSubUri;
     public TimeSpan FetchTimeout { get; set; } = DefaultFetchTimeout;
     public int FetchCount { get; set; } = DefaultFetchCount;
+
+    /// <summary>
+    /// Upper bound on any consumer <see cref="IReplayIdRepository"/> call (and the MES stream commit).
+    /// The transport must not trust a consumer implementation to be prompt — a black-holed connection
+    /// that hangs instead of failing wedged the read loop deaf in the 13.6h soak (DECISIONS #23). A
+    /// timed-out call becomes an ordinary commit failure feeding the absorb-and-retry path.
+    /// </summary>
+    public TimeSpan RepositoryCallTimeout { get; set; } = DefaultRepositoryCallTimeout;
 
     /// <summary>
     /// How long the transport caches a Salesforce access token before re-fetching it from the

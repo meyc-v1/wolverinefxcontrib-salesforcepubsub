@@ -28,8 +28,27 @@ aren't conformance issues go under "Cleanups / tech-debt".
 ---
 
 ## 23. Topic-listener liveness: an unbounded `IReplayIdRepository` call can wedge the read loop deaf (first volume soak)
-- **Date:** 2026-07-07 · **Status:** **Open — fix pending** (found by the first 13.6h volume soak; full
-  evidence log: `docs/test-results/overnight-inline-13h-win.txt`)
+- **Date:** 2026-07-07 · **Status:** **Resolved** (same day — two-layer fix, red-first per the fix
+  direction below; evidence log: `docs/test-results/overnight-inline-13h-win.txt`)
+- **Resolution:** (1) **The read loop and completion path no longer touch the write at all** —
+  `ReplayCommitTracker` hands positions to a latest-wins **single-flight writer** (`ScheduleLocked` /
+  `WriteLoopAsync`); `CompleteAsync`/`ObserveKeepAliveAsync` return immediately, positions coalesce
+  exactly as the throttle already coalesced them, and `FlushAsync` still genuinely awaits the drain
+  (bounded by the listener's existing 5s). This subsumes fix-direction #2 and structurally removes the
+  #22 in-instance reorder race (one writer = sequential writes; the monotonic guard stays as belt).
+  (2) **Every consumer-repository touchpoint is bounded** by a new transport-owned
+  `RepositoryCallTimeout` (default 30s): the listener wraps `transport.CommitAsync` (the token cancels
+  cooperative implementations; `WaitAsync` abandons black-holed ones — the soak's half-open TCP writes
+  ignored everything), logging timeouts at Warning; `ClientManagedReplayTransport` bounds
+  `GetLastReplayIdAsync` and `ResetForNewEventsOnlyAsync`, whose timeouts throw into the reconnect
+  loop's normal backoff. The writer therefore recovers from a hang and durable commits resume — the
+  soak's proven absorb-and-retry path, now time-bounded instead of at TCP's mercy. Watchdog escalation
+  (fix-direction #3) was **considered and deferred**: with the loop decoupled and every dependency call
+  bounded, this wedge class is eliminated; the watchdog stays detection-only for unknown-unknowns.
+  Pinned red-first in the #22 harness (`HangCommits`: a never-completing commit wedged the completion
+  path in 2s exactly as observed live): loop liveness, prompt completions, bounded shutdown, and writer
+  recovery once the repository heals. Tracker tests gained explicit writer-drain awaits (the
+  single-flight writer made commit recording asynchronous).
 - **Context:** Overnight soak (all five WIT subscriptions Inline, publisher both events every 60s,
   815 published each, SQL replay store over VPN). At 05:14 the VPN dropped — severing only the route to
   the SQL replay store; Salesforce connectivity was unaffected (the REST publisher and both MES listeners,

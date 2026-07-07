@@ -133,7 +133,8 @@ internal sealed partial class ClientManagedReplayTransport : ISubscriptionTransp
             {
                 // An event-skipping recovery decision must be visible at production log levels, not Trace.
                 LogResettingToNewEventsOnly(_topicName);
-                await _replayIdRepository.ResetForNewEventsOnlyAsync(_topicName, ct).ConfigureAwait(false);
+                await _replayIdRepository.ResetForNewEventsOnlyAsync(_topicName, ct)
+                    .WaitAsync(_settings.RepositoryCallTimeout, ct).ConfigureAwait(false);
                 LogFinished("ResetReplayId", _topicName);
             }
         }
@@ -161,7 +162,10 @@ internal sealed partial class ClientManagedReplayTransport : ISubscriptionTransp
         else
         {
             LogStarted("GetReplayId", _topicName);
-            replayId = await _replayIdRepository.GetLastReplayIdAsync(_topicName, ct).ConfigureAwait(false);
+            // Bounded (DECISIONS #23): a hung consumer-repository read on the connect path would wedge
+            // the reconnect loop; a timeout throws into the loop's normal backoff-and-retry handling.
+            replayId = await _replayIdRepository.GetLastReplayIdAsync(_topicName, ct)
+                .WaitAsync(_settings.RepositoryCallTimeout, ct).ConfigureAwait(false);
             LogFinished("GetReplayId", _topicName);
         }
 
