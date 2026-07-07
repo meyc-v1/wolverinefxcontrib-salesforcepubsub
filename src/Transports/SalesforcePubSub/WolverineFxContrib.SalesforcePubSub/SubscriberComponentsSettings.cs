@@ -12,6 +12,12 @@ namespace Wolverine.SalesforcePubSub;
 internal sealed class SubscriberComponentsSettings
 {
     internal static readonly int DefaultFetchCount = 10;
+
+    /// <summary>
+    /// The Pub/Sub API's documented cap on events per fetch request; the server silently clamps larger
+    /// requests to this, so the config surface rejects them instead.
+    /// </summary>
+    internal static readonly int MaxFetchCount = 100;
     internal static readonly TimeSpan DefaultFetchTimeout = TimeSpan.FromSeconds(270);
     internal static readonly TimeSpan DefaultTokenCacheDuration = TimeSpan.FromMinutes(60);
     internal static readonly Uri DefaultPubSubUri = new("https://api.pubsub.salesforce.com:7443");

@@ -50,6 +50,41 @@ public class PerEndpointConfigTests
         Assert.True(effective.StartFromEarliest);                       // inherited default
     }
 
+    [Theory]
+    [InlineData(0)]
+    [InlineData(101)] // the Pub/Sub API clamps >100 silently; the config surface rejects instead
+    public void Fetch_count_outside_the_platform_range_throws_at_config_time(int count)
+    {
+        var transport = new SalesforcePubSubTransport();
+        var endpoint = transport.EndpointForResource(SalesforceResourceKind.Topic, "/event/A__e");
+        var config = new SalesforceListenerConfiguration(endpoint);
+
+        Assert.Throws<ArgumentOutOfRangeException>(() => config.FetchCount(count));
+    }
+
+    [Fact]
+    public void Fetch_count_accepts_the_platform_maximum()
+    {
+        var transport = new SalesforcePubSubTransport();
+        var endpoint = transport.EndpointForResource(SalesforceResourceKind.Topic, "/event/A__e");
+        var config = new SalesforceListenerConfiguration(endpoint);
+
+        config.FetchCount(100);
+        ((IDelayedEndpointConfiguration)config).Apply();
+
+        Assert.Equal(100, endpoint.FetchCount);
+    }
+
+    [Fact]
+    public void Replay_commit_threshold_below_one_throws_at_config_time()
+    {
+        var transport = new SalesforcePubSubTransport();
+        var endpoint = transport.EndpointForResource(SalesforceResourceKind.Topic, "/event/A__e");
+        var config = new SalesforceListenerConfiguration(endpoint);
+
+        Assert.Throws<ArgumentOutOfRangeException>(() => config.ReplayCommitThreshold(0));
+    }
+
     [Fact]
     public void Replay_commit_threshold_defaults_to_null_so_the_listener_falls_back_to_fetch_count()
     {

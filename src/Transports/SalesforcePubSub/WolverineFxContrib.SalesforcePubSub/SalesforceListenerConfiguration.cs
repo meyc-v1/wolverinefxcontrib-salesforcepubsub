@@ -61,9 +61,15 @@ public class SalesforceListenerConfiguration
         return MapEvent(messageType, attribute.EventApiName);
     }
 
-    /// <summary>Override the fetch batch size for this listener (default 10).</summary>
+    /// <summary>
+    /// Override the fetch batch size for this listener (default 10). The Pub/Sub API caps requests at
+    /// 100 events — and clamps silently rather than erroring — so an out-of-range value throws here
+    /// instead of quietly delivering smaller batches than configured.
+    /// </summary>
     public SalesforceListenerConfiguration FetchCount(int count)
     {
+        ArgumentOutOfRangeException.ThrowIfLessThan(count, 1);
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(count, SubscriberComponentsSettings.MaxFetchCount);
         add(e => e.FetchCount = count);
         return this;
     }
@@ -76,6 +82,7 @@ public class SalesforceListenerConfiguration
     /// </summary>
     public SalesforceListenerConfiguration ReplayCommitThreshold(int threshold)
     {
+        ArgumentOutOfRangeException.ThrowIfLessThan(threshold, 1);
         add(e => e.ReplayCommitThreshold = threshold);
         return this;
     }
