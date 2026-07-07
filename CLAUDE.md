@@ -130,9 +130,14 @@ steady-state — DECISIONS #20), the stop/dispose stale-commit gap is fixed with
 unit harness (DECISIONS #22), and the integration suite covers the full Kafka-parity read-side matrix
 (16 facts, ~4.5 min — the agreed acceptance gate before shipping as a NuGet package). Open, in rough
 order:
-1. Opportunistic: NuGet packaging (metadata done; id/versioning pending with maintainers), consumer
-   adoption. (The #23 topic-listener liveness gap is RESOLVED: single-flight commit writer +
-   transport-owned `RepositoryCallTimeout`; red-first pins in the #22 unit harness.)
+1. **Ship the first package** — identity is settled (DECISIONS #24: maintainer-approved id/namespace,
+   independent SemVer, version now 1.0.0-preview.1): do the pre-1.0 API pass (`IReplayIdRepository`
+   shape — the fabricated `replayIdsReceived` param + naming), then NuGet account + a manually-triggered
+   publish workflow + first prerelease push.
+2. In flight: a docs PR to JasperFx/wolverine linking this project (maintainer-invited, discussion
+   #3325) — branch `docs/community-salesforce-pubsub-transport` on the local Wolverine clone.
+3. Opportunistic: consumer adoption; a Postgres replay sibling to `MssqlReplay`. (The #23 liveness gap
+   is RESOLVED: single-flight commit writer + transport-owned `RepositoryCallTimeout`.)
 
 ## Conventions
 - **Do it the Wolverine way.** This is a community Wolverine transport and should look/behave like a

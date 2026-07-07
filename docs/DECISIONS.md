@@ -27,6 +27,20 @@ aren't conformance issues go under "Cleanups / tech-debt".
 
 ---
 
+## 24. Package identity settled with the Wolverine maintainers: keep the names, version independently from 1.0
+- **Date:** 2026-07-08 · **Status:** Accepted (maintainer guidance in
+  https://github.com/JasperFx/wolverine/discussions/3325)
+- **Decision:** Package id stays `WolverineFxContrib.SalesforcePubSub` and root namespace stays
+  `Wolverine.SalesforcePubSub` — both explicitly approved by Jeremy Miller ("the 'WolverineFxContrib'
+  prefix is the best I've got"; "the root namespace also seems good to me"). Versioning is
+  **independent SemVer starting at 1.0** ("just go for '1.0' when you're ready"), not
+  Wolverine-tracking — `<Version>` is `1.0.0-preview.1` until the pre-1.0 API pass lands, then 1.0.0.
+  On API shape he prefers consistency with Wolverine idioms over contrib-differentiation, which
+  ratifies the existing extension-method surface.
+- **Consequences:** The prerelease pipeline is fully unblocked (API pass → NuGet account → publish
+  workflow → first package). A maintainer-invited docs PR links the project from Wolverine's
+  transports docs.
+
 ## 23. Topic-listener liveness: an unbounded `IReplayIdRepository` call can wedge the read loop deaf (first volume soak)
 - **Date:** 2026-07-07 · **Status:** **Resolved** (same day — two-layer fix, red-first per the fix
   direction below; evidence log: `docs/test-results/overnight-inline-13h-win.txt`)
