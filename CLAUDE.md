@@ -139,10 +139,9 @@ unit harness (DECISIONS #22), and the integration suite covers the full Kafka-pa
 API pass per #25 (`IReplayIdRepository` → Get/Store/Reset + `ReplayCommitKind`; auth + backoff
 interfaces reviewed), published via the manually-dispatched `publish.yml` (NuGet Trusted Publishing /
 OIDC, no stored key — the dispatch `version` input must match `Directory.Build.props`). Open:
-1. Awaiting review: the maintainer-invited docs PR to JasperFx/wolverine (from discussion #3325),
-   opened from the meyc-v1/wolverine fork.
-2. Opportunistic: consumer adoption; a Postgres replay sibling to `MssqlReplay`; 1.0.0 final when
-   the preview has soaked with real consumers.
+1. Opportunistic: consumer adoption (the project is linked from Wolverine's transports docs —
+   maintainer-invited PR merged 2026-07-07); a Postgres replay sibling to `MssqlReplay`; OTEL metrics
+   (a transport Meter); 1.0.0 final when the preview has soaked with real consumers.
 
 ## Conventions
 - **Do it the Wolverine way.** This is a community Wolverine transport and should look/behave like a
